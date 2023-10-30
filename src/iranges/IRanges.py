@@ -1,7 +1,7 @@
 import biocutils as ut
 from typing import Sequence, Optional, List, Union, Dict
 from biocframe import BiocFrame
-from biocgenerics import combine
+from biocgenerics import combine_seqs, combine_rows
 import numpy as np
 from copy import deepcopy
 
@@ -63,7 +63,6 @@ class IRanges:
         self._metadata = self._sanitize_metadata(metadata)
 
         if validate:
-            self._validate_start()
             self._validate_width()
             self._validate_names()
             self._validate_mcols()
@@ -88,7 +87,7 @@ class IRanges:
             raise ValueError("end position should fit in a 32-bit signed integer")
 
     def _sanitize_names(self, names):
-        if self._names is None:
+        if names is None:
             return None
         elif not isinstance(names, list):
             names = list(names)
@@ -97,7 +96,7 @@ class IRanges:
     def _validate_names(self):
         if self._names is None:
             return
-        if ut.is_list_of_type(self._names, str):
+        if not ut.is_list_of_type(self._names, str):
             raise ValueError("'names' should be a list of strings")
         if len(self._names) != len(self._start):
             raise ValueError("'names' and 'start' should have the same length")
@@ -106,10 +105,10 @@ class IRanges:
         if mcols is None:
             return BiocFrame({}, number_of_rows=len(self._start))
         else:
-            mcols
+            return mcols
 
     def _validate_mcols(self):
-        if not isinstance(self._mcols, BiocFrame)
+        if not isinstance(self._mcols, BiocFrame):
             raise TypeError("'mcols' should be a BiocFrame")
         if self._mcols.shape[0] != len(self._start):
             raise ValueError("number of rows of 'mcols' should be equal to length of 'start'")
@@ -179,7 +178,7 @@ class IRanges:
         if in_place:
             return self
         else:
-            return type(self)(self._start, self._width, names=self._names, mcols=self._mcols, metadata=self._metadata)
+            return self.__copy__()
 
     def set_start(self, start: Sequence[int], in_place: bool = False) -> "IRanges":
         """
@@ -196,8 +195,9 @@ class IRanges:
             modified and a reference to it is returned.
         """
         output = self._define_output(in_place)
+        if len(start) != len(output._start):
+            raise ValueError("length of 'start' should be equal to 'length(<IRanges>)'")
         output._start = output._sanitize_start(start)
-        output._validate_start()
         return output
 
     def set_width(self, width: Sequence[int], in_place: bool = False) -> "IRanges":
@@ -254,7 +254,7 @@ class IRanges:
             directly modified and a reference to it is returned.
         """
         output = self._define_output(in_place)
-        output._width = output._sanitize_mcols(mcols)
+        output._mcols = output._sanitize_mcols(mcols)
         output._validate_mcols()
         return output
 
@@ -273,13 +273,20 @@ class IRanges:
             modified and a reference to it is returned.
         """
         output = self._define_output(in_place)
-        output._width = output._sanitize_metadata(metadata)
+        output._metadata = output._sanitize_metadata(metadata)
         output._validate_metadata()
         return output
 
     #########################
     #### Getitem/setitem ####
     #########################
+
+    def __len__(self) -> int:
+        """
+        Returns:
+            Length of this object.
+        """
+        return len(self._start)
 
     def __getitem__(self, subset: Union[Sequence, int, str, bool, slice, range]) -> "IRanges":
         """
@@ -292,12 +299,12 @@ class IRanges:
         Returns:
             A new ``IRanges`` object containing the ranges of interest.
         """
-        idx = ut.normalize_subscript(subset, len(self), self._names)
+        idx, scalar = ut.normalize_subscript(subset, len(self), self._names)
         return type(self)(
             start = self._start[idx],
             width = self._width[idx],
             names = ut.subset(self._names, idx) if self._names is not None else None,
-            mcols = self._mcols[idx,:],
+            mcols = self._mcols[list(idx),:], # doesn't support ranges yet.
             metadata = self._metadata
         )
 
@@ -316,13 +323,19 @@ class IRanges:
         Returns:
             Specified ranges are replaced by ``value`` in the current object.
         """
-        idx = ut.normalize_subscript(args, len(self), self._names)
+        idx, scalar = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
-        self._mcols[idx,:] = value._mcols
-        if self._names and value._names:
+#        self._mcols[list(idx),:] = value._mcols # doesn't support ranges yet.
+
+        if value._names is not None:
+            if self._names is None:
+                self._names = [''] * len(self)
             for i, j in enumerate(idx):
                 self._names[j] = value._names[i]
+        elif self._names is not None:
+            for i, j in enumerate(idx):
+                self._names[j] = ''
 
     ##################
     #### Printing ####
@@ -389,7 +402,7 @@ class IRanges:
         )
 
 
-@combine.register
+@combine_seqs.register
 def _combine_IRanges(*x: IRanges) -> IRanges:
     has_names = False
     for y in x:
@@ -407,10 +420,10 @@ def _combine_IRanges(*x: IRanges) -> IRanges:
                 all_names += [""] * len(y)
 
     return IRanges(
-        start = combine(*[y._start for y in x]),
-        width = combine(*[y._width for y in x]),
+        start = combine_seqs(*[y._start for y in x]),
+        width = combine_seqs(*[y._width for y in x]),
         names = all_names,
-        mcols = combine(*[y._mcols for y in x]),
+        mcols = combine_rows(*[y._mcols for y in x]),
         metadata = x[0]._metadata,
         validate = False
     )
