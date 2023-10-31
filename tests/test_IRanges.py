@@ -67,7 +67,7 @@ def test_IRanges_metadata():
 
     with pytest.raises(ValueError) as ex:
         IRanges(starts, widths, mcols=BiocFrame({}, number_of_rows=3))
-    assert str(ex.value).find("number of rows") >= 0
+    assert str(ex.value).find("Number of rows") >= 0
 
     assert x.get_metadata() == {}
     y = x.set_metadata({"A": 2})

@@ -1,16 +1,18 @@
-import biocutils as ut
-from typing import Sequence, Optional, List, Union, Dict
-from biocframe import BiocFrame
-from biocgenerics import combine_seqs, combine_rows, show_as_cell, format_table
-import numpy as np
 from copy import deepcopy
+from typing import List, Optional, Sequence, Union
+from warnings import warn
+
+import biocutils as ut
+from biocframe import BiocFrame
+from biocgenerics import combine_rows, combine_seqs, format_table, show_as_cell
+from numpy import array, get_printoptions, int32, ndarray
 
 
 class IRanges:
-    """A collection of integer ranges, equivalent to the ``IRanges`` class from the Bioconductor package of the same
-    name.
+    """A collection of integer ranges, equivalent to the ``IRanges`` class from the
+    `Bioconductor package <https://bioconductor.org/packages/IRanges>`_ of the same name.
 
-    This holds a start position and a width, and is most typically used to represent coordinates along some genomic
+    This holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic
     sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a
     1-based position, but other use cases may allow zero or even negative values.
     """
@@ -21,7 +23,7 @@ class IRanges:
         width: Sequence[int],
         names: Optional[Sequence[str]] = None,
         mcols: Optional[BiocFrame] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[dict] = None,
         validate: bool = True,
     ):
         """
@@ -68,20 +70,24 @@ class IRanges:
             self._validate_metadata()
 
     def _sanitize_start(self, start):
-        if isinstance(start, np.ndarray) and start.dtype == np.int32:
+        if isinstance(start, ndarray) and start.dtype == int32:
             return start
-        return np.array(start, dtype=np.int32, copy=False)
+
+        return array(start, dtype=int32, copy=False)
 
     def _sanitize_width(self, width):
-        if isinstance(width, np.ndarray) and width.dtype == np.int32:
+        if isinstance(width, ndarray) and width.dtype == int32:
             return width
-        return np.array(width, dtype=np.int32, copy=False)
+
+        return array(width, dtype=int32, copy=False)
 
     def _validate_width(self):
         if len(self._start) != len(self._width):
             raise ValueError("'start' and 'width' should have the same length")
+
         if (self._width < 0).any():
             raise ValueError("'width' must be non-negative")
+
         if (self._start + self._width < self._start).any():
             raise ValueError("end position should fit in a 32-bit signed integer")
 
@@ -90,13 +96,16 @@ class IRanges:
             return None
         elif not isinstance(names, list):
             names = list(names)
+
         return names
 
     def _validate_names(self):
         if self._names is None:
-            return
+            return None
+
         if not ut.is_list_of_type(self._names, str):
             raise ValueError("'names' should be a list of strings")
+
         if len(self._names) != len(self._start):
             raise ValueError("'names' and 'start' should have the same length")
 
@@ -109,9 +118,10 @@ class IRanges:
     def _validate_mcols(self):
         if not isinstance(self._mcols, BiocFrame):
             raise TypeError("'mcols' should be a BiocFrame")
+
         if self._mcols.shape[0] != len(self._start):
             raise ValueError(
-                "number of rows of 'mcols' should be equal to length of 'start'"
+                "Number of rows in 'mcols' should be equal to length of 'start'"
             )
 
     def _sanitize_metadata(self, metadata):
@@ -119,6 +129,7 @@ class IRanges:
             return {}
         elif not isinstance(metadata, dict):
             metadata = dict(metadata)
+
         return metadata
 
     def _validate_metadata(self):
@@ -129,60 +140,18 @@ class IRanges:
     #### Getter/setters ####
     ########################
 
-    def get_start(self) -> np.ndarray:
-        """
+    def get_start(self) -> ndarray:
+        """Get all start positions.
+
         Returns:
             NumPy array of 32-bit signed integers containing the start
             positions for all ranges.
         """
         return self._start
 
-    def get_width(self) -> np.ndarray:
-        """
-        Returns:
-            NumPy array of 32-bit signed integers containing the widths for all
-            ranges.
-        """
-        return self._width
-
-    def get_end(self) -> np.ndarray:
-        """
-        Returns:
-            NumPy array of 32-bit signed integers containing the end position
-            (not inclusive) for all ranges.
-        """
-        return self._start + self._width
-
-    def get_names(self) -> Union[None, List[str]]:
-        """
-        Returns:
-            List containing the names for all ranges, or None if no names are
-            present.
-        """
-        return self._names
-
-    def get_mcols(self) -> BiocFrame:
-        """
-        Returns:
-            Data frame containing additional metadata columns for all ranges.
-        """
-        return self._mcols
-
-    def get_metadata(self) -> Dict:
-        """
-        Returns:
-            Dictionary containing additional metadata.
-        """
-        return self._metadata
-
-    def _define_output(self, in_place):
-        if in_place:
-            return self
-        else:
-            return self.__copy__()
-
     def set_start(self, start: Sequence[int], in_place: bool = False) -> "IRanges":
-        """
+        """Modify start positions (in-place operation).
+
         Args:
             start:
                 Sequence of start positions, see the constructor for details.
@@ -198,8 +167,43 @@ class IRanges:
         output = self._define_output(in_place)
         if len(start) != len(output._start):
             raise ValueError("length of 'start' should be equal to 'length(<IRanges>)'")
+
         output._start = output._sanitize_start(start)
         return output
+
+    @property
+    def start(self) -> ndarray:
+        """Get all start positions.
+
+        Returns:
+            NumPy array of 32-bit signed integers containing the start
+            positions for all ranges.
+        """
+        return self.get_start()
+
+    @start.setter
+    def start(self, start: Sequence[int]):
+        """Modify start positions (in-place operation).
+
+        Args:
+            start:
+                Sequence of start positions, see the constructor for details.
+        """
+        warn(
+            "Setting property 'start'is an in-place operation, use 'set_start' instead",
+            UserWarning,
+        )
+
+        self.set_start(start, in_place=True)
+
+    def get_width(self) -> ndarray:
+        """Get width of each interval.
+
+        Returns:
+            ndarray: NumPy array of 32-bit signed integers containing the widths for all
+            ranges.
+        """
+        return self._width
 
     def set_width(self, width: Sequence[int], in_place: bool = False) -> "IRanges":
         """
@@ -219,6 +223,58 @@ class IRanges:
         output._width = output._sanitize_width(width)
         output._validate_width()
         return output
+
+    @property
+    def width(self) -> ndarray:
+        """Get width of each interval.
+
+        Returns:
+            ndarray: NumPy array of 32-bit signed integers containing the widths for all
+            ranges.
+        """
+        return self.get_width()
+
+    @width.setter
+    def width(self, width: Sequence[int]):
+        """Set or modify width of each interval (in-place operation).
+
+        Args:
+            width:
+                Sequence of widths, see the constructor for details.
+        """
+        warn(
+            "Setting property 'width'is an in-place operation, use 'set_width' instead",
+            UserWarning,
+        )
+        return self.set_width(width, in_place=True)
+
+    def get_end(self) -> ndarray:
+        """Get all end positions.
+
+        Returns:
+            NumPy array of 32-bit signed integers containing the end position
+            (not inclusive) for all ranges.
+        """
+        return self._start + self._width
+
+    @property
+    def end(self) -> ndarray:
+        """Get all end positions (read-only).
+
+        Returns:
+            NumPy array of 32-bit signed integers containing the end position
+            (not inclusive) for all ranges.
+        """
+        return self.get_end()
+
+    def get_names(self) -> Union[None, List[str]]:
+        """Get all names.
+
+        Returns:
+            List containing the names for all ranges, or None if no names are
+            present.
+        """
+        return self._names
 
     def set_names(
         self, names: Optional[Sequence[str]], in_place: bool = False
@@ -241,10 +297,48 @@ class IRanges:
         output._validate_names()
         return output
 
+    @property
+    def names(self) -> Union[None, List[str]]:
+        """Get all names.
+
+        Returns:
+            List containing the names for all ranges, or None if no names are
+            present.
+        """
+        return self.get_names()
+
+    @names.setter
+    def names(self, names: Optional[Sequence[str]]):
+        """Set new names (in-place operation).
+
+        Args:
+            names:
+                Sequence of names or None, see the constructor for details.
+
+        Returns:
+            If ``in_place = False``, a new ``IRanges`` is returned with the
+            modified names. Otherwise, the current object is directly modified
+            and a reference to it is returned.
+        """
+        warn(
+            "Setting property 'names'is an in-place operation, use 'set_names' instead",
+            UserWarning,
+        )
+        self.set_names(names, in_place=True)
+
+    def get_mcols(self) -> BiocFrame:
+        """Get metadata about ranges.
+
+        Returns:
+            Data frame containing additional metadata columns for all ranges.
+        """
+        return self._mcols
+
     def set_mcols(
         self, mcols: Optional[BiocFrame], in_place: bool = False
     ) -> "IRanges":
-        """
+        """Set new metadata about ranges.
+
         Args:
             mcols:
                 Data frame of additional columns, see the constructor for
@@ -263,10 +357,43 @@ class IRanges:
         output._validate_mcols()
         return output
 
-    def set_metadata(
-        self, metadata: Optional[Dict], in_place: bool = False
-    ) -> "IRanges":
+    @property
+    def mcols(self) -> BiocFrame:
+        """Get metadata about ranges.
+
+        Returns:
+            Data frame containing additional metadata columns for all ranges.
         """
+        return self.get_mcols()
+
+    @mcols.setter
+    def mcols(self, mcols: Optional[BiocFrame]):
+        """Set new metadata about ranges (in-place operation).
+
+        Args:
+            mcols:
+                Data frame of additional columns, see the constructor for
+                details.
+        """
+        warn(
+            "Setting property 'mcols'is an in-place operation, use 'set_mcols' instead",
+            UserWarning,
+        )
+        self.set_mcols(mcols, in_place=True)
+
+    def get_metadata(self) -> dict:
+        """Get additional metadata.
+
+        Returns:
+            Dictionary containing additional metadata.
+        """
+        return self._metadata
+
+    def set_metadata(
+        self, metadata: Optional[dict], in_place: bool = False
+    ) -> "IRanges":
+        """Set or replace metadata.
+
         Args:
             metadata:
                 Additional metadata.
@@ -284,6 +411,35 @@ class IRanges:
         output._validate_metadata()
         return output
 
+    @property
+    def metadata(self) -> dict:
+        """Get additional metadata.
+
+        Returns:
+            Dictionary containing additional metadata.
+        """
+        return self.get_metadata()
+
+    @metadata.setter
+    def metadata(self, metadata: Optional[dict]):
+        """Set or replace metadata (in-place operation).
+
+        Args:
+            metadata:
+                Additional metadata.
+        """
+        warn(
+            "Setting property 'metadata'is an in-place operation, use 'set_metadata' instead",
+            UserWarning,
+        )
+        self.set_metadata(metadata, in_place=True)
+
+    def _define_output(self, in_place):
+        if in_place:
+            return self
+        else:
+            return self.__copy__()
+
     #########################
     #### Getitem/setitem ####
     #########################
@@ -298,7 +454,8 @@ class IRanges:
     def __getitem__(
         self, subset: Union[Sequence, int, str, bool, slice, range]
     ) -> "IRanges":
-        """
+        """Subset the IRanges.
+
         Args:
             subset:
                 Integer indices, a boolean filter, or (if the current object is
@@ -308,7 +465,7 @@ class IRanges:
         Returns:
             A new ``IRanges`` object containing the ranges of interest.
         """
-        idx, scalar = ut.normalize_subscript(subset, len(self), self._names)
+        idx, _ = ut.normalize_subscript(subset, len(self), self._names)
         return type(self)(
             start=self._start[idx],
             width=self._width[idx],
@@ -320,7 +477,8 @@ class IRanges:
     def __setitem__(
         self, args: Union[Sequence, int, str, bool, slice, range], value: "IRanges"
     ):
-        """
+        """Add or update positions (in-place operation).
+
         Args:
             subset:
                 Integer indices, a boolean filter, or (if the current object is
@@ -334,7 +492,7 @@ class IRanges:
         Returns:
             Specified ranges are replaced by ``value`` in the current object.
         """
-        idx, scalar = ut.normalize_subscript(args, len(self), self._names)
+        idx, _ = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
         self._mcols[idx, :] = value._mcols
@@ -353,11 +511,7 @@ class IRanges:
     ##################
 
     def __repr__(self) -> str:
-        """
-        Returns:
-            A string representation of this object.
-        """
-        opt = np.get_printoptions()
+        opt = get_printoptions()
         old_threshold = opt["threshold"]
         old_edgeitems = opt["edgeitems"]
 
@@ -366,12 +520,16 @@ class IRanges:
             opt["edgeitems"] = 3
             message = "IRanges(start=" + repr(self._start)
             message += ", width=" + repr(self._width)
+
             if self._names:
                 message += ", names=" + ut.print_truncated_list(self._names)
+
             if self._mcols.shape[1] > 0:
                 message += ", mcols=" + repr(self._mcols)
+
             if len(self._metadata):
                 message += ", metadata=" + repr(self._metadata)
+
             message += ")"
         finally:
             opt["threshold"] = old_threshold
@@ -380,10 +538,6 @@ class IRanges:
         return message
 
     def __str__(self) -> str:
-        """
-        Returns:
-            A pretty-printed string representation of this object.
-        """
         nranges = len(self)
         nmcols = self._mcols.shape[1]
         output = (
@@ -464,10 +618,11 @@ class IRanges:
     #### Copying ####
     #################
 
-    def __copy__(self):
-        """
+    def __copy__(self) -> "IRanges":
+        """Shallow copy of the object.
+
         Returns:
-            A shallow copy of this object.
+            Same type as the caller, a shallow copy of this object.
         """
         return type(self)(
             start=self._start,
@@ -478,13 +633,14 @@ class IRanges:
             validate=False,
         )
 
-    def __deepcopy__(self, memo):
-        """
+    def __deepcopy__(self, memo) -> "IRanges":
+        """Deep copy of the object.
+
         Args:
             memo: Passed to internal :py:meth:`~deepcopy` calls.
 
         Returns:
-            A deep copy of this object.
+            Same type as the caller, a deep copy of this object.
         """
         return type(self)(
             start=deepcopy(self._start, memo),
