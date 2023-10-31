@@ -471,7 +471,7 @@ class IRanges:
         Returns:
             Specified ranges are replaced by ``value`` in the current object.
         """
-        idx, scalar = ut.normalize_subscript(args, len(self), self._names)
+        idx, _ = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
         self._mcols[idx, :] = value._mcols
@@ -490,47 +490,38 @@ class IRanges:
     ##################
 
     def __repr__(self) -> str:
-        """
-        Returns:
-            A string representation of this object.
-        """
         message = "IRanges(start=" + ut.print_truncated_list(self._start) + ", "
         message += "width=" + ut.print_truncated_list(self._width) + ", "
+
         if self._names:
             message += "names=" + ut.print_truncated_list(self._names)
+
         if self._mcols.shape[1] > 0:
             message += "mcols=" + repr(self._mcols)
+
         if len(self._metadata):
             message += repr(self._metadata)
+
         return message
 
     def __str__(self):
-        """
-        Returns:
-            A pretty-printed string representation of this object.
-        """
         nranges = len(self)
         nmcols = self._mcols.shape[1]
         # TODO: clean up later.
         return (
-            "IRanges object with "
-            + str(nranges)
-            + " range"
-            + ("" if nranges == 1 else "s")
-            + " and "
-            + str(nmcols)
-            + " metadata column"
-            + ("" if nmcols == 1 else "s")
+            f"IRanges object with {str(nranges)} range{'' if nranges == 1 else 's'} "
+            f" and f{str(nmcols)} metadata column{'' if nmcols == 1 else 's'}"
         )
 
     #################
     #### Copying ####
     #################
 
-    def __copy__(self):
-        """
+    def __copy__(self) -> "IRanges":
+        """Shallow copy of the object.
+
         Returns:
-            A shallow copy of this object.
+            Same type as the caller, a shallow copy of this object.
         """
         return type(self)(
             start=self._start,
@@ -541,13 +532,14 @@ class IRanges:
             validate=False,
         )
 
-    def __deepcopy__(self, memo):
-        """
+    def __deepcopy__(self, memo) -> "IRanges":
+        """Deep copy of the object.
+
         Args:
             memo: Passed to internal :py:meth:`~deepcopy` calls.
 
         Returns:
-            A deep copy of this object.
+            Same type as the caller, a deep copy of this object.
         """
         return type(self)(
             start=deepcopy(self._start, memo),
