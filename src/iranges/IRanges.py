@@ -561,7 +561,11 @@ class IRanges:
             sub_start = self._start[indices]
             sub_width = self._width[indices]
             sub_end = sub_start + sub_width
-            for prop, val in [ ("start", sub_start), ("end", sub_end), ("width", sub_width) ]:
+            for prop, val in [
+                ("start", sub_start),
+                ("end", sub_end),
+                ("width", sub_width),
+            ]:
                 header = [prop, "<" + ut.print_type(val) + ">"]
                 showed = show_as_cell(val, range(len(val)))
                 if insert_ellipsis:
@@ -576,7 +580,9 @@ class IRanges:
                     data = self._mcols.column(col)
                     showed = show_as_cell(data, indices)
                     header = [col, "<" + ut.print_type(data) + ">"]
-                    showed = ut.truncate_strings(showed, width=max(40, len(header[0]), len(header[1])))
+                    showed = ut.truncate_strings(
+                        showed, width=max(40, len(header[0]), len(header[1]))
+                    )
                     if insert_ellipsis:
                         showed = showed[:3] + ["..."] + showed[3:]
                     columns.append(header + showed)
@@ -587,14 +593,14 @@ class IRanges:
         footer = []
         if len(self._metadata):
             footer.append(
-                "metadata(" +
-                str(len(self._metadata)) +
-                "): " +
-                ut.print_truncated_list(
+                "metadata("
+                + str(len(self._metadata))
+                + "): "
+                + ut.print_truncated_list(
                     list(self._metadata.keys()),
                     sep=" ",
                     include_brackets=False,
-                    transform=lambda y : y
+                    transform=lambda y: y,
                 )
             )
         if len(footer):
