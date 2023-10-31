@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import biocutils as ut
 from biocframe import BiocFrame
@@ -22,7 +22,7 @@ class IRanges:
         width: Sequence[int],
         names: Optional[Sequence[str]] = None,
         mcols: Optional[BiocFrame] = None,
-        metadata: Optional[Dict] = None,
+        metadata: Optional[dict] = None,
         validate: bool = True,
     ):
         """
@@ -364,7 +364,7 @@ class IRanges:
         """
         self.set_mcols(mcols, in_place=True)
 
-    def get_metadata(self) -> Dict:
+    def get_metadata(self) -> dict:
         """Get additional metadata.
 
         Returns:
@@ -373,7 +373,7 @@ class IRanges:
         return self._metadata
 
     def set_metadata(
-        self, metadata: Optional[Dict], in_place: bool = False
+        self, metadata: Optional[dict], in_place: bool = False
     ) -> "IRanges":
         """Set or replace metadata.
 
@@ -404,7 +404,7 @@ class IRanges:
         return self.get_metadata()
 
     @metadata.setter
-    def metadata(self, metadata: Optional[Dict]):
+    def metadata(self, metadata: Optional[dict]):
         """Set or replace metadata (in-place operation).
 
         Args:
