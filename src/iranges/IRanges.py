@@ -95,6 +95,7 @@ class IRanges:
             return None
         elif not isinstance(names, list):
             names = list(names)
+
         return names
 
     def _validate_names(self):
@@ -119,7 +120,7 @@ class IRanges:
 
         if self._mcols.shape[0] != len(self._start):
             raise ValueError(
-                "Number of rows of 'mcols' should be equal to length of 'start'"
+                "Number of rows in 'mcols' should be equal to length of 'start'"
             )
 
     def _sanitize_metadata(self, metadata):
@@ -448,7 +449,7 @@ class IRanges:
             start=self._start[idx],
             width=self._width[idx],
             names=ut.subset(self._names, idx) if self._names is not None else None,
-            mcols=self._mcols[list(idx), :],  # doesn't support ranges yet.
+            mcols=self._mcols[list(idx), :],
             metadata=self._metadata,
         )
 
@@ -473,7 +474,7 @@ class IRanges:
         idx, scalar = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
-        #        self._mcols[list(idx),:] = value._mcols # doesn't support ranges yet.
+        self._mcols[list(idx), :] = value._mcols
 
         if value._names is not None:
             if self._names is None:
