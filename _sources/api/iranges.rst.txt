@@ -1,0 +1,21 @@
+iranges package
+===============
+
+Submodules
+----------
+
+iranges.IRanges module
+----------------------
+
+.. automodule:: iranges.IRanges
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: iranges
+   :members:
+   :undoc-members:
+   :show-inheritance:

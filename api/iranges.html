@@ -1,0 +1,684 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="iranges" href="modules.html" />
+
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>iranges package - IRanges 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">IRanges 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">IRanges 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributions &amp; Help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">Module Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Module Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">iranges package</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="iranges-package">
+<h1>iranges package<a class="headerlink" href="#iranges-package" title="Link to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-iranges.IRanges">
+<span id="iranges-iranges-module"></span><h2>iranges.IRanges module<a class="headerlink" href="#module-iranges.IRanges" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iranges.IRanges.</span></span><span class="sig-name descname"><span class="pre">IRanges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A collection of integer ranges, equivalent to the <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> class from the
+<a class="reference external" href="https://bioconductor.org/packages/IRanges">Bioconductor package</a> of the same name.</p>
+<p>This holds a <strong>start</strong> position and a <strong>width</strong>, and is most typically used to represent coordinates along some genomic
+sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a
+1-based position, but other use cases may allow zero or even negative values.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__copy__">
+<span class="sig-name descname"><span class="pre">__copy__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__copy__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__copy__" title="Link to this definition">#</a></dt>
+<dd><p>Shallow copy of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Same type as the caller, a shallow copy of this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__deepcopy__">
+<span class="sig-name descname"><span class="pre">__deepcopy__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">memo</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__deepcopy__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__deepcopy__" title="Link to this definition">#</a></dt>
+<dd><p>Deep copy of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>memo</strong> – Passed to internal <code class="xref py py-meth docutils literal notranslate"><span class="pre">deepcopy()</span></code> calls.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Same type as the caller, a deep copy of this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__getitem__" title="Link to this definition">#</a></dt>
+<dd><p>Subset the IRanges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>subset</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#slice" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#range" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">range</span></code></a>]) – Integer indices, a boolean filter, or (if the current object is
+named) names specifying the ranges to be extracted, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">normalize_subscript()</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object containing the ranges of interest.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__len__">
+<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__len__" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Length of this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__repr__" title="Link to this definition">#</a></dt>
+<dd><p>Return repr(self).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__setitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__setitem__" title="Link to this definition">#</a></dt>
+<dd><p>Add or update positions (in-place operation).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subset</strong> – Integer indices, a boolean filter, or (if the current object is
+named) names specifying the ranges to be replaced, see
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">normalize_subscript()</span></code>.</p></li>
+<li><p><strong>value</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a>) – An <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object of length equal to the number of ranges
+to be replaced, as specified by <code class="docutils literal notranslate"><span class="pre">subset</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Specified ranges are replaced by <code class="docutils literal notranslate"><span class="pre">value</span></code> in the current object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#iranges.IRanges.IRanges.end" title="Link to this definition">#</a></dt>
+<dd><p>Get all end positions (read-only).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array of 32-bit signed integers containing the end position
+(not inclusive) for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_end">
+<span class="sig-name descname"><span class="pre">get_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_end" title="Link to this definition">#</a></dt>
+<dd><p>Get all end positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>NumPy array of 32-bit signed integers containing the end position
+(not inclusive) for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_mcols">
+<span class="sig-name descname"><span class="pre">get_mcols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_mcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_mcols" title="Link to this definition">#</a></dt>
+<dd><p>Get metadata about ranges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">BiocFrame</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Data frame containing additional metadata columns for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_metadata">
+<span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_metadata" title="Link to this definition">#</a></dt>
+<dd><p>Get additional metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary containing additional metadata.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_names">
+<span class="sig-name descname"><span class="pre">get_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_names" title="Link to this definition">#</a></dt>
+<dd><p>Get all names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List containing the names for all ranges, or None if no names are
+present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_start">
+<span class="sig-name descname"><span class="pre">get_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_start" title="Link to this definition">#</a></dt>
+<dd><p>Get all start positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>NumPy array of 32-bit signed integers containing the start
+positions for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_width">
+<span class="sig-name descname"><span class="pre">get_width</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_width" title="Link to this definition">#</a></dt>
+<dd><p>Get width of each interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array of 32-bit signed integers containing the widths for all
+ranges.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.mcols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BiocFrame</span></em><a class="headerlink" href="#iranges.IRanges.IRanges.mcols" title="Link to this definition">#</a></dt>
+<dd><p>Get metadata about ranges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Data frame containing additional metadata columns for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.metadata">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></em><a class="headerlink" href="#iranges.IRanges.IRanges.metadata" title="Link to this definition">#</a></dt>
+<dd><p>Get additional metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary containing additional metadata.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#iranges.IRanges.IRanges.names" title="Link to this definition">#</a></dt>
+<dd><p>Get all names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List containing the names for all ranges, or None if no names are
+present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.set_mcols">
+<span class="sig-name descname"><span class="pre">set_mcols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mcols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.set_mcols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.set_mcols" title="Link to this definition">#</a></dt>
+<dd><p>Set new metadata about ranges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mcols</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">BiocFrame</span></code>]) – Data frame of additional columns, see the constructor for
+details.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether to modify the object in place.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+modified metadata columns. Otherwise, the current object is
+directly modified and a reference to it is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.set_metadata">
+<span class="sig-name descname"><span class="pre">set_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.set_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.set_metadata" title="Link to this definition">#</a></dt>
+<dd><p>Set or replace metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]) – Additional metadata.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether to modify the object in place.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+modified metadata. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.set_names">
+<span class="sig-name descname"><span class="pre">set_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.set_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.set_names" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]) – Sequence of names or None, see the constructor for details.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether to modify the object in place.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+modified names. Otherwise, the current object is directly modified
+and a reference to it is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.set_start">
+<span class="sig-name descname"><span class="pre">set_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.set_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.set_start" title="Link to this definition">#</a></dt>
+<dd><p>Modify start positions (in-place operation).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Sequence of start positions, see the constructor for details.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether to modify the object in place.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+modified start positions. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.set_width">
+<span class="sig-name descname"><span class="pre">set_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.set_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.set_width" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Sequence of widths, see the constructor for details.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether to modify the object in place.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+modified widths. Otherwise, the current object is directly modified
+and a reference to it is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#iranges.IRanges.IRanges.start" title="Link to this definition">#</a></dt>
+<dd><p>Get all start positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array of 32-bit signed integers containing the start
+positions for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.width">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#iranges.IRanges.IRanges.width" title="Link to this definition">#</a></dt>
+<dd><p>Get width of each interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array of 32-bit signed integers containing the widths for all
+ranges.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-iranges">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-iranges" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="modules.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">iranges</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, LTLA
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">iranges package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-iranges.IRanges">iranges.IRanges module</a><ul>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges"><code class="docutils literal notranslate"><span class="pre">IRanges</span></code></a><ul>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__copy__"><code class="docutils literal notranslate"><span class="pre">IRanges.__copy__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__deepcopy__"><code class="docutils literal notranslate"><span class="pre">IRanges.__deepcopy__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__getitem__"><code class="docutils literal notranslate"><span class="pre">IRanges.__getitem__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__len__"><code class="docutils literal notranslate"><span class="pre">IRanges.__len__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__repr__"><code class="docutils literal notranslate"><span class="pre">IRanges.__repr__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__setitem__"><code class="docutils literal notranslate"><span class="pre">IRanges.__setitem__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.end"><code class="docutils literal notranslate"><span class="pre">IRanges.end</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_end"><code class="docutils literal notranslate"><span class="pre">IRanges.get_end()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_mcols"><code class="docutils literal notranslate"><span class="pre">IRanges.get_mcols()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_metadata"><code class="docutils literal notranslate"><span class="pre">IRanges.get_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_names"><code class="docutils literal notranslate"><span class="pre">IRanges.get_names()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_start"><code class="docutils literal notranslate"><span class="pre">IRanges.get_start()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_width"><code class="docutils literal notranslate"><span class="pre">IRanges.get_width()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.mcols"><code class="docutils literal notranslate"><span class="pre">IRanges.mcols</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.metadata"><code class="docutils literal notranslate"><span class="pre">IRanges.metadata</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.names"><code class="docutils literal notranslate"><span class="pre">IRanges.names</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.set_mcols"><code class="docutils literal notranslate"><span class="pre">IRanges.set_mcols()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.set_metadata"><code class="docutils literal notranslate"><span class="pre">IRanges.set_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.set_names"><code class="docutils literal notranslate"><span class="pre">IRanges.set_names()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.set_start"><code class="docutils literal notranslate"><span class="pre">IRanges.set_start()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.set_width"><code class="docutils literal notranslate"><span class="pre">IRanges.set_width()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.start"><code class="docutils literal notranslate"><span class="pre">IRanges.start</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.width"><code class="docutils literal notranslate"><span class="pre">IRanges.width</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-iranges">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>
