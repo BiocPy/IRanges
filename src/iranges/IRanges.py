@@ -337,7 +337,7 @@ class IRanges:
         idx, scalar = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
-        self._mcols[idx,:] = value._mcols
+        self._mcols[idx, :] = value._mcols
 
         if value._names is not None:
             if self._names is None:
