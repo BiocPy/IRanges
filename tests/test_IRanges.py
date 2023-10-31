@@ -112,7 +112,7 @@ def test_IRanges_setitem():
     x[1:3] = y[1:3]
     assert (x.get_start() == np.array([1, 20, 30, 4])).all()
     assert (x.get_width() == np.array([4, 60, 70, 7])).all()
-    assert x.get_names() == None
+    assert x.get_names() is None
 
     #    x = IRanges(starts, widths, mcols = BiocFrame({"foo": ['a', 'b', 'c', 'd']}))
     #    y = IRanges(starts2, widths2, mcols = BiocFrame({"foo": ['A', 'B', 'C', 'D']}))
