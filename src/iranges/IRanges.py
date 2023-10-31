@@ -7,32 +7,31 @@ from copy import deepcopy
 
 
 class IRanges:
-    """
-    A collection of integer ranges, equivalent to the ``IRanges`` class from
-    the Bioconductor package of the same name. This holds a start position and
-    a width, and is most typically used to represent coordinates along some
-    genomic sequence. The interpretation of the start position depends on the
-    application; for sequences, the start is usually a 1-based position, but
-    other use cases may allow zero or even negative values.
+    """A collection of integer ranges, equivalent to the ``IRanges`` class from the Bioconductor package of the same
+    name.
+
+    This holds a start position and a width, and is most typically used to represent coordinates along some genomic
+    sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a
+    1-based position, but other use cases may allow zero or even negative values.
     """
 
     def __init__(
-        self, 
-        start: Sequence[int], 
-        width: Sequence[int], 
-        names: Optional[Sequence[str]] = None, 
-        mcols: Optional[BiocFrame] = None, 
-        metadata: Optional[Dict] = None, 
+        self,
+        start: Sequence[int],
+        width: Sequence[int],
+        names: Optional[Sequence[str]] = None,
+        mcols: Optional[BiocFrame] = None,
+        metadata: Optional[Dict] = None,
         validate: bool = True,
     ):
         """
         Args:
-            start: 
+            start:
                 Sequence of integers containing the start position for each
                 range. All values should fall within the range that can be
                 represented by a 32-bit signed integer.
 
-            width: 
+            width:
                 Sequence of integers containing the width for each range. This
                 should be of the same length as ``start``. All values should be
                 non-negative and fall within the range that can be represented
@@ -111,7 +110,9 @@ class IRanges:
         if not isinstance(self._mcols, BiocFrame):
             raise TypeError("'mcols' should be a BiocFrame")
         if self._mcols.shape[0] != len(self._start):
-            raise ValueError("number of rows of 'mcols' should be equal to length of 'start'")
+            raise ValueError(
+                "number of rows of 'mcols' should be equal to length of 'start'"
+            )
 
     def _sanitize_metadata(self, metadata):
         if metadata is None:
@@ -183,14 +184,14 @@ class IRanges:
     def set_start(self, start: Sequence[int], in_place: bool = False) -> "IRanges":
         """
         Args:
-            start: 
+            start:
                 Sequence of start positions, see the constructor for details.
 
-            in_place: 
+            in_place:
                 Whether to modify the object in place.
 
         Returns:
-            If ``in_place = False``, a new ``IRanges`` is returned with the 
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             modified start positions. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
@@ -203,10 +204,10 @@ class IRanges:
     def set_width(self, width: Sequence[int], in_place: bool = False) -> "IRanges":
         """
         Args:
-            width: 
+            width:
                 Sequence of widths, see the constructor for details.
 
-            in_place: 
+            in_place:
                 Whether to modify the object in place.
 
         Returns:
@@ -219,13 +220,15 @@ class IRanges:
         output._validate_width()
         return output
 
-    def set_names(self, names: Optional[Sequence[str]], in_place: bool = False) -> "IRanges":
+    def set_names(
+        self, names: Optional[Sequence[str]], in_place: bool = False
+    ) -> "IRanges":
         """
         Args:
-            names: 
+            names:
                 Sequence of names or None, see the constructor for details.
 
-            in_place: 
+            in_place:
                 Whether to modify the object in place.
 
         Returns:
@@ -238,14 +241,16 @@ class IRanges:
         output._validate_names()
         return output
 
-    def set_mcols(self, mcols: Optional[BiocFrame], in_place: bool = False) -> "IRanges":
+    def set_mcols(
+        self, mcols: Optional[BiocFrame], in_place: bool = False
+    ) -> "IRanges":
         """
         Args:
-            mcols: 
+            mcols:
                 Data frame of additional columns, see the constructor for
                 details.
 
-            in_place: 
+            in_place:
                 Whether to modify the object in place.
 
         Returns:
@@ -258,13 +263,15 @@ class IRanges:
         output._validate_mcols()
         return output
 
-    def set_metadata(self, metadata: Optional[Dict], in_place: bool = False) -> "IRanges":
+    def set_metadata(
+        self, metadata: Optional[Dict], in_place: bool = False
+    ) -> "IRanges":
         """
         Args:
-            metadata: 
+            metadata:
                 Additional metadata.
 
-            in_place: 
+            in_place:
                 Whether to modify the object in place.
 
         Returns:
@@ -288,10 +295,12 @@ class IRanges:
         """
         return len(self._start)
 
-    def __getitem__(self, subset: Union[Sequence, int, str, bool, slice, range]) -> "IRanges":
+    def __getitem__(
+        self, subset: Union[Sequence, int, str, bool, slice, range]
+    ) -> "IRanges":
         """
         Args:
-            subset: 
+            subset:
                 Integer indices, a boolean filter, or (if the current object is
                 named) names specifying the ranges to be extracted, see
                 :py:meth:`~biocutils.normalize_subscript.normalize_subscript`.
@@ -301,17 +310,19 @@ class IRanges:
         """
         idx, scalar = ut.normalize_subscript(subset, len(self), self._names)
         return type(self)(
-            start = self._start[idx],
-            width = self._width[idx],
-            names = ut.subset(self._names, idx) if self._names is not None else None,
-            mcols = self._mcols[list(idx),:], # doesn't support ranges yet.
-            metadata = self._metadata
+            start=self._start[idx],
+            width=self._width[idx],
+            names=ut.subset(self._names, idx) if self._names is not None else None,
+            mcols=self._mcols[list(idx), :],  # doesn't support ranges yet.
+            metadata=self._metadata,
         )
 
-    def __setitem__(self, args: Union[Sequence, int, str, bool, slice, range], value: "IRanges"):
+    def __setitem__(
+        self, args: Union[Sequence, int, str, bool, slice, range], value: "IRanges"
+    ):
         """
         Args:
-            subset: 
+            subset:
                 Integer indices, a boolean filter, or (if the current object is
                 named) names specifying the ranges to be replaced, see
                 :py:meth:`~biocutils.normalize_subscript.normalize_subscript`.
@@ -326,16 +337,16 @@ class IRanges:
         idx, scalar = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
-#        self._mcols[list(idx),:] = value._mcols # doesn't support ranges yet.
+        #        self._mcols[list(idx),:] = value._mcols # doesn't support ranges yet.
 
         if value._names is not None:
             if self._names is None:
-                self._names = [''] * len(self)
+                self._names = [""] * len(self)
             for i, j in enumerate(idx):
                 self._names[j] = value._names[i]
         elif self._names is not None:
             for i, j in enumerate(idx):
-                self._names[j] = ''
+                self._names[j] = ""
 
     ##################
     #### Printing ####
@@ -364,7 +375,16 @@ class IRanges:
         nranges = len(self)
         nmcols = self._mcols.shape[1]
         # TODO: clean up later.
-        return "IRanges object with " + str(nranges) + " range" + ("" if nranges == 1 else "s") + " and " + str(nmcols) + " metadata column" + ("" if nmcols == 1 else "s")
+        return (
+            "IRanges object with "
+            + str(nranges)
+            + " range"
+            + ("" if nranges == 1 else "s")
+            + " and "
+            + str(nmcols)
+            + " metadata column"
+            + ("" if nmcols == 1 else "s")
+        )
 
     #################
     #### Copying ####
@@ -376,12 +396,12 @@ class IRanges:
             A shallow copy of this object.
         """
         return type(self)(
-            start = self._start, 
-            width = self._width,
-            names = self._names,
-            mcols = self._mcols,
-            metadata = self._metadata,
-            validate = False
+            start=self._start,
+            width=self._width,
+            names=self._names,
+            mcols=self._mcols,
+            metadata=self._metadata,
+            validate=False,
         )
 
     def __deepcopy__(self, memo):
@@ -393,12 +413,12 @@ class IRanges:
             A deep copy of this object.
         """
         return type(self)(
-            start = deepcopy(self._start, memo),
-            width = deepcopy(self._width, memo),
-            names = deepcopy(self._names, memo),
-            mcols = deepcopy(self._mcols, memo),
-            metadata = deepcopy(self._metadata, memo),
-            validate = False
+            start=deepcopy(self._start, memo),
+            width=deepcopy(self._width, memo),
+            names=deepcopy(self._names, memo),
+            mcols=deepcopy(self._mcols, memo),
+            metadata=deepcopy(self._metadata, memo),
+            validate=False,
         )
 
 
@@ -420,10 +440,10 @@ def _combine_IRanges(*x: IRanges) -> IRanges:
                 all_names += [""] * len(y)
 
     return IRanges(
-        start = combine_seqs(*[y._start for y in x]),
-        width = combine_seqs(*[y._width for y in x]),
-        names = all_names,
-        mcols = combine_rows(*[y._mcols for y in x]),
-        metadata = x[0]._metadata,
-        validate = False
+        start=combine_seqs(*[y._start for y in x]),
+        width=combine_seqs(*[y._width for y in x]),
+        names=all_names,
+        mcols=combine_rows(*[y._mcols for y in x]),
+        metadata=x[0]._metadata,
+        validate=False,
     )
