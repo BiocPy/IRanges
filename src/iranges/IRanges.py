@@ -416,7 +416,7 @@ class IRanges:
             floating = ["", ""] + raw_floating
 
             columns = []
-            for prop in [ "start", "end", "width" ]:
+            for prop in ["start", "end", "width"]:
                 data = getattr(self, "get_" + prop)()
                 showed = show_as_cell(data, indices)
                 header = [prop, "<" + type(data).__name__ + ">"]
