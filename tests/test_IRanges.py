@@ -1,9 +1,10 @@
-from iranges import IRanges
-from biocframe import BiocFrame
+import copy
+
 import numpy as np
 import pytest
-import copy
+from biocframe import BiocFrame
 from biocgenerics import combine_seqs
+from iranges import IRanges
 
 
 def test_IRanges_basic():
