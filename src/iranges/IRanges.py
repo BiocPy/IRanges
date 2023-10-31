@@ -1,5 +1,6 @@
 from copy import deepcopy
 from typing import List, Optional, Sequence, Union
+from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
@@ -188,6 +189,10 @@ class IRanges:
             start:
                 Sequence of start positions, see the constructor for details.
         """
+        warn(
+            "Setting property 'start'is an in-place operation, use 'set_start' instead",
+            UserWarning,
+        )
 
         self.set_start(start, in_place=True)
 
@@ -237,6 +242,10 @@ class IRanges:
             width:
                 Sequence of widths, see the constructor for details.
         """
+        warn(
+            "Setting property 'width'is an in-place operation, use 'set_width' instead",
+            UserWarning,
+        )
         return self.set_width(width, in_place=True)
 
     def get_end(self) -> ndarray:
@@ -311,6 +320,10 @@ class IRanges:
             modified names. Otherwise, the current object is directly modified
             and a reference to it is returned.
         """
+        warn(
+            "Setting property 'names'is an in-place operation, use 'set_names' instead",
+            UserWarning,
+        )
         self.set_names(names, in_place=True)
 
     def get_mcols(self) -> BiocFrame:
@@ -362,6 +375,10 @@ class IRanges:
                 Data frame of additional columns, see the constructor for
                 details.
         """
+        warn(
+            "Setting property 'mcols'is an in-place operation, use 'set_mcols' instead",
+            UserWarning,
+        )
         self.set_mcols(mcols, in_place=True)
 
     def get_metadata(self) -> dict:
@@ -411,6 +428,10 @@ class IRanges:
             metadata:
                 Additional metadata.
         """
+        warn(
+            "Setting property 'metadata'is an in-place operation, use 'set_metadata' instead",
+            UserWarning,
+        )
         self.set_metadata(metadata, in_place=True)
 
     def _define_output(self, in_place):
