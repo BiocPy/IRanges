@@ -4,8 +4,8 @@ from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
-from biocgenerics import combine_rows, combine_seqs
-from numpy import array, int32, ndarray
+from biocgenerics import combine_rows, combine_seqs, format_table, show_as_cell
+from numpy import array, get_printoptions, int32, ndarray
 
 
 class IRanges:
@@ -511,28 +511,108 @@ class IRanges:
     ##################
 
     def __repr__(self) -> str:
-        message = "IRanges(start=" + ut.print_truncated_list(self._start) + ", "
-        message += "width=" + ut.print_truncated_list(self._width) + ", "
+        opt = get_printoptions()
+        old_threshold = opt["threshold"]
+        old_edgeitems = opt["edgeitems"]
 
-        if self._names:
-            message += "names=" + ut.print_truncated_list(self._names)
+        try:
+            opt["threshold"] = 50
+            opt["edgeitems"] = 3
+            message = "IRanges(start=" + repr(self._start)
+            message += ", width=" + repr(self._width)
 
-        if self._mcols.shape[1] > 0:
-            message += "mcols=" + repr(self._mcols)
+            if self._names:
+                message += ", names=" + ut.print_truncated_list(self._names)
 
-        if len(self._metadata):
-            message += repr(self._metadata)
+            if self._mcols.shape[1] > 0:
+                message += ", mcols=" + repr(self._mcols)
+
+            if len(self._metadata):
+                message += ", metadata=" + repr(self._metadata)
+
+            message += ")"
+        finally:
+            opt["threshold"] = old_threshold
+            opt["edgeitems"] = old_edgeitems
 
         return message
 
-    def __str__(self):
+    def __str__(self) -> str:
         nranges = len(self)
         nmcols = self._mcols.shape[1]
-        # TODO: clean up later.
-        return (
-            f"IRanges object with {str(nranges)} range{'' if nranges == 1 else 's'} "
-            f" and f{str(nmcols)} metadata column{'' if nmcols == 1 else 's'}"
+        output = (
+            "IRanges object with "
+            + str(nranges)
+            + " range"
+            + ("" if nranges == 1 else "s")
+            + " and "
+            + str(nmcols)
+            + " metadata column"
+            + ("" if nmcols == 1 else "s")
+            + "\n"
         )
+
+        added_table = False
+        if nranges:
+            if nranges <= 10:
+                indices = range(nranges)
+                insert_ellipsis = False
+            else:
+                indices = [0, 1, 2, nranges - 3, nranges - 2, nranges - 1]
+                insert_ellipsis = True
+
+            if self._names is not None:
+                raw_floating = ut.subset(self._names, indices)
+            else:
+                raw_floating = ["[" + str(i) + "]" for i in indices]
+            if insert_ellipsis:
+                raw_floating = raw_floating[:3] + [""] + raw_floating[3:]
+            floating = ["", ""] + raw_floating
+
+            columns = []
+            for prop in ["start", "end", "width"]:
+                data = getattr(self, "get_" + prop)()
+                showed = show_as_cell(data, indices)
+                header = [prop, "<" + type(data).__name__ + ">"]
+                if insert_ellipsis:
+                    showed = showed[:3] + ["..."] + showed[3:]
+                columns.append(header + showed)
+
+            if self._mcols.shape[1] > 0:
+                spacer = ["|"] * (len(indices) + insert_ellipsis)
+                columns.append(["", ""] + spacer)
+
+                for col in self._mcols.get_column_names():
+                    data = self._mcols.column(col)
+                    showed = show_as_cell(data, indices)
+                    header = [col, "<" + type(data).__name__ + ">"]
+                    minwidth = max(40, len(header[0]), len(header[1]))
+                    for i, y in enumerate(showed):
+                        if len(y) > minwidth:
+                            showed[i] = y[: minwidth - 3] + "..."
+                    if insert_ellipsis:
+                        showed = showed[:3] + ["..."] + showed[3:]
+                    columns.append(header + showed)
+
+            output += format_table(columns, floating_names=floating)
+            added_table = True
+
+        footer = []
+        if len(self._metadata):
+            footer.append(
+                "metadata ("
+                + str(len(self._metadata))
+                + "): "
+                + ut.print_truncated_list(
+                    list(self._metadata.keys()), sep=" ", include_brackets=False
+                )
+            )
+        if len(footer):
+            if added_table:
+                output += "\n------\n"
+            output += "\n".join(footer)
+
+        return output
 
     #################
     #### Copying ####
