@@ -449,7 +449,7 @@ class IRanges:
             start=self._start[idx],
             width=self._width[idx],
             names=ut.subset(self._names, idx) if self._names is not None else None,
-            mcols=self._mcols[list(idx), :],
+            mcols=self._mcols[idx, :],
             metadata=self._metadata,
         )
 
@@ -474,7 +474,7 @@ class IRanges:
         idx, scalar = ut.normalize_subscript(args, len(self), self._names)
         self._start[idx] = value._start
         self._width[idx] = value._width
-        self._mcols[list(idx), :] = value._mcols
+        self._mcols[idx, :] = value._mcols
 
         if value._names is not None:
             if self._names is None:
