@@ -4,8 +4,8 @@ from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
-from biocgenerics import combine_rows, combine_seqs, format_table, show_as_cell
-from numpy import array, get_printoptions, int32, ndarray
+from biocgenerics import combine_rows, combine_seqs, show_as_cell
+from numpy import array, printoptions, int32, ndarray
 
 
 class IRanges:
@@ -511,16 +511,9 @@ class IRanges:
     ##################
 
     def __repr__(self) -> str:
-        opt = get_printoptions()
-        old_threshold = opt["threshold"]
-        old_edgeitems = opt["edgeitems"]
-
-        try:
-            opt["threshold"] = 50
-            opt["edgeitems"] = 3
+        with printoptions(threshold=50, edgeitems=3):
             message = "IRanges(start=" + repr(self._start)
             message += ", width=" + repr(self._width)
-
             if self._names:
                 message += ", names=" + ut.print_truncated_list(self._names)
 
@@ -528,12 +521,9 @@ class IRanges:
                 message += ", mcols=" + repr(self._mcols)
 
             if len(self._metadata):
-                message += ", metadata=" + repr(self._metadata)
+                message += ", metadata=" + ut.print_truncated_dict(self._metadata)
 
             message += ")"
-        finally:
-            opt["threshold"] = old_threshold
-            opt["edgeitems"] = old_edgeitems
 
         return message
 
@@ -561,19 +551,23 @@ class IRanges:
                 indices = [0, 1, 2, nranges - 3, nranges - 2, nranges - 1]
                 insert_ellipsis = True
 
-            if self._names is not None:
-                raw_floating = ut.subset(self._names, indices)
-            else:
-                raw_floating = ["[" + str(i) + "]" for i in indices]
+            raw_floating = ut.create_floating_names(self._names, indices)
             if insert_ellipsis:
                 raw_floating = raw_floating[:3] + [""] + raw_floating[3:]
             floating = ["", ""] + raw_floating
 
             columns = []
-            for prop in ["start", "end", "width"]:
-                data = getattr(self, "get_" + prop)()
-                showed = show_as_cell(data, indices)
-                header = [prop, "<" + type(data).__name__ + ">"]
+
+            sub_start = self._start[indices]
+            sub_width = self._width[indices]
+            sub_end = sub_start + sub_width
+            for prop, val in [
+                ("start", sub_start),
+                ("end", sub_end),
+                ("width", sub_width),
+            ]:
+                header = [prop, "<" + ut.print_type(val) + ">"]
+                showed = show_as_cell(val, range(len(val)))
                 if insert_ellipsis:
                     showed = showed[:3] + ["..."] + showed[3:]
                 columns.append(header + showed)
@@ -585,26 +579,28 @@ class IRanges:
                 for col in self._mcols.get_column_names():
                     data = self._mcols.column(col)
                     showed = show_as_cell(data, indices)
-                    header = [col, "<" + type(data).__name__ + ">"]
-                    minwidth = max(40, len(header[0]), len(header[1]))
-                    for i, y in enumerate(showed):
-                        if len(y) > minwidth:
-                            showed[i] = y[: minwidth - 3] + "..."
+                    header = [col, "<" + ut.print_type(data) + ">"]
+                    showed = ut.truncate_strings(
+                        showed, width=max(40, len(header[0]), len(header[1]))
+                    )
                     if insert_ellipsis:
                         showed = showed[:3] + ["..."] + showed[3:]
                     columns.append(header + showed)
 
-            output += format_table(columns, floating_names=floating)
+            output += ut.print_wrapped_table(columns, floating_names=floating)
             added_table = True
 
         footer = []
         if len(self._metadata):
             footer.append(
-                "metadata ("
+                "metadata("
                 + str(len(self._metadata))
                 + "): "
                 + ut.print_truncated_list(
-                    list(self._metadata.keys()), sep=" ", include_brackets=False
+                    list(self._metadata.keys()),
+                    sep=" ",
+                    include_brackets=False,
+                    transform=lambda y: y,
                 )
             )
         if len(footer):
