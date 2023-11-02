@@ -1,11 +1,11 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
-from numpy import array, clip, count_nonzero, int32, ndarray, printoptions, sum, zeros
+from numpy import array, int32, ndarray, printoptions
 
 from .interval import create_np_interval_vector
 
@@ -770,7 +770,7 @@ class IRanges:
 
             _clipped_starts.append(_start)
             _clipped_widths.append(_width)
-            _clipped_names.append(name if name is not None else str(counter-1))
+            _clipped_names.append(name if name is not None else str(counter - 1))
 
         if all(x is None for x in _clipped_names):
             _clipped_names = None
