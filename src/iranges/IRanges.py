@@ -1,11 +1,47 @@
 from copy import deepcopy
-from typing import List, Optional, Sequence, Union
+from typing import Dict, List, Optional, Sequence, Union
 from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
-from numpy import array, printoptions, int32, ndarray
+from numpy import array, clip, count_nonzero, int32, ndarray, printoptions, sum, zeros
+
+from .interval import create_np_interval_vector
+
+
+class IRangesIter:
+    """An iterator to a :py:class:`~iranges.IRanges.IRanges` object.
+
+    Args:
+        obj (IRanges): Object to iterate.
+    """
+
+    def __init__(self, obj: "IRanges") -> None:
+        """Initialize the iterator.
+
+        Args:
+            obj (IRanges): Source object to iterate.
+        """
+        self._iranges = obj
+        self._current_index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._current_index < len(self._iranges):
+            iter_row_index = (
+                self._iranges.names[self._current_index]
+                if self._iranges.names is not None
+                else None
+            )
+
+            iter_slice = self._iranges.get_row(self._current_index)
+            self._current_index += 1
+            return (iter_row_index, iter_slice)
+
+        raise StopIteration
 
 
 class IRanges:
@@ -646,6 +682,123 @@ class IRanges:
             metadata=deepcopy(self._metadata, memo),
             validate=False,
         )
+
+    def get_row(self, index_or_name: Union[str, int]) -> "IRanges":
+        """Access a row by index or row name.
+
+        Args:
+            index_or_name (Union[str, int]): Integer index of the row to access.
+
+                Alternatively, you may provide a string specifying the row name to access,
+                only if :py:attr:`~iranges.IRanges.IRanges.names` are available.
+
+        Raises:
+            ValueError:
+                If ``index_or_name`` is not in row names.
+                If the integer index is greater than the number of rows.
+            TypeError:
+                If ``index_or_name`` is neither a string nor an integer.
+
+        Returns:
+            IRanges: A sliced IRanges object
+        """
+
+        if not isinstance(index_or_name, (int, str)):
+            raise TypeError("`index_or_name` must be either an integer index or name.")
+
+        return self[index_or_name]
+
+    def __iter__(self) -> IRangesIter:
+        """Iterator over intervals."""
+        return IRangesIter(self)
+
+    #######################
+    #### range methods ####
+    #######################
+
+    def clip_intervals(
+        self, shift: int = 0, width: Optional[Union[int, List[int]]] = None
+    ) -> "IRanges":
+        """Clip intervals. Starts are always clipped to positive interval ranges (1, Inf).
+
+        If ``width`` is specified, the intervals are clipped to (1, width).
+
+        Args:
+            shift (int, optional): Shift all starts before clipping. Defaults to 0.
+            width (Union[int, List[int]], optional): Clip width of each interval. Defaults to None.
+
+        Returns:
+            IRanges: A ``IRanges`` object, with the clipped intervals.
+        """
+
+        _clipped_starts = []
+        _clipped_widths = []
+        _clipped_names = []
+
+        counter = 0
+        for name, val in self:
+            _start = val.start[0]
+            _width = val.width[0]
+
+            if shift > 0:
+                _start += shift
+
+            if width is not None:
+                _width = width
+                if isinstance(_width, list):
+                    if len(_width) != len(self):
+                        raise ValueError(
+                            "Length of 'width' must match the number of intervals"
+                        )
+
+                    _width = _width[counter]
+
+                if not isinstance(_width, int):
+                    raise TypeError("'width' must be either an integer or a vector.")
+
+                _width = _width - _start
+
+            counter += 1
+
+            if _start < 1:
+                _start = 1
+                _width = val.end[0] - _start
+
+            _end = _start + _width
+            if _end < 1:
+                continue
+
+            _clipped_starts.append(_start)
+            _clipped_widths.append(_width)
+            _clipped_names.append(name if name is not None else str(counter-1))
+
+        if all(x is None for x in _clipped_names):
+            _clipped_names = None
+
+        return IRanges(_clipped_starts, _clipped_widths, names=_clipped_names)
+
+    def coverage(
+        self, shift: int = 0, width: Optional[int] = None, weight: int = 1
+    ) -> ndarray:
+        """Calculate coverage, for each position, counts the number of intervals that cover it.
+
+        Args:
+            shift (int, optional): Shift all intervals. Defaults to 0.
+            width (int, optional): Restrict the width of all intervals. Defaults to None.
+            weight (int, optional): Weight to use. Defaults to 1.
+
+        Returns:
+            ndarray:  A numpy array with the coverage vector.
+        """
+
+        new_ranges = self.clip_intervals(shift=shift, width=width)
+        print("new_ranges", new_ranges)
+
+        cov, _ = create_np_interval_vector(new_ranges)
+
+        print("in coverage function::", cov)
+
+        return cov
 
 
 @combine_seqs.register
