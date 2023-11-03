@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import biocutils as ut
@@ -807,13 +807,74 @@ class IRanges:
                 original object?. Defaults to False.
 
         Returns:
-            IRanges: An IRanges instance with a single range, from the minimum start to the maximum end of the concatenated object.
+            IRanges: An new IRanges instance with a single range,
+            from the minimum start to the maximum end of the concatenated object.
         """
 
         min_start = min(self.start)
         max_end = max(self.end)
 
         return IRanges([min_start], [max_end - min_start])
+
+    def reduce(
+        self,
+        with_reverse_map: bool = False,
+        min_gap_width: int = 1,
+    ) -> "IRanges":
+        """`Reduce` orders the ranges, then merges overlapping or adjacent ranges.
+
+        Args:
+            with_reverse_map (bool, optional): Whether to return map of indices back to
+                original object. Defaults to False.
+            min_gap_width (int, optional): Ranges separated by a gap of
+                at least ``min_gap_width`` positions are not merged. Defaults to 1.
+
+        Returns:
+            IRanges: A new `GenomicRanges` object with reduced intervals.
+        """
+
+        pass
+
+    def _get_intervals_as_list(self) -> List[Tuple[int, int, int]]:
+        """Internal method to get intervals as a list of tuples.
+
+        Returns:
+            List[Tuple[int, int, int]]: List of tuples containing the start, end and the index.
+        """
+        intvals = []
+        for i in range(len(self)):
+            intvals.append((self.start[i], self.end[i], i))
+
+        return intvals
+
+    def order(self, decreasing: bool = False) -> List[int]:
+        """Get the order of indices for sorting.
+
+        Args:
+            decreasing (bool, optional): Whether to sort in descending order. Defaults to False.
+
+        Returns:
+            List[int]: List of integers indicating index position.
+        """
+        intvals = sorted(self._get_intervals_as_list(), reverse=decreasing)
+        order = [o[2] for o in intvals]
+        return order
+
+    def sort(self, decreasing: bool = False, in_place: bool = False) -> "IRanges":
+        """Sort the intervals.
+
+        Args:
+            decreasing (bool): Whether to sort in descending order. Defaults to False.
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            sorted intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+        order = self.order(decreasing=decreasing)
+        output = self._define_output(in_place)
+        return output[order]
 
 
 @combine_seqs.register
