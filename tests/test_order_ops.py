@@ -14,7 +14,7 @@ def test_sort():
 
     sorted = x.sort()
     assert all(np.equal(sorted.start, [-6, -4, -2, 0, 1, 3, 6, 9, 10]))
-    assert all(np.equal(sorted.width, [2,1,5,3,4,0,0,6,3]))
+    assert all(np.equal(sorted.width, [2, 1, 5, 3, 4, 0, 0, 6, 3]))
 
 
 def test_sort_decreasing():
@@ -24,7 +24,7 @@ def test_sort_decreasing():
 
     sorted_iranges = x.sort(decreasing=True)
     assert all(np.equal(sorted_iranges.start, [-6, -4, -2, 0, 1, 3, 6, 9, 10][::-1]))
-    assert all(np.equal(sorted_iranges.width, [2,1,5,3,4,0,0,6,3][::-1]))
+    assert all(np.equal(sorted_iranges.width, [2, 1, 5, 3, 4, 0, 0, 6, 3][::-1]))
 
 
 def test_order():
@@ -33,4 +33,4 @@ def test_order():
     x = IRanges(starts, widths)
 
     order = x.order()
-    assert order == [6,3,0,5,4,7,1,2,8]
+    assert order == [6, 3, 0, 5, 4, 7, 1, 2, 8]
