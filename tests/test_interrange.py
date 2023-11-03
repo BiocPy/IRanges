@@ -59,6 +59,7 @@ def test_gap():
     assert all(np.equal(gaps.start, [-3, 5]))
     assert all(np.equal(gaps.width, [1, 4]))
 
+
 def test_gap_with_restrictions():
     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
 
