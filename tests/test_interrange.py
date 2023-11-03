@@ -40,6 +40,7 @@ def test_reduce_drop_ranges():
     assert all(np.equal(reduced.width, [3, 7, 6]))
     assert reduced.mcols.colnames == []
 
+
 def test_reduce_drop_ranges_and_revmap():
     starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
     widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
