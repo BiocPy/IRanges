@@ -66,3 +66,18 @@ def test_gap_with_restrictions():
     gaps = x.gaps(start=-6, end=20)
     assert all(np.equal(gaps.start, [-3, 5, 15]))
     assert all(np.equal(gaps.width, [1, 4, 6]))
+
+def test_disjoin():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+
+    dj = x.disjoin()
+    assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
+    assert all(np.equal(dj.width, [2,1,2,1,2,2,1,3,2]))
+
+def test_disjoin_with_revmap():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+
+    dj = x.disjoin(with_reverse_map=True)
+    assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
+    assert all(np.equal(dj.width, [2,1,2,1,2,2,1,3,2]))
+    assert dj.mcols.colnames == ["revmap"]

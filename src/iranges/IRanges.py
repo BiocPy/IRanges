@@ -994,9 +994,56 @@ class IRanges:
             result_starts.append(overlap_end + 1)
             result_widths.append(end - overlap_end)
 
-        print("result_starts", result_starts)
-        print(result_widths)
         return IRanges(result_starts, result_widths)
+
+    # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
+    # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389
+    def disjoin(self, with_reverse_map: bool = False) -> "IRanges":
+        """Calculate disjoint intervals.
+
+        Args:
+            with_reverse_map (bool, optional): Whether to return a map of indices back to the original object.
+                Defaults to False.
+
+        Returns:
+            IRanges: A new `IRanges` containing disjoint intervals.
+        """
+        all_ints = []
+        counter = 0
+        for _, val in self:
+            all_ints.append((val.start[0], 1, counter))
+            all_ints.append((val.end[0], -1, counter))
+
+            counter += 1
+
+        sorted_ints = sorted(all_ints)
+
+        counter = 0
+        _current_start = None
+
+        result_starts = []
+        result_widths = []
+        result_revmaps = []
+
+        _curr_revmap = []
+        for x in sorted_ints:
+            _curr_revmap.append(x[2])
+
+            if _current_start is not None and x[0] > _current_start and counter != 0:
+                result_starts.append(_current_start)
+                result_widths.append(x[0] - _current_start)
+                result_revmaps.append(list(set(_curr_revmap)))
+                _curr_revmap = []
+
+            _current_start = x[0]
+            counter += x[1]
+
+        result = IRanges(result_starts, result_widths)
+
+        if with_reverse_map is True:
+            result.set_mcols(BiocFrame({"revmap": result_revmaps}), in_place=True)
+
+        return result
 
 
 @combine_seqs.register
