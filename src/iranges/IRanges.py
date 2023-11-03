@@ -9,6 +9,9 @@ from numpy import array, int32, ndarray, printoptions
 
 from .interval import create_np_interval_vector
 
+__author__ = "Aaron Lun, Jayaram Kancherla"
+__copyright__ = "LTLA, jkanche"
+__license__ = "MIT"
 
 class IRangesIter:
     """An iterator to a :py:class:`~iranges.IRanges.IRanges` object.
@@ -788,16 +791,28 @@ class IRanges:
         """
 
         new_ranges = self.clip_intervals(shift=shift, width=width)
-        print("new_ranges", new_ranges)
 
         if weight is not None and not isinstance(weight, (int, float)):
             raise TypeError("'width' must be an integer or float.")
 
         cov, _ = create_np_interval_vector(new_ranges, force_size=width, value=weight)
-
-        print("in coverage function::", cov)
-
         return cov
+
+    def range(self) -> "IRanges":
+        """Concatenate all intervals. A tuple of minimum of all starts, maximum of all ends) in the object.
+
+        Args:
+            with_reverse_map (bool, optional): return map of indices back to
+                original object?. Defaults to False.
+
+        Returns:
+            IRanges: An IRanges instance with a single range, from the minimum start to the maximum end of the concatenated object.
+        """
+
+        min_start = min(self.start)
+        max_end = max(self.end)
+
+        return IRanges([min_start], [max_end - min_start])
 
 
 @combine_seqs.register
