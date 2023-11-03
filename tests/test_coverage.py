@@ -6,6 +6,7 @@ __author__ = "jkanche"
 __copyright__ = "jkanche"
 __license__ = "MIT"
 
+
 def test_coverage():
     starts = [-2, 6, 9, -4, 1, 0, -6, 10]
     widths = [5, 0, 6, 1, 4, 3, 2, 3]
