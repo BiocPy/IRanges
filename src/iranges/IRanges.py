@@ -936,6 +936,68 @@ class IRanges:
         output = self._define_output(in_place)
         return output[order]
 
+    def gaps(
+        self, start: Optional[int] = None, end: Optional[int] = None
+    ) -> Optional["IRanges"]:
+        """gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals
+         are removed specified by the start and end arguments.
+
+        Args:
+            start (int, optional): Restrict start position. Defaults to 1.
+            end (int, optional): Restrict end position. Defaults to None.
+
+        Returns:
+            IRanges: A new ``IRanges`` is returned with the gaps.
+        """
+        _order = self.order()
+
+        overlap_start = min(self.start) if start is None else start
+        overlap_end = overlap_start - 1 if start is not None else None
+
+        result_starts = []
+        result_widths = []
+
+        def get_elem_counter(idx):
+            elem = self[idx]
+            start = elem.start[0]
+            end = elem.end[0] - 1
+            width = elem.width[0]
+            return start, end, width
+
+        for i in range(len(_order)):
+            _start, _end, _width = get_elem_counter(_order[i])
+
+            if _width == 0:
+                continue
+
+            if overlap_end is None:
+                overlap_end = _end
+            else:
+                _gap_start = overlap_end + 1
+
+                if end is not None and _start > end + 1:
+                    _start = end + 1
+
+                _gap_width = _start - _gap_start
+
+                if _gap_width >= 1:
+                    result_starts.append(_gap_start)
+                    result_widths.append(_gap_width)
+                    overlap_end = _end
+                elif _end > overlap_end:
+                    overlap_end = _end
+
+            if end is not None and overlap_end >= end:
+                break
+
+        if end is not None and overlap_end is not None and overlap_end < end:
+            result_starts.append(overlap_end + 1)
+            result_widths.append(end - overlap_end)
+
+        print("result_starts", result_starts)
+        print(result_widths)
+        return IRanges(result_starts, result_widths)
+
 
 @combine_seqs.register
 def _combine_IRanges(*x: IRanges) -> IRanges:

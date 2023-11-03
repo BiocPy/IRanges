@@ -50,3 +50,18 @@ def test_reduce_drop_ranges_and_revmap():
     assert all(np.equal(reduced.start, [-6, -2, 9]))
     assert all(np.equal(reduced.width, [3, 7, 6]))
     assert reduced.mcols.colnames == ["revmap"]
+
+
+def test_gap():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+
+    gaps = x.gaps()
+    assert all(np.equal(gaps.start, [-3, 5]))
+    assert all(np.equal(gaps.width, [1, 4]))
+
+def test_gap_with_restrictions():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+
+    gaps = x.gaps(start=-6, end=20)
+    assert all(np.equal(gaps.start, [-3, 5, 15]))
+    assert all(np.equal(gaps.width, [1, 4, 6]))
