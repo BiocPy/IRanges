@@ -819,6 +819,7 @@ class IRanges:
     def reduce(
         self,
         with_reverse_map: bool = False,
+        drop_empty_ranges: bool = False,
         min_gap_width: int = 1,
     ) -> "IRanges":
         """`Reduce` orders the ranges, then merges overlapping or adjacent ranges.
@@ -826,14 +827,73 @@ class IRanges:
         Args:
             with_reverse_map (bool, optional): Whether to return map of indices back to
                 original object. Defaults to False.
-            min_gap_width (int, optional): Ranges separated by a gap of
-                at least ``min_gap_width`` positions are not merged. Defaults to 1.
+            drop_empty_ranges (bool, optional): Whether to drop empty ranges. Defaults to False.
+            min_gap_width (int, optional): Ranges separated by a gap of at least ``min_gap_width``
+                positions are not merged. Defaults to 1.
 
         Returns:
-            IRanges: A new `GenomicRanges` object with reduced intervals.
+            IRanges: A new ``IRanges`` object with reduced intervals.
         """
+        if min_gap_width < 0:
+            raise ValueError("'min_gap_width' cannot be negative.")
 
-        pass
+        _order = self.order()
+
+        result_starts = []
+        result_widths = []
+        result_revmaps = []
+        counter = 0
+
+        def get_elem_counter(idx):
+            elem = self[idx]
+            start = elem.start[0]
+            end = elem.end[0] - 1
+            width = elem.width[0]
+            return start, end, width
+
+        current_start, current_end, _ = get_elem_counter(_order[counter])
+        current_revmaps = [_order[counter]]
+
+        counter += 1
+        while counter < len(_order):
+            merge = False
+
+            o = _order[counter]
+            _idx_start, _idx_end, _idx_width = get_elem_counter(o)
+            _gap_width = _idx_start - current_end
+
+            if _gap_width <= min_gap_width:
+                merge = True
+
+            if merge is True:
+                if current_end < _idx_end:
+                    current_end = _idx_end
+
+                current_revmaps.append(o)
+                counter += 1
+            else:
+                if not (
+                    drop_empty_ranges is True and current_end - current_start + 1 == 0
+                ):
+                    result_starts.append(current_start)
+                    result_widths.append(current_end - current_start + 1)
+                    result_revmaps.append(current_revmaps)
+
+                current_revmaps = [o]
+                current_start = _idx_start
+                current_end = _idx_end
+                counter += 1
+
+        result_starts.append(current_start)
+        result_widths.append(current_end - current_start + 1)
+        result_revmaps.append(current_revmaps)
+
+        result = IRanges(result_starts, result_widths)
+
+        if with_reverse_map is True:
+            result.set_mcols(BiocFrame({"revmap": result_revmaps}), in_place=True)
+
+        return result
 
     def _get_intervals_as_list(self) -> List[Tuple[int, int, int]]:
         """Internal method to get intervals as a list of tuples.
