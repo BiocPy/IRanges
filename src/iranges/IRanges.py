@@ -744,19 +744,11 @@ class IRanges:
                 _start += shift
 
             if width is not None:
-                _width = width
-                if isinstance(_width, list):
-                    if len(_width) != len(self):
-                        raise ValueError(
-                            "Length of 'width' must match the number of intervals"
-                        )
-
-                    _width = _width[counter]
-
-                if not isinstance(_width, int):
+                if not isinstance(width, int):
                     raise TypeError("'width' must be either an integer or a vector.")
 
-                _width = _width - _start
+                if _start + _width > width:
+                    _width = width - _start
 
             counter += 1
 
@@ -778,14 +770,18 @@ class IRanges:
         return IRanges(_clipped_starts, _clipped_widths, names=_clipped_names)
 
     def coverage(
-        self, shift: int = 0, width: Optional[int] = None, weight: int = 1
+        self, shift: int = 0, width: Optional[int] = None, weight: Union[int, float] = 1
     ) -> ndarray:
         """Calculate coverage, for each position, counts the number of intervals that cover it.
 
         Args:
             shift (int, optional): Shift all intervals. Defaults to 0.
             width (int, optional): Restrict the width of all intervals. Defaults to None.
-            weight (int, optional): Weight to use. Defaults to 1.
+            weight (Union[int, float], optional): Weight to use. Defaults to 1.
+
+        Raises:
+            - If 'weight' is not a number.
+            - If 'width' is not a number.
 
         Returns:
             ndarray:  A numpy array with the coverage vector.
@@ -794,7 +790,10 @@ class IRanges:
         new_ranges = self.clip_intervals(shift=shift, width=width)
         print("new_ranges", new_ranges)
 
-        cov, _ = create_np_interval_vector(new_ranges)
+        if weight is not None and not isinstance(weight, (int, float)):
+            raise TypeError("'width' must be an integer or float.")
+
+        cov, _ = create_np_interval_vector(new_ranges, force_size=width, value=weight)
 
         print("in coverage function::", cov)
 
