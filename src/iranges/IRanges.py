@@ -15,7 +15,7 @@ __license__ = "MIT"
 
 
 class IRangesIter:
-    """An iterator to a :py:class:`~iranges.IRanges.IRanges` object.
+    """An iterator to :py:class:`~iranges.IRanges.IRanges`.
 
     Args:
         obj (IRanges): Object to iterate.
@@ -716,9 +716,9 @@ class IRanges:
         """Iterator over intervals."""
         return IRangesIter(self)
 
-    #######################
-    #### range methods ####
-    #######################
+    ############################
+    #### iter range methods ####
+    ############################
 
     def clip_intervals(
         self, shift: int = 0, width: Optional[Union[int, List[int]]] = None
@@ -1044,6 +1044,29 @@ class IRanges:
             result.set_mcols(BiocFrame({"revmap": result_revmaps}), in_place=True)
 
         return result
+
+    #############################
+    #### intra range methods ####
+    #############################
+
+    def shift(self, shift: int, in_place: bool = False) -> "IRanges":
+        """Shifts all the intervals by the amount specified by the ``shift`` argument.
+
+        Args:
+            shift (int): Amount to shift by.
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            sorted intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+        if not isinstance(shift, int):
+            raise TypeError("'shift' must be an integer.")
+
+        output = self._define_output(in_place)
+        output._start = output._start + shift
+        return output
 
 
 @combine_seqs.register
