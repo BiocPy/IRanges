@@ -15,5 +15,3 @@ def test_shift():
     sorted = x.shift(shift=-3)
     assert all(np.equal(sorted.start, [-2, 17, 22, 22, 30]))
     assert all(np.equal(sorted.width, widths))
-
-
