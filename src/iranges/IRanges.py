@@ -1195,8 +1195,7 @@ class IRanges:
         both: bool = False,
         in_place: bool = False,
     ) -> "IRanges":
-        """Compute flanking ranges for each range. The logic is from the `IRanges`
-        package.
+        """Compute flanking ranges for each range. The logic is from the `IRanges` package.
 
         If ``start`` is ``True`` for a given range, the flanking occurs at the `start`,
         otherwise the `end`.

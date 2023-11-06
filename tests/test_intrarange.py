@@ -52,27 +52,28 @@ def test_resize():
     assert all(np.equal(res.start, [18, 23, 31, 36]))
     assert all(np.equal(res.width, [2] * 4))
 
+
 def test_flank():
-    starts = [2,5,1]
+    starts = [2, 5, 1]
     widths = [2, 3, 3]
     x = IRanges(starts, widths)
 
     res = x.flank(2)
-    assert all(np.equal(res.start, [0,3,-1]))
+    assert all(np.equal(res.start, [0, 3, -1]))
     assert all(np.equal(res.width, [2] * 3))
 
     res = x.flank(2, start=False)
-    assert all(np.equal(res.start, [4,8,4]))
+    assert all(np.equal(res.start, [4, 8, 4]))
     assert all(np.equal(res.width, [2] * 3))
 
     res = x.flank(2, both=True)
-    assert all(np.equal(res.start, [0,3,-1]))
+    assert all(np.equal(res.start, [0, 3, -1]))
     assert all(np.equal(res.width, [4] * 3))
 
     res = x.flank(2, start=False, both=True)
-    assert all(np.equal(res.start, [2,6,2]))
+    assert all(np.equal(res.start, [2, 6, 2]))
     assert all(np.equal(res.width, [4] * 3))
 
     res = x.flank(-2, start=False, both=True)
-    assert all(np.equal(res.start, [2,6,2]))
+    assert all(np.equal(res.start, [2, 6, 2]))
     assert all(np.equal(res.width, [4] * 3))
