@@ -66,7 +66,7 @@ def create_np_interval_vector(
 def calc_gap_and_overlap(
     first: Tuple[int, int], second: Tuple[int, int]
 ) -> Tuple[Optional[int], Optional[int]]:
-    """Calculate gap and/or overlap between two intervals
+    """Calculate gap and/or overlap between two intervals.
 
     Args:
         first (Tuple): Interval containing start and end positions. `end` is non-inclusive.
