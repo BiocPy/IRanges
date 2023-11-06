@@ -1,4 +1,3 @@
-
 from iranges import IRanges
 
 __author__ = "jkanche"
@@ -14,5 +13,5 @@ def test_find_overlaps():
     assert res  == [[0], [0], [2]]
 
     res = query.find_overlaps(subject, max_gap=0)
-    print(res)
     assert res == [[0], [0, 1], [2]]
+    assert res == [[0], [0], [2]]
