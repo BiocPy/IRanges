@@ -61,3 +61,27 @@ def create_np_interval_vector(
 
         counter += 1
     return cov[1:], revmap
+
+
+def calc_gap_and_overlap(
+    first: Tuple[int, int], second: Tuple[int, int]
+) -> Tuple[Optional[int], Optional[int]]:
+    """Calculate gap and/or overlap between two intervals
+
+    Args:
+        first (Tuple): Interval containing start and end positions. `end` is non-inclusive.
+        second (Tuple): Interval containing start and end positions. `end` is non-inclusive.
+    """
+    _gap = None
+    _overlap = None
+
+    if first[0] <= second[1] and first[1] >= second[0]:
+        _overlap = min(first[1], second[1]) - max(first[0], second[0])
+    else:
+        _gap = None
+        if second[0] >= first[1]:
+            _gap = second[0] - first[1]
+        elif first[0] >= second[1]:
+            _gap = first[0] - second[1]
+
+    return (_gap, _overlap)

@@ -1476,6 +1476,108 @@ class IRanges:
 
         return _inter
 
+    ############################
+    #### Overlap operations ####
+    ############################
+
+    def find_overlaps(
+        self,
+        subject: "IRanges",
+        query_type: Literal["any", "start", "end", "within"] = "any",
+        select: Literal["all", "first", "last", "arbitrary"] = "all",
+        max_gap: int = -1,
+        min_overlap: int = 1,
+    ) -> List[List[int]]:
+        """Find overlaps between ``subject`` (self) and a ``query`` `IRanges` object.
+
+        Args:
+            subject (GenomicRanges): Query `IRanges`.
+            query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
+                must be one of
+
+                - "any": Any overlap is good
+                - "start": Overlap at the beginning of the intervals
+                - "end": Must overlap at the end of the intervals
+                - "within": Fully contain the query interval
+
+                Defaults to "any".
+            select (Literal["all", "first", "last", "arbitrary"]): Determine what hit to choose when
+                there are multiple hits for an interval in ``subject``.
+            max_gap (int, optional): Maximum gap allowed in the overlap.
+                Defaults to -1 (no gap allowed).
+            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.
+
+        Raises:
+            TypeError: If ``query`` is not an `IRanges` object.
+
+        Returns:
+            A List of indices that overlap with ``query``.
+        """
+
+        if not isinstance(subject, IRanges):
+            raise TypeError("`query` is not a `IRanges` object.")
+
+        if query_type not in ["any", "start", "end", "within"]:
+            raise ValueError(
+                f"'{query_type}' must be one of {', '.join(['any', 'start', 'end', 'within'])}."
+            )
+
+        if not ut.package_utils.is_package_installed("ncls"):
+            raise ImportError("package: 'ncls' is not installed.")
+
+        from ncls import NCLS
+
+        _index = NCLS(self.start, self.end, array([i for i in range(len(self))]))
+
+        all_overlaps = []
+        for name, val in subject:
+            _start = val.start[0]
+            _end = val.end[0]
+            _iter = _index.find_overlap(_start, _end)
+            _idx = []
+            for i in _iter:
+                _idx.append(i[2])
+
+            if len(_idx) <= 1:
+                all_overlaps.append(_idx)
+            else:
+                if select == "first" or select == "arbitrary":
+                    all_overlaps.append([_idx[0]])
+                elif select == "last":
+                    all_overlaps.append([_idx[-1]])
+                elif select == "all":
+                    all_overlaps.append(_idx)
+
+        return all_overlaps
+
+    def count_overlaps(
+        self,
+        subject: "IRanges",
+        query_type: Literal["any", "start", "end", "within"] = "any",
+    ) -> List[int]:
+        """Find overlaps between ``subject`` (self) and a ``query`` `IRanges` object.
+
+        Args:
+            subject (GenomicRanges): Query `IRanges`.
+            query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
+                must be one of
+
+                - "any": Any overlap is good
+                - "start": Overlap at the beginning of the intervals
+                - "end": Must overlap at the end of the intervals
+                - "within": Fully contain the query interval
+
+                Defaults to "any".
+
+        Raises:
+            TypeError: If ``query`` is not an `IRanges` object.
+
+        Returns:
+            A List with number of overlaps.
+        """
+        _overlaps = self.find_overlaps(subject)
+        return [len(x) for x in _overlaps]
+
 
 @combine_seqs.register
 def _combine_IRanges(*x: IRanges) -> IRanges:
