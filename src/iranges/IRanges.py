@@ -1291,7 +1291,7 @@ class IRanges:
         return output
 
     def reflect(self, bounds: "IRanges", in_place: bool = False) -> "IRanges":
-        """reverses each range in x relative to the corresponding range in bounds.
+        """Reverses each range in x relative to the corresponding range in bounds.
 
         Reflection preserves the width of a range, but shifts it such the distance
         from the left bound to the start of the range becomes the distance from the
