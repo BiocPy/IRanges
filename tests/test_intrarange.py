@@ -108,3 +108,21 @@ def test_reflect():
     res = x.reflect(bounds=bounds)
     assert all(np.equal(res.start, [7, 4, 9]))
     assert all(np.equal(res.width, [2, 3, 3]))
+
+
+def test_restrict():
+    starts = [1, 20, 25, 25, 33]
+    widths = [19, 5, 0, 8, 5]
+    x = IRanges(starts, widths)
+
+    res = x.restrict(start=12, end=34)
+    assert all(np.equal(res.start, [12, 20, 25, 25, 33]))
+    assert all(np.equal(res.width, [8, 5, 0, 8, 2]))
+
+    res = x.restrict(start=20)
+    assert all(np.equal(res.start, [20, 20, 25, 25, 33]))
+    assert all(np.equal(res.width, [0, 5, 0, 8, 5]))
+
+    res = x.restrict(start=21)
+    assert all(np.equal(res.start, [21, 25, 25, 33]))
+    assert all(np.equal(res.width, [4, 0, 8, 5]))

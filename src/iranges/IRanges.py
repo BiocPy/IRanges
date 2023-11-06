@@ -5,7 +5,7 @@ from warnings import warn
 import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
-from numpy import array, int32, ndarray, printoptions, zeros
+from numpy import array, int32, ndarray, printoptions, zeros, clip, where
 
 from .interval import create_np_interval_vector
 
@@ -1138,8 +1138,6 @@ class IRanges:
             elif end is not None:
                 all_widths = all_widths + end + 1
 
-        print("final starts, ends:::", all_starts, all_widths)
-
         output._start = all_starts
         output._width = all_widths
         return output
@@ -1321,6 +1319,83 @@ class IRanges:
         output = self._define_output(in_place)
         output._start = ((2 * bounds.start) + bounds.width) - output.end
         return output
+
+    def restrict(
+        self,
+        start: Optional[int] = None,
+        end: Optional[int] = None,
+        keep_all_ranges: bool = False,
+    ) -> "IRanges":
+        """Restrict ranges to a given start and end positions.
+
+        Args:
+            start (int, optional): Start position. Defaults to None.
+            end (int, optional): End position. Defaults to None.
+            keep_all_ranges (bool, optional): Whether to keep intervals that do not overlap with start and end.
+                Defaults to False.
+
+        Returns:
+            IRanges: A new ``IRanges`` is returned with the
+            restricted intervals.
+        """
+        if start is None and end is None:
+            warn("Both 'start' and 'end' are 'None'.")
+            return self._define_output(False)
+
+        if start is not None:
+            new_starts = clip(self.start, start, None)
+        else:
+            new_starts = self.start
+
+        if end is not None:
+            new_ends = clip(self.end, None, end + 1)
+        else:
+            new_ends = self.end
+
+        new_starts = new_starts
+        new_widths = new_ends - new_starts
+
+        if keep_all_ranges is True:
+            new_widths = clip(new_widths, 0, None)
+        else:
+            _flt_idx = where(new_widths > -1)
+            new_starts = new_starts[_flt_idx]
+            new_widths = new_widths[_flt_idx]
+
+        return IRanges(new_starts, new_widths)
+
+    def overlap_indices(
+        self, start: Optional[int] = None, end: Optional[int] = None
+    ) -> List[int]:
+        """Find overlaps with the start and end positions.
+
+        Args:
+            start (int, optional): Start position. Defaults to None.
+            end (int, optional): End position. Defaults to None.
+
+        Returns:
+            List[int]: List of indices that overlap with the given range.
+        """
+        counter = 0
+        overlaps = []
+        for _, val in self:
+            keep_s = True
+            keep_e = True
+            _start = val.start[0]
+            _end = val.end[0] - 1
+
+            if start is not None and (_start < start):
+                keep_s = False
+
+            if end is not None and (_end > end):
+                keep_e = False
+
+            if keep_s is True or keep_e is True:
+                overlaps.append(counter)
+
+            counter += 1
+
+        return overlaps
 
 
 @combine_seqs.register
