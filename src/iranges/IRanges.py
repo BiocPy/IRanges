@@ -1,11 +1,11 @@
 from copy import deepcopy
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union, Literal
 from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
-from numpy import array, int32, ndarray, printoptions
+from numpy import array, int32, ndarray, printoptions, zeros
 
 from .interval import create_np_interval_vector
 
@@ -1058,7 +1058,7 @@ class IRanges:
 
         Returns:
             IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
-            sorted intervals. Otherwise, the current object is directly
+            shifted intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
         if not isinstance(shift, int):
@@ -1066,6 +1066,126 @@ class IRanges:
 
         output = self._define_output(in_place)
         output._start = output._start + shift
+        return output
+
+    # TODO: not fully implemented
+    def narrow(
+        self,
+        start: Optional[int] = None,
+        width: Optional[int] = None,
+        end: Optional[int] = None,
+        in_place: bool = False,
+    ) -> "IRanges":
+        """Narrow genomic positions by provided ``start``, ``width`` and ``end`` parameters.
+
+        Important: These arguments are relative shift in positions for each range.
+
+        Args:
+            start (int, optional): Relative start position. Defaults to None.
+            width (int, optional): Relative end position. Defaults to None.
+            end (int, optional): Relative width of the interval. Defaults to None.
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Raises:
+            ValueError: If `width` is provided, either `start` or `end` must be provided.
+            ValueError: Provide two of the three parameters - `start`, `end` and `width`
+                but not all.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            narrow intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+
+        if start is not None and end is not None and width is not None:
+            raise ValueError(
+                "Only provide two of the three parameters - 'start', "
+                "'end' and 'width' but not all!"
+            )
+
+        if width is not None:
+            if start is None and end is None:
+                raise ValueError(
+                    "If 'width' is provided, either 'start' or 'end' must be provided."
+                )
+
+        output = self._define_output(in_place)
+
+        all_starts = output.start.copy()
+        all_widths = output.width.copy()
+        all_ends = output.end.copy()
+
+        if start is not None:
+            if start > 0:
+                all_starts = all_starts + start - 1
+                all_widths = all_widths - start + 1
+            else:
+                all_starts = all_ends + start
+                all_widths = zeros(len(all_widths)) + start
+
+            if width is not None:
+                all_widths = zeros(len(all_widths)) + width
+            elif end is not None:
+                all_widths = all_widths + end + 1
+        elif end is not None:
+            if end < 0:
+                all_widths = all_widths + end - 1
+            else:
+                all_widths = zeros(len(all_widths)) + end
+
+            if width is not None:
+                all_widths = zeros(len(all_widths)) + width
+            elif end is not None:
+                all_widths = all_widths + end + 1
+
+        print("final starts, ends:::", all_starts, all_widths)
+
+        output._start = all_starts
+        output._width = all_widths
+        return output
+
+    def resize(
+        self,
+        width: int,
+        fix: Literal["start", "end", "center"] = "start",
+        in_place: bool = False,
+    ) -> "IRanges":
+        """Resize ranges to the specified ``width`` where either the ``start``, ``end``,
+        or ``center`` is used as an anchor.
+
+        Args:
+            width (int): Width to resize, must be non-negative!
+            fix (Literal["start", "end", "center"], optional): Fix positions by "start", "end", or "center".
+                Defaults to "start".
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Raises:
+            ValueError: If parameter ``fix`` is neither `start`, `end`, nor `center`.
+            ValueError: If ``width`` is negative.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            resized intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+
+        if width < 0:
+            raise ValueError("`width` cannot be negative!")
+
+        if fix not in ["start", "end", "center"]:
+            raise ValueError(
+                f"`fix` must be either 'start', 'end' or 'center', provided {fix}"
+            )
+
+        output = self._define_output(in_place)
+        if fix != "start":
+            if fix == "end":
+                output._start = output.start + output.width - width
+
+            if fix == "center":
+                output._start = output.start + output.width - (width / 2)
+
+        output._width = width
         return output
 
 
