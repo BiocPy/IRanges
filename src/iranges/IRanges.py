@@ -6,6 +6,7 @@ import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
 from numpy import array, clip, int32, ndarray, printoptions, where, zeros
+from itertools import chain
 
 from .interval import calc_gap_and_overlap, create_np_interval_vector
 
@@ -1482,16 +1483,16 @@ class IRanges:
 
     def find_overlaps(
         self,
-        subject: "IRanges",
+        query: "IRanges",
         query_type: Literal["any", "start", "end", "within"] = "any",
         select: Literal["all", "first", "last", "arbitrary"] = "all",
         max_gap: int = -1,
         min_overlap: int = 1,
     ) -> List[List[int]]:
-        """Find overlaps between ``subject`` (self) and a ``query`` `IRanges` object.
+        """Find overlaps with ``query`` `IRanges` object.
 
         Args:
-            subject (GenomicRanges): Query `IRanges`.
+            query (IRanges): Query `IRanges`.
             query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
                 must be one of
 
@@ -1514,7 +1515,7 @@ class IRanges:
             A List of indices that overlap with ``query``.
         """
 
-        if not isinstance(subject, IRanges):
+        if not isinstance(query, IRanges):
             raise TypeError("`query` is not a `IRanges` object.")
 
         if query_type not in ["any", "start", "end", "within"]:
@@ -1535,7 +1536,7 @@ class IRanges:
         _index = NCLS(self.start, self.end, array([i for i in range(len(self))]))
 
         all_overlaps = []
-        for _, val in subject:
+        for _, val in query:
             _start = val.start[0]
             _end = val.end[0]
 
@@ -1569,15 +1570,15 @@ class IRanges:
 
     def count_overlaps(
         self,
-        subject: "IRanges",
+        query: "IRanges",
         query_type: Literal["any", "start", "end", "within"] = "any",
         max_gap: int = -1,
         min_overlap: int = 1,
     ) -> List[int]:
-        """Find overlaps between ``subject`` (self) and a ``query`` `IRanges` object.
+        """Count number of overlaps with ``query`` `IRanges` object.
 
         Args:
-            subject (GenomicRanges): Query `IRanges`.
+            subject (IRanges): Query `IRanges`.
             query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
                 must be one of
 
@@ -1598,9 +1599,45 @@ class IRanges:
             A List with number of overlaps.
         """
         _overlaps = self.find_overlaps(
-            subject, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
+            query, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
         )
         return [len(x) for x in _overlaps]
+
+    def subset_by_overlaps(
+        self,
+        query: "IRanges",
+        query_type: Literal["any", "start", "end", "within"] = "any",
+        max_gap: int = -1,
+        min_overlap: int = 1,
+    ) -> "IRanges":
+        """Subset by overlap intervals in ``query`` `IRanges` object.
+
+        Args:
+            subject (IRanges): Query `IRanges`.
+            query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
+                must be one of
+
+                - "any": Any overlap is good
+                - "start": Overlap at the beginning of the intervals
+                - "end": Must overlap at the end of the intervals
+                - "within": Fully contain the query interval
+
+                Defaults to "any".
+            max_gap (int, optional): Maximum gap allowed in the overlap.
+                Defaults to -1 (no gap allowed).
+            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.
+
+        Raises:
+            TypeError: If ``query`` is not of type `IRanges`.
+
+        Returns:
+            IRanges: A new `IRanges` object containing only subsets.
+        """
+        _overlaps = self.find_overlaps(
+            query=query, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
+        )
+        _all_indices = list(set(chain(*_overlaps)))
+        return self[_all_indices]
 
 
 @combine_seqs.register
