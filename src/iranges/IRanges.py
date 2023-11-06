@@ -7,7 +7,7 @@ from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
 from numpy import array, clip, int32, ndarray, printoptions, where, zeros
 
-from .interval import create_np_interval_vector
+from .interval import calc_gap_and_overlap, create_np_interval_vector
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
 __copyright__ = "LTLA, jkanche"
@@ -1519,7 +1519,12 @@ class IRanges:
 
         if query_type not in ["any", "start", "end", "within"]:
             raise ValueError(
-                f"'{query_type}' must be one of {', '.join(['any', 'start', 'end', 'within'])}."
+                f"'query_type' must be one of {', '.join(['any', 'start', 'end', 'within'])}."
+            )
+
+        if select not in ["all", "first", "last", "arbitrary"]:
+            raise ValueError(
+                f"'select' must be one of {', '.join(['all', 'first', 'last', 'arbitrary'])}."
             )
 
         if not ut.package_utils.is_package_installed("ncls"):
@@ -1530,13 +1535,25 @@ class IRanges:
         _index = NCLS(self.start, self.end, array([i for i in range(len(self))]))
 
         all_overlaps = []
-        for name, val in subject:
+        for _, val in subject:
             _start = val.start[0]
             _end = val.end[0]
-            _iter = _index.find_overlap(_start, _end)
+
             _idx = []
+            _tgap = 0 if max_gap == -1 else max_gap
+            _iter = _index.find_overlap(_start - _tgap - 1, _end + _tgap + 1)
             for i in _iter:
-                _idx.append(i[2])
+                _gap, _overlap = calc_gap_and_overlap((_start, _end), (i[0], i[1]))
+                _append = True
+
+                if _gap is not None and _gap > max_gap:
+                    _append = False
+
+                if _overlap is not None and _overlap < min_overlap:
+                    _append = False
+
+                if _append is True:
+                    _idx.append(i[2])
 
             if len(_idx) <= 1:
                 all_overlaps.append(_idx)

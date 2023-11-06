@@ -12,3 +12,7 @@ def test_find_overlaps():
 
     res = query.find_overlaps(subject)
     assert res  == [[0], [0], [2]]
+
+    res = query.find_overlaps(subject, max_gap=0)
+    print(res)
+    assert res == [[0], [0, 1], [2]]

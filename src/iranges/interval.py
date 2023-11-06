@@ -75,7 +75,7 @@ def calc_gap_and_overlap(
     _gap = None
     _overlap = None
 
-    if first[0] <= second[1] and first[1] >= second[0]:
+    if first[0] < second[1] and first[1] > second[0]:
         _overlap = min(first[1], second[1]) - max(first[0], second[0])
     else:
         _gap = None
