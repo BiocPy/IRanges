@@ -1150,8 +1150,8 @@ class IRanges:
         fix: Literal["start", "end", "center"] = "start",
         in_place: bool = False,
     ) -> "IRanges":
-        """Resize ranges to the specified ``width`` where either the ``start``, ``end``,
-        or ``center`` is used as an anchor.
+        """Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an
+        anchor.
 
         Args:
             width (int): Width to resize, must be non-negative!
