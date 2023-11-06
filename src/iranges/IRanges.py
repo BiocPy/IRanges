@@ -1188,6 +1188,76 @@ class IRanges:
         output._width = width
         return output
 
+    def flank(
+        self,
+        width: int,
+        start: bool = True,
+        both: bool = False,
+        in_place: bool = False,
+    ) -> "IRanges":
+        """Compute flanking ranges for each range. The logic is from the `IRanges`
+        package.
+
+        If ``start`` is ``True`` for a given range, the flanking occurs at the `start`,
+        otherwise the `end`.
+        The `widths` of the flanks are given by the ``width`` parameter.
+
+        ``width`` can be negative, in which case the flanking region is
+        reversed so that it represents a prefix or suffix of the range.
+
+        Usage:
+
+            `ir.flank(3, True)`, where "x" indicates a range in ``ir`` and "-" indicates the
+            resulting flanking region:
+                ---xxxxxxx
+            If ``start`` were ``False``, the range in ``ir`` becomes
+                xxxxxxx---
+            For negative width, i.e. `ir.flank(x, -3, FALSE)`, where "*" indicates the overlap
+            between "x" and the result:
+                xxxx***
+            If ``both`` is ``True``, then, for all ranges in "x", the flanking regions are
+            extended into (or out of, if ``width`` is negative) the range, so that the result
+            straddles the given endpoint and has twice the width given by width.
+
+            This is illustrated below for `ir.flank(3, both=TRUE)`:
+                ---***xxxx
+
+        Args:
+            width (int): Width to flank by. May be negative.
+            start (bool, optional): Whether to only flank starts. Defaults to True.
+            both (bool, optional): Whether to flank both starts and ends. Defaults to False.
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            flanked intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+
+        output = self._define_output(in_place)
+
+        if both is True:
+            width = abs(width)
+            if start is True:
+                output._start = output.start - width
+            else:
+                output._start = output.end - width
+
+            output._width = zeros(len(output)) + (2 * width)
+        else:
+            if start is True:
+                if width >= 0:
+                    output._start = output.start - width
+            else:
+                if width >= 0:
+                    output._start = output.end
+                else:
+                    output._start = output.end + width
+
+            output._width = zeros(len(output)) + abs(width)
+
+        return output
+
 
 @combine_seqs.register
 def _combine_IRanges(*x: IRanges) -> IRanges:
