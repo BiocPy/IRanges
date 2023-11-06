@@ -1571,6 +1571,8 @@ class IRanges:
         self,
         subject: "IRanges",
         query_type: Literal["any", "start", "end", "within"] = "any",
+        max_gap: int = -1,
+        min_overlap: int = 1,
     ) -> List[int]:
         """Find overlaps between ``subject`` (self) and a ``query`` `IRanges` object.
 
@@ -1585,6 +1587,9 @@ class IRanges:
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
+            max_gap (int, optional): Maximum gap allowed in the overlap.
+                Defaults to -1 (no gap allowed).
+            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.
 
         Raises:
             TypeError: If ``query`` is not an `IRanges` object.
@@ -1592,7 +1597,9 @@ class IRanges:
         Returns:
             A List with number of overlaps.
         """
-        _overlaps = self.find_overlaps(subject)
+        _overlaps = self.find_overlaps(
+            subject, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
+        )
         return [len(x) for x in _overlaps]
 
 
