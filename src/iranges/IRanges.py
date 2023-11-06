@@ -1290,6 +1290,38 @@ class IRanges:
         output._width = new_ends - new_starts
         return output
 
+    def reflect(self, bounds: "IRanges", in_place: bool = False) -> "IRanges":
+        """reverses each range in x relative to the corresponding range in bounds.
+
+        Reflection preserves the width of a range, but shifts it such the distance
+        from the left bound to the start of the range becomes the distance from the
+        end of the range to the right bound. This is illustrated below, where x
+        represents a range in x and [ and ] indicate the bounds:
+
+            [..xxx.....]
+            becomes
+            [.....xxx..]
+
+        Args:
+            bounds (IRanges): IRanges with the same length as the current object specifying the bounds.
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            reflected intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+
+        if not isinstance(bounds, IRanges):
+            raise TypeError("'bounds' must be an IRanges object.")
+
+        if len(bounds) != len(self):
+            raise ValueError("'bounds' does not contain the same number of intervals.")
+
+        output = self._define_output(in_place)
+        output._start = ((2 * bounds.start) + bounds.width) - output.end
+        return output
+
 
 @combine_seqs.register
 def _combine_IRanges(*x: IRanges) -> IRanges:

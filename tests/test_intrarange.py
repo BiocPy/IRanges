@@ -96,3 +96,15 @@ def test_promoters():
     res = x.promoters(upstream=1, downstream=0)
     assert all(np.equal(res.start, [19, 20, 21, 22]))
     assert all(np.equal(res.width, [1] * 4))
+
+
+def test_reflect():
+    starts = [2, 5, 1]
+    widths = [2, 3, 3]
+    x = IRanges(starts, widths)
+
+    bounds = IRanges([0, 5, 3], [11, 2, 7])
+
+    res = x.reflect(bounds=bounds)
+    assert all(np.equal(res.start, [7, 4, 9]))
+    assert all(np.equal(res.width, [2, 3, 3]))
