@@ -77,3 +77,22 @@ def test_flank():
     res = x.flank(-2, start=False, both=True)
     assert all(np.equal(res.start, [2, 6, 2]))
     assert all(np.equal(res.width, [4] * 3))
+
+
+def test_promoters():
+    starts = [20, 21, 22, 23]
+    widths = [3, 3, 3, 3]
+    x = IRanges(starts, widths)
+
+    res = x.promoters(upstream=0, downstream=0)
+    assert all(np.equal(res.start, starts))
+    assert all(np.equal(res.width, [0] * 4))
+
+    res = x.promoters(upstream=0, downstream=1)
+    print(res)
+    assert all(np.equal(res.start, starts))
+    assert all(np.equal(res.width, [1] * 4))
+
+    res = x.promoters(upstream=1, downstream=0)
+    assert all(np.equal(res.start, [19, 20, 21, 22]))
+    assert all(np.equal(res.width, [1] * 4))

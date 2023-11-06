@@ -1189,11 +1189,7 @@ class IRanges:
         return output
 
     def flank(
-        self,
-        width: int,
-        start: bool = True,
-        both: bool = False,
-        in_place: bool = False,
+        self, width: int, start: bool = True, both: bool = False, in_place: bool = False
     ) -> "IRanges":
         """Compute flanking ranges for each range. The logic is from the `IRanges` package.
 
@@ -1255,6 +1251,43 @@ class IRanges:
 
             output._width = zeros(len(output)) + abs(width)
 
+        return output
+
+    def promoters(
+        self, upstream: int = 2000, downstream: int = 200, in_place: bool = False
+    ) -> "IRanges":
+        """Extend intervals to promoter regions.
+
+        Generates promoter ranges relative to the transcription start site (TSS),
+        where TSS is start(x). The promoter range is expanded around the TSS
+        according to the upstream and downstream arguments. Upstream represents
+        the number of nucleotides in the 5' direction and downstream the number
+        in the 3' direction. The full range is defined as, (`start(x) - upstream`)
+        to (`start(x) + downstream - 1`).
+
+        Args:
+            upstream (int, optional): Number of positions to extend in the 5' direction.
+                Defaults to 2000.
+            downstream (int, optional): Number of positions to extend in the 3' direction.
+                Defaults to 200.
+            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+        Returns:
+            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            promoter intervals. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+
+        output = self._define_output(in_place)
+
+        if upstream < 0 or downstream < 0:
+            raise ValueError("'upstream' and 'downstream; must be integers >=0.")
+
+        new_starts = output.start - upstream
+        new_ends = output.start + downstream
+
+        output._start = new_starts
+        output._width = new_ends - new_starts
         return output
 
 
