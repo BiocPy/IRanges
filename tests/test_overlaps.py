@@ -16,8 +16,9 @@ def test_find_overlaps():
     res = query.find_overlaps(subject, max_gap=0)
     assert res == [[0], [0, 1], [2]]
 
+
 def test_subset_overlaps():
-    query = IRanges([1,4], [5, 4])
+    query = IRanges([1, 4], [5, 4])
     subject = IRanges([2, 2], [1, 2])
 
     res = query.subset_by_overlaps(subject)
