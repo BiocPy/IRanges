@@ -1,11 +1,11 @@
 from copy import deepcopy
-from typing import List, Optional, Sequence, Tuple, Union, Literal
+from typing import List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
-from numpy import array, int32, ndarray, printoptions, zeros, clip, where
+from numpy import array, clip, int32, ndarray, printoptions, where, zeros
 
 from .interval import create_np_interval_vector
 
@@ -936,9 +936,7 @@ class IRanges:
         output = self._define_output(in_place)
         return output[order]
 
-    def gaps(
-        self, start: Optional[int] = None, end: Optional[int] = None
-    ) -> Optional["IRanges"]:
+    def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
         """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
         removed specified by the start and end arguments.
 
@@ -1396,6 +1394,87 @@ class IRanges:
             counter += 1
 
         return overlaps
+
+    ########################
+    #### set operations ####
+    ########################
+
+    # set operations
+    def union(self, other: "IRanges") -> "IRanges":
+        """Find union of intervals with `other`.
+
+        Args:
+            other (GenomicRanges): `IRanges` object.
+
+        Raises:
+            TypeError: If ``other`` is not `IRanges`.
+
+        Returns:
+            IRanges: A new `IRanges` object with all ranges.
+        """
+
+        if not isinstance(other, IRanges):
+            raise TypeError("'other' is not an IRanges object.")
+
+        all_starts = combine_seqs(self.start, other.start)
+        all_widths = combine_seqs(self.width, other.width)
+
+        output = IRanges(all_starts, all_widths)
+        output = output.reduce(min_gap_width=0, drop_empty_ranges=True)
+        return output
+
+    def setdiff(self, other: "IRanges") -> "IRanges":
+        """Find set difference with `other`.
+
+        Args:
+            other (GenomicRanges): `IRanges` object.
+
+        Raises:
+            TypeError: If ``other`` is not `IRanges`.
+
+        Returns:
+            IRanges: A new `IRanges` object.
+        """
+
+        if not isinstance(other, IRanges):
+            raise TypeError("'other' is not an IRanges object.")
+
+        all_starts = combine_seqs(self.start, other.start)
+        all_ends = combine_seqs(self.end, other.end)
+        start = min(all_starts)
+        end = max(all_ends)
+
+        x_gaps = self.gaps(start=start, end=end)
+        x_gaps_u = x_gaps.union(other)
+        diff = x_gaps_u.gaps(start=start, end=end)
+
+        return diff
+
+    def intersect(self, other: "IRanges") -> "IRanges":
+        """Find intersecting intervals with `other`.
+
+        Args:
+            other (GenomicRanges): `IRanges` object.
+
+        Raises:
+            TypeError: If ``other`` is not `IRanges`.
+
+        Returns:
+            IRanges: A new `IRanges` object with all intersecting intervals.
+        """
+
+        if not isinstance(other, IRanges):
+            raise TypeError("'other' is not an IRanges object.")
+
+        all_starts = combine_seqs(self.start, other.start)
+        all_ends = combine_seqs(self.end, other.end)
+        start = min(all_starts)
+        end = max(all_ends)
+
+        _gaps = other.gaps(start=start, end=end)
+        _inter = self.setdiff(_gaps)
+
+        return _inter
 
 
 @combine_seqs.register
