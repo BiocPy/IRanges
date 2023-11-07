@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>iranges.IRanges - IRanges 0.0.1 documentation</title>
+        <title>iranges.IRanges - IRanges 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -122,7 +122,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">IRanges 0.0.1 documentation</div></a>
+      <a href="../../index.html"><div class="brand">IRanges 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,7 +145,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,13 +198,63 @@
         <article role="main">
           <h1>Source code for iranges.IRanges</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span> <span class="nn">biocutils</span> <span class="k">as</span> <span class="nn">ut</span>
 <span class="kn">from</span> <span class="nn">biocframe</span> <span class="kn">import</span> <span class="n">BiocFrame</span>
-<span class="kn">from</span> <span class="nn">biocgenerics</span> <span class="kn">import</span> <span class="n">combine_rows</span><span class="p">,</span> <span class="n">combine_seqs</span><span class="p">,</span> <span class="n">format_table</span><span class="p">,</span> <span class="n">show_as_cell</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">get_printoptions</span><span class="p">,</span> <span class="n">int32</span><span class="p">,</span> <span class="n">ndarray</span>
+<span class="kn">from</span> <span class="nn">biocgenerics</span> <span class="kn">import</span> <span class="n">combine_rows</span><span class="p">,</span> <span class="n">combine_seqs</span><span class="p">,</span> <span class="n">show_as_cell</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">clip</span><span class="p">,</span> <span class="n">int32</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">printoptions</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">zeros</span>
+
+<span class="kn">from</span> <span class="nn">.interval</span> <span class="kn">import</span> <span class="n">calc_gap_and_overlap</span><span class="p">,</span> <span class="n">create_np_interval_vector</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Aaron Lun, Jayaram Kancherla&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;LTLA, jkanche&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
+
+
+<div class="viewcode-block" id="IRangesIter">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRangesIter">[docs]</a>
+<span class="k">class</span> <span class="nc">IRangesIter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An iterator to :py:class:`~iranges.IRanges.IRanges`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        obj (IRanges): Object to iterate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the iterator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj (IRanges): Source object to iterate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="IRangesIter.__iter__">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRangesIter.__iter__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="IRangesIter.__next__">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRangesIter.__next__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="p">):</span>
+            <span class="n">iter_row_index</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span><span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+
+            <span class="n">iter_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">get_row</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">iter_row_index</span><span class="p">,</span> <span class="n">iter_slice</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">StopIteration</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="IRanges">
@@ -756,16 +806,9 @@
 <div class="viewcode-block" id="IRanges.__repr__">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.__repr__">[docs]</a>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">get_printoptions</span><span class="p">()</span>
-        <span class="n">old_threshold</span> <span class="o">=</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span>
-        <span class="n">old_edgeitems</span> <span class="o">=</span> <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;edgeitems&quot;</span><span class="p">]</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span>
-            <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;edgeitems&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">with</span> <span class="n">printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">edgeitems</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
             <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;IRanges(start=&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)</span>
             <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;, width=&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span>
-
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
                 <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;, names=&quot;</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_truncated_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
 
@@ -773,12 +816,9 @@
                 <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;, mcols=&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mcols</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">):</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;, metadata=&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;, metadata=&quot;</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_truncated_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">)</span>
 
             <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_threshold</span>
-            <span class="n">opt</span><span class="p">[</span><span class="s2">&quot;edgeitems&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_edgeitems</span>
 
         <span class="k">return</span> <span class="n">message</span></div>
 
@@ -807,19 +847,23 @@
                 <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nranges</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nranges</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nranges</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
                 <span class="n">insert_ellipsis</span> <span class="o">=</span> <span class="kc">True</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">raw_floating</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">raw_floating</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+            <span class="n">raw_floating</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">create_floating_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">insert_ellipsis</span><span class="p">:</span>
                 <span class="n">raw_floating</span> <span class="o">=</span> <span class="n">raw_floating</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">raw_floating</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
             <span class="n">floating</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">raw_floating</span>
 
             <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">]:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_&quot;</span> <span class="o">+</span> <span class="n">prop</span><span class="p">)()</span>
-                <span class="n">showed</span> <span class="o">=</span> <span class="n">show_as_cell</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
-                <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
+
+            <span class="n">sub_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+            <span class="n">sub_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
+            <span class="n">sub_end</span> <span class="o">=</span> <span class="n">sub_start</span> <span class="o">+</span> <span class="n">sub_width</span>
+            <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="p">(</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="n">sub_start</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="n">sub_end</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="n">sub_width</span><span class="p">),</span>
+            <span class="p">]:</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
+                <span class="n">showed</span> <span class="o">=</span> <span class="n">show_as_cell</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="n">insert_ellipsis</span><span class="p">:</span>
                     <span class="n">showed</span> <span class="o">=</span> <span class="n">showed</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;...&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">showed</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
                 <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">showed</span><span class="p">)</span>
@@ -831,26 +875,28 @@
                 <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcols</span><span class="o">.</span><span class="n">get_column_names</span><span class="p">():</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcols</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
                     <span class="n">showed</span> <span class="o">=</span> <span class="n">show_as_cell</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
-                    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
-                    <span class="n">minwidth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">showed</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">minwidth</span><span class="p">:</span>
-                            <span class="n">showed</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span> <span class="n">minwidth</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span>
+                    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
+                    <span class="n">showed</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">truncate_strings</span><span class="p">(</span>
+                        <span class="n">showed</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">insert_ellipsis</span><span class="p">:</span>
                         <span class="n">showed</span> <span class="o">=</span> <span class="n">showed</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;...&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">showed</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
                     <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">showed</span><span class="p">)</span>
 
-            <span class="n">output</span> <span class="o">+=</span> <span class="n">format_table</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">floating_names</span><span class="o">=</span><span class="n">floating</span><span class="p">)</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_wrapped_table</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">floating_names</span><span class="o">=</span><span class="n">floating</span><span class="p">)</span>
             <span class="n">added_table</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">footer</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">):</span>
             <span class="n">footer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;metadata (&quot;</span>
+                <span class="s2">&quot;metadata(&quot;</span>
                 <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">))</span>
                 <span class="o">+</span> <span class="s2">&quot;): &quot;</span>
                 <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_truncated_list</span><span class="p">(</span>
-                    <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">include_brackets</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                    <span class="n">sep</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+                    <span class="n">include_brackets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">footer</span><span class="p">):</span>
@@ -901,6 +947,1248 @@
             <span class="n">metadata</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">,</span> <span class="n">memo</span><span class="p">),</span>
             <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IRanges.get_row">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.get_row">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_or_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Access a row by index or row name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index_or_name (Union[str, int]): Integer index of the row to access.</span>
+
+<span class="sd">                Alternatively, you may provide a string specifying the row name to access,</span>
+<span class="sd">                only if :py:attr:`~iranges.IRanges.IRanges.names` are available.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError:</span>
+<span class="sd">                If ``index_or_name`` is not in row names.</span>
+<span class="sd">                If the integer index is greater than the number of rows.</span>
+<span class="sd">            TypeError:</span>
+<span class="sd">                If ``index_or_name`` is neither a string nor an integer.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A sliced IRanges object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index_or_name</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`index_or_name` must be either an integer index or name.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">index_or_name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="IRanges.__iter__">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.__iter__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IRangesIter</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterator over intervals.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">IRangesIter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+    <span class="c1">############################</span>
+    <span class="c1">#### iter range methods ####</span>
+    <span class="c1">############################</span>
+
+<div class="viewcode-block" id="IRanges.clip_intervals">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.clip_intervals">[docs]</a>
+    <span class="k">def</span> <span class="nf">clip_intervals</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clip intervals. Starts are always clipped to positive interval ranges (1, Inf).</span>
+
+<span class="sd">        If ``width`` is specified, the intervals are clipped to (1, width).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shift (int, optional): Shift all starts before clipping. Defaults to 0.</span>
+<span class="sd">            width (Union[int, List[int]], optional): Clip width of each interval. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A ``IRanges`` object, with the clipped intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">_clipped_starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_clipped_widths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_clipped_names</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">_start</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">_width</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">shift</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">_start</span> <span class="o">+=</span> <span class="n">shift</span>
+
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;width&#39; must be either an integer or a vector.&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">_start</span> <span class="o">+</span> <span class="n">_width</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">:</span>
+                    <span class="n">_width</span> <span class="o">=</span> <span class="n">width</span> <span class="o">-</span> <span class="n">_start</span>
+
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">_start</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">_start</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">_width</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">_start</span>
+
+            <span class="n">_end</span> <span class="o">=</span> <span class="n">_start</span> <span class="o">+</span> <span class="n">_width</span>
+            <span class="k">if</span> <span class="n">_end</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">_clipped_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_start</span><span class="p">)</span>
+            <span class="n">_clipped_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_width</span><span class="p">)</span>
+            <span class="n">_clipped_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_clipped_names</span><span class="p">):</span>
+            <span class="n">_clipped_names</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">_clipped_starts</span><span class="p">,</span> <span class="n">_clipped_widths</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">_clipped_names</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IRanges.coverage">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.coverage">[docs]</a>
+    <span class="k">def</span> <span class="nf">coverage</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate coverage, for each position, counts the number of intervals that cover it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shift (int, optional): Shift all intervals. Defaults to 0.</span>
+<span class="sd">            width (int, optional): Restrict the width of all intervals. Defaults to None.</span>
+<span class="sd">            weight (Union[int, float], optional): Weight to use. Defaults to 1.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            - If &#39;weight&#39; is not a number.</span>
+<span class="sd">            - If &#39;width&#39; is not a number.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ndarray:  A numpy array with the coverage vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_ranges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_intervals</span><span class="p">(</span><span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;width&#39; must be an integer or float.&quot;</span><span class="p">)</span>
+
+        <span class="n">cov</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_np_interval_vector</span><span class="p">(</span><span class="n">new_ranges</span><span class="p">,</span> <span class="n">force_size</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cov</span></div>
+
+
+<div class="viewcode-block" id="IRanges.range">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.range">[docs]</a>
+    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate all intervals. A tuple of minimum of all starts, maximum of all ends) in the object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            with_reverse_map (bool, optional): return map of indices back to</span>
+<span class="sd">                original object?. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: An new IRanges instance with a single range,</span>
+<span class="sd">            from the minimum start to the maximum end of the concatenated object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">min_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">max_end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">([</span><span class="n">min_start</span><span class="p">],</span> <span class="p">[</span><span class="n">max_end</span> <span class="o">-</span> <span class="n">min_start</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="IRanges.reduce">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.reduce">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">with_reverse_map</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">drop_empty_ranges</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">min_gap_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;`Reduce` orders the ranges, then merges overlapping or adjacent ranges.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            with_reverse_map (bool, optional): Whether to return map of indices back to</span>
+<span class="sd">                original object. Defaults to False.</span>
+<span class="sd">            drop_empty_ranges (bool, optional): Whether to drop empty ranges. Defaults to False.</span>
+<span class="sd">            min_gap_width (int, optional): Ranges separated by a gap of at least ``min_gap_width``</span>
+<span class="sd">                positions are not merged. Defaults to 1.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new ``IRanges`` object with reduced intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">min_gap_width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;min_gap_width&#39; cannot be negative.&quot;</span><span class="p">)</span>
+
+        <span class="n">_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+
+        <span class="n">result_starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result_widths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result_revmaps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">def</span> <span class="nf">get_elem_counter</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span>
+
+        <span class="n">current_start</span><span class="p">,</span> <span class="n">current_end</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_elem_counter</span><span class="p">(</span><span class="n">_order</span><span class="p">[</span><span class="n">counter</span><span class="p">])</span>
+        <span class="n">current_revmaps</span> <span class="o">=</span> <span class="p">[</span><span class="n">_order</span><span class="p">[</span><span class="n">counter</span><span class="p">]]</span>
+
+        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">_order</span><span class="p">):</span>
+            <span class="n">merge</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">o</span> <span class="o">=</span> <span class="n">_order</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
+            <span class="n">_idx_start</span><span class="p">,</span> <span class="n">_idx_end</span><span class="p">,</span> <span class="n">_idx_width</span> <span class="o">=</span> <span class="n">get_elem_counter</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+            <span class="n">_gap_width</span> <span class="o">=</span> <span class="n">_idx_start</span> <span class="o">-</span> <span class="n">current_end</span>
+
+            <span class="k">if</span> <span class="n">_gap_width</span> <span class="o">&lt;=</span> <span class="n">min_gap_width</span><span class="p">:</span>
+                <span class="n">merge</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">merge</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_end</span> <span class="o">&lt;</span> <span class="n">_idx_end</span><span class="p">:</span>
+                    <span class="n">current_end</span> <span class="o">=</span> <span class="n">_idx_end</span>
+
+                <span class="n">current_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                    <span class="n">drop_empty_ranges</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">current_end</span> <span class="o">-</span> <span class="n">current_start</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="p">):</span>
+                    <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_start</span><span class="p">)</span>
+                    <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_end</span> <span class="o">-</span> <span class="n">current_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">result_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_revmaps</span><span class="p">)</span>
+
+                <span class="n">current_revmaps</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="p">]</span>
+                <span class="n">current_start</span> <span class="o">=</span> <span class="n">_idx_start</span>
+                <span class="n">current_end</span> <span class="o">=</span> <span class="n">_idx_end</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_start</span><span class="p">)</span>
+        <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_end</span> <span class="o">-</span> <span class="n">current_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">result_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_revmaps</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">result_starts</span><span class="p">,</span> <span class="n">result_widths</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">with_reverse_map</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">set_mcols</span><span class="p">(</span><span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;revmap&quot;</span><span class="p">:</span> <span class="n">result_revmaps</span><span class="p">}),</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_get_intervals_as_list</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal method to get intervals as a list of tuples.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple[int, int, int]]: List of tuples containing the start, end and the index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">intvals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">intvals</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">i</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">intvals</span>
+
+<div class="viewcode-block" id="IRanges.order">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.order">[docs]</a>
+    <span class="k">def</span> <span class="nf">order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decreasing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the order of indices for sorting.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            decreasing (bool, optional): Whether to sort in descending order. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: List of integers indicating index position.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">intvals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_intervals_as_list</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="n">decreasing</span><span class="p">)</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">intvals</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">order</span></div>
+
+
+<div class="viewcode-block" id="IRanges.sort">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.sort">[docs]</a>
+    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decreasing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort the intervals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            decreasing (bool): Whether to sort in descending order. Defaults to False.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            sorted intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="n">decreasing</span><span class="o">=</span><span class="n">decreasing</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="p">[</span><span class="n">order</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="IRanges.gaps">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.gaps">[docs]</a>
+    <span class="k">def</span> <span class="nf">gaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are</span>
+<span class="sd">        removed specified by the start and end arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start (int, optional): Restrict start position. Defaults to 1.</span>
+<span class="sd">            end (int, optional): Restrict end position. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new ``IRanges`` is returned with the gaps.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+
+        <span class="n">overlap_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start</span>
+        <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">overlap_start</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">result_starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result_widths</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">get_elem_counter</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>
+            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_order</span><span class="p">)):</span>
+            <span class="n">_start</span><span class="p">,</span> <span class="n">_end</span><span class="p">,</span> <span class="n">_width</span> <span class="o">=</span> <span class="n">get_elem_counter</span><span class="p">(</span><span class="n">_order</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">_width</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">overlap_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">_end</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_gap_start</span> <span class="o">=</span> <span class="n">overlap_end</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_start</span> <span class="o">&gt;</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">_start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="n">_gap_width</span> <span class="o">=</span> <span class="n">_start</span> <span class="o">-</span> <span class="n">_gap_start</span>
+
+                <span class="k">if</span> <span class="n">_gap_width</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_gap_start</span><span class="p">)</span>
+                    <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_gap_width</span><span class="p">)</span>
+                    <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">_end</span>
+                <span class="k">elif</span> <span class="n">_end</span> <span class="o">&gt;</span> <span class="n">overlap_end</span><span class="p">:</span>
+                    <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">_end</span>
+
+            <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">overlap_end</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">overlap_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">overlap_end</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+            <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">overlap_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">overlap_end</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">result_starts</span><span class="p">,</span> <span class="n">result_widths</span><span class="p">)</span></div>
+
+
+    <span class="c1"># folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals</span>
+    <span class="c1"># otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389</span>
+<div class="viewcode-block" id="IRanges.disjoin">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.disjoin">[docs]</a>
+    <span class="k">def</span> <span class="nf">disjoin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">with_reverse_map</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate disjoint intervals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            with_reverse_map (bool, optional): Whether to return a map of indices back to the original object.</span>
+<span class="sd">                Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new `IRanges` containing disjoint intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_ints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">all_ints</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">counter</span><span class="p">))</span>
+            <span class="n">all_ints</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">counter</span><span class="p">))</span>
+
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">sorted_ints</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_ints</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">_current_start</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">result_starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result_widths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result_revmaps</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">_curr_revmap</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sorted_ints</span><span class="p">:</span>
+            <span class="n">_curr_revmap</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">_current_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">_current_start</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_current_start</span><span class="p">)</span>
+                <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">_current_start</span><span class="p">)</span>
+                <span class="n">result_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">_curr_revmap</span><span class="p">)))</span>
+                <span class="n">_curr_revmap</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">_current_start</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">result_starts</span><span class="p">,</span> <span class="n">result_widths</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">with_reverse_map</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">set_mcols</span><span class="p">(</span><span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;revmap&quot;</span><span class="p">:</span> <span class="n">result_revmaps</span><span class="p">}),</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+    <span class="c1">#############################</span>
+    <span class="c1">#### intra range methods ####</span>
+    <span class="c1">#############################</span>
+
+<div class="viewcode-block" id="IRanges.shift">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.shift">[docs]</a>
+    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shifts all the intervals by the amount specified by the ``shift`` argument.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shift (int): Amount to shift by.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            shifted intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;shift&#39; must be an integer.&quot;</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">+</span> <span class="n">shift</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+    <span class="c1"># TODO: not fully implemented</span>
+<div class="viewcode-block" id="IRanges.narrow">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.narrow">[docs]</a>
+    <span class="k">def</span> <span class="nf">narrow</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Narrow genomic positions by provided ``start``, ``width`` and ``end`` parameters.</span>
+
+<span class="sd">        Important: These arguments are relative shift in positions for each range.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start (int, optional): Relative start position. Defaults to None.</span>
+<span class="sd">            width (int, optional): Relative end position. Defaults to None.</span>
+<span class="sd">            end (int, optional): Relative width of the interval. Defaults to None.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `width` is provided, either `start` or `end` must be provided.</span>
+<span class="sd">            ValueError: Provide two of the three parameters - `start`, `end` and `width`</span>
+<span class="sd">                but not all.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            narrow intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Only provide two of the three parameters - &#39;start&#39;, &quot;</span>
+                <span class="s2">&quot;&#39;end&#39; and &#39;width&#39; but not all!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;If &#39;width&#39; is provided, either &#39;start&#39; or &#39;end&#39; must be provided.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+
+        <span class="n">all_starts</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">all_widths</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">all_ends</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">all_starts</span> <span class="o">=</span> <span class="n">all_starts</span> <span class="o">+</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">all_widths</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_starts</span> <span class="o">=</span> <span class="n">all_ends</span> <span class="o">+</span> <span class="n">start</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_widths</span><span class="p">))</span> <span class="o">+</span> <span class="n">start</span>
+
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_widths</span><span class="p">))</span> <span class="o">+</span> <span class="n">width</span>
+            <span class="k">elif</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">all_widths</span> <span class="o">+</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">all_widths</span> <span class="o">+</span> <span class="n">end</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_widths</span><span class="p">))</span> <span class="o">+</span> <span class="n">end</span>
+
+            <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_widths</span><span class="p">))</span> <span class="o">+</span> <span class="n">width</span>
+            <span class="k">elif</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">all_widths</span> <span class="o">=</span> <span class="n">all_widths</span> <span class="o">+</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">all_starts</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">all_widths</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="IRanges.resize">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.resize">[docs]</a>
+    <span class="k">def</span> <span class="nf">resize</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">fix</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
+        <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an</span>
+<span class="sd">        anchor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            width (int): Width to resize, must be non-negative!</span>
+<span class="sd">            fix (Literal[&quot;start&quot;, &quot;end&quot;, &quot;center&quot;], optional): Fix positions by &quot;start&quot;, &quot;end&quot;, or &quot;center&quot;.</span>
+<span class="sd">                Defaults to &quot;start&quot;.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If parameter ``fix`` is neither `start`, `end`, nor `center`.</span>
+<span class="sd">            ValueError: If ``width`` is negative.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            resized intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`width` cannot be negative!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`fix` must be either &#39;start&#39;, &#39;end&#39; or &#39;center&#39;, provided </span><span class="si">{</span><span class="n">fix</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fix</span> <span class="o">!=</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fix</span> <span class="o">==</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">output</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="n">width</span>
+
+            <span class="k">if</span> <span class="n">fix</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">output</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="IRanges.flank">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.flank">[docs]</a>
+    <span class="k">def</span> <span class="nf">flank</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">both</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute flanking ranges for each range. The logic is from the `IRanges` package.</span>
+
+<span class="sd">        If ``start`` is ``True`` for a given range, the flanking occurs at the `start`,</span>
+<span class="sd">        otherwise the `end`.</span>
+<span class="sd">        The `widths` of the flanks are given by the ``width`` parameter.</span>
+
+<span class="sd">        ``width`` can be negative, in which case the flanking region is</span>
+<span class="sd">        reversed so that it represents a prefix or suffix of the range.</span>
+
+<span class="sd">        Usage:</span>
+
+<span class="sd">            `ir.flank(3, True)`, where &quot;x&quot; indicates a range in ``ir`` and &quot;-&quot; indicates the</span>
+<span class="sd">            resulting flanking region:</span>
+<span class="sd">                ---xxxxxxx</span>
+<span class="sd">            If ``start`` were ``False``, the range in ``ir`` becomes</span>
+<span class="sd">                xxxxxxx---</span>
+<span class="sd">            For negative width, i.e. `ir.flank(x, -3, FALSE)`, where &quot;*&quot; indicates the overlap</span>
+<span class="sd">            between &quot;x&quot; and the result:</span>
+<span class="sd">                xxxx***</span>
+<span class="sd">            If ``both`` is ``True``, then, for all ranges in &quot;x&quot;, the flanking regions are</span>
+<span class="sd">            extended into (or out of, if ``width`` is negative) the range, so that the result</span>
+<span class="sd">            straddles the given endpoint and has twice the width given by width.</span>
+
+<span class="sd">            This is illustrated below for `ir.flank(3, both=TRUE)`:</span>
+<span class="sd">                ---***xxxx</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            width (int): Width to flank by. May be negative.</span>
+<span class="sd">            start (bool, optional): Whether to only flank starts. Defaults to True.</span>
+<span class="sd">            both (bool, optional): Whether to flank both starts and ends. Defaults to False.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            flanked intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">both</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">width</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="n">width</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">width</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">width</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">end</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">width</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="IRanges.promoters">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.promoters">[docs]</a>
+    <span class="k">def</span> <span class="nf">promoters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">upstream</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">downstream</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend intervals to promoter regions.</span>
+
+<span class="sd">        Generates promoter ranges relative to the transcription start site (TSS),</span>
+<span class="sd">        where TSS is start(x). The promoter range is expanded around the TSS</span>
+<span class="sd">        according to the upstream and downstream arguments. Upstream represents</span>
+<span class="sd">        the number of nucleotides in the 5&#39; direction and downstream the number</span>
+<span class="sd">        in the 3&#39; direction. The full range is defined as, (`start(x) - upstream`)</span>
+<span class="sd">        to (`start(x) + downstream - 1`).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            upstream (int, optional): Number of positions to extend in the 5&#39; direction.</span>
+<span class="sd">                Defaults to 2000.</span>
+<span class="sd">            downstream (int, optional): Number of positions to extend in the 3&#39; direction.</span>
+<span class="sd">                Defaults to 200.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            promoter intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">upstream</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">downstream</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;upstream&#39; and &#39;downstream; must be integers &gt;=0.&quot;</span><span class="p">)</span>
+
+        <span class="n">new_starts</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">upstream</span>
+        <span class="n">new_ends</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="n">downstream</span>
+
+        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">new_starts</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">new_ends</span> <span class="o">-</span> <span class="n">new_starts</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="IRanges.reflect">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.reflect">[docs]</a>
+    <span class="k">def</span> <span class="nf">reflect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reverses each range in x relative to the corresponding range in bounds.</span>
+
+<span class="sd">        Reflection preserves the width of a range, but shifts it such the distance</span>
+<span class="sd">        from the left bound to the start of the range becomes the distance from the</span>
+<span class="sd">        end of the range to the right bound. This is illustrated below, where x</span>
+<span class="sd">        represents a range in x and [ and ] indicate the bounds:</span>
+
+<span class="sd">            [..xxx.....]</span>
+<span class="sd">            becomes</span>
+<span class="sd">            [.....xxx..]</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bounds (IRanges): IRanges with the same length as the current object specifying the bounds.</span>
+<span class="sd">            in_place (bool): Whether to modify the object in place. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the</span>
+<span class="sd">            reflected intervals. Otherwise, the current object is directly</span>
+<span class="sd">            modified and a reference to it is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;bounds&#39; must be an IRanges object.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;bounds&#39; does not contain the same number of intervals.&quot;</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">bounds</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="o">+</span> <span class="n">bounds</span><span class="o">.</span><span class="n">width</span><span class="p">)</span> <span class="o">-</span> <span class="n">output</span><span class="o">.</span><span class="n">end</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="IRanges.restrict">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.restrict">[docs]</a>
+    <span class="k">def</span> <span class="nf">restrict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">keep_all_ranges</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restrict ranges to a given start and end positions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start (int, optional): Start position. Defaults to None.</span>
+<span class="sd">            end (int, optional): End position. Defaults to None.</span>
+<span class="sd">            keep_all_ranges (bool, optional): Whether to keep intervals that do not overlap with start and end.</span>
+<span class="sd">                Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new ``IRanges`` is returned with the</span>
+<span class="sd">            restricted intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Both &#39;start&#39; and &#39;end&#39; are &#39;None&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_starts</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_ends</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>
+
+        <span class="n">new_starts</span> <span class="o">=</span> <span class="n">new_starts</span>
+        <span class="n">new_widths</span> <span class="o">=</span> <span class="n">new_ends</span> <span class="o">-</span> <span class="n">new_starts</span>
+
+        <span class="k">if</span> <span class="n">keep_all_ranges</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">new_widths</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">new_widths</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_flt_idx</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">new_widths</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">new_starts</span> <span class="o">=</span> <span class="n">new_starts</span><span class="p">[</span><span class="n">_flt_idx</span><span class="p">]</span>
+            <span class="n">new_widths</span> <span class="o">=</span> <span class="n">new_widths</span><span class="p">[</span><span class="n">_flt_idx</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_widths</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IRanges.overlap_indices">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.overlap_indices">[docs]</a>
+    <span class="k">def</span> <span class="nf">overlap_indices</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find overlaps with the start and end positions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start (int, optional): Start position. Defaults to None.</span>
+<span class="sd">            end (int, optional): End position. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: List of indices that overlap with the given range.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">overlaps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">keep_s</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">keep_e</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">_start</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">_end</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">):</span>
+                <span class="n">keep_s</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_end</span> <span class="o">&gt;</span> <span class="n">end</span><span class="p">):</span>
+                <span class="n">keep_e</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">keep_s</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">keep_e</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">overlaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">overlaps</span></div>
+
+
+    <span class="c1">########################</span>
+    <span class="c1">#### set operations ####</span>
+    <span class="c1">########################</span>
+
+    <span class="c1"># set operations</span>
+<div class="viewcode-block" id="IRanges.union">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.union">[docs]</a>
+    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find union of intervals with `other`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (GenomicRanges): `IRanges` object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``other`` is not `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new `IRanges` object with all ranges.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;other&#39; is not an IRanges object.&quot;</span><span class="p">)</span>
+
+        <span class="n">all_starts</span> <span class="o">=</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">all_widths</span> <span class="o">=</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">all_starts</span><span class="p">,</span> <span class="n">all_widths</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">min_gap_width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">drop_empty_ranges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="IRanges.setdiff">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.setdiff">[docs]</a>
+    <span class="k">def</span> <span class="nf">setdiff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find set difference with `other`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (GenomicRanges): `IRanges` object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``other`` is not `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new `IRanges` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;other&#39; is not an IRanges object.&quot;</span><span class="p">)</span>
+
+        <span class="n">all_starts</span> <span class="o">=</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">all_ends</span> <span class="o">=</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">all_starts</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">all_ends</span><span class="p">)</span>
+
+        <span class="n">x_gaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaps</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">x_gaps_u</span> <span class="o">=</span> <span class="n">x_gaps</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">x_gaps_u</span><span class="o">.</span><span class="n">gaps</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">diff</span></div>
+
+
+<div class="viewcode-block" id="IRanges.intersect">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.intersect">[docs]</a>
+    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find intersecting intervals with `other`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (GenomicRanges): `IRanges` object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``other`` is not `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new `IRanges` object with all intersecting intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;other&#39; is not an IRanges object.&quot;</span><span class="p">)</span>
+
+        <span class="n">all_starts</span> <span class="o">=</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">all_ends</span> <span class="o">=</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">all_starts</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">all_ends</span><span class="p">)</span>
+
+        <span class="n">_gaps</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">gaps</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">_inter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setdiff</span><span class="p">(</span><span class="n">_gaps</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_inter</span></div>
+
+
+    <span class="c1">############################</span>
+    <span class="c1">#### Overlap operations ####</span>
+    <span class="c1">############################</span>
+
+    <span class="k">def</span> <span class="nf">_build_ncls_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ut</span><span class="o">.</span><span class="n">package_utils</span><span class="o">.</span><span class="n">is_package_installed</span><span class="p">(</span><span class="s2">&quot;ncls&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;package: &#39;ncls&#39; is not installed.&quot;</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">ncls</span> <span class="kn">import</span> <span class="n">NCLS</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span> <span class="o">=</span> <span class="n">NCLS</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))])</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_delete_ncls_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span>
+
+    <span class="k">def</span> <span class="nf">_generic_find_hits</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">,</span>
+        <span class="n">gap_start</span><span class="p">,</span>
+        <span class="n">gap_end</span><span class="p">,</span>
+        <span class="n">max_gap</span><span class="p">,</span>
+        <span class="n">min_overlap</span><span class="p">,</span>
+        <span class="n">select</span><span class="p">,</span>
+        <span class="n">delete_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
+
+        <span class="n">all_overlaps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
+            <span class="n">_start</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">_end</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">_idx</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">new_start</span> <span class="o">=</span> <span class="n">_start</span> <span class="o">-</span> <span class="n">gap_start</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">new_end</span> <span class="o">=</span> <span class="n">_end</span> <span class="o">+</span> <span class="n">gap_end</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">find_overlap</span><span class="p">(</span><span class="n">new_start</span><span class="p">,</span> <span class="n">new_end</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_iter</span><span class="p">:</span>
+                <span class="n">_gap</span><span class="p">,</span> <span class="n">_overlap</span> <span class="o">=</span> <span class="n">calc_gap_and_overlap</span><span class="p">((</span><span class="n">_start</span><span class="p">,</span> <span class="n">_end</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">_append</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">_gap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_gap</span> <span class="o">&gt;</span> <span class="n">max_gap</span><span class="p">:</span>
+                    <span class="n">_append</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="n">_overlap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_overlap</span> <span class="o">&lt;</span> <span class="n">min_overlap</span><span class="p">:</span>
+                    <span class="n">_append</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="n">_append</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_idx</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">all_overlaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_idx</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span> <span class="ow">or</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">:</span>
+                    <span class="n">all_overlaps</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                <span class="k">elif</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+                    <span class="n">all_overlaps</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+                <span class="k">elif</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+                    <span class="n">all_overlaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_idx</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">delete_index</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">all_overlaps</span>
+
+<div class="viewcode-block" id="IRanges.find_overlaps">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.find_overlaps">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_overlaps</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span>
+        <span class="n">query_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;within&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+        <span class="n">max_gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find overlaps with ``query`` `IRanges` object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (IRanges): Query `IRanges`.</span>
+<span class="sd">            query_type (Literal[&quot;any&quot;, &quot;start&quot;, &quot;end&quot;, &quot;within&quot;], optional): Overlap query type,</span>
+<span class="sd">                must be one of</span>
+
+<span class="sd">                - &quot;any&quot;: Any overlap is good</span>
+<span class="sd">                - &quot;start&quot;: Overlap at the beginning of the intervals</span>
+<span class="sd">                - &quot;end&quot;: Must overlap at the end of the intervals</span>
+<span class="sd">                - &quot;within&quot;: Fully contain the query interval</span>
+
+<span class="sd">                Defaults to &quot;any&quot;.</span>
+<span class="sd">            select (Literal[&quot;all&quot;, &quot;first&quot;, &quot;last&quot;, &quot;arbitrary&quot;]): Determine what hit to choose when</span>
+<span class="sd">                there are multiple hits for an interval in ``subject``.</span>
+<span class="sd">            max_gap (int, optional): Maximum gap allowed in the overlap.</span>
+<span class="sd">                Defaults to -1 (no gap allowed).</span>
+<span class="sd">            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``query`` is not an `IRanges` object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A List of indices that overlap with ``query``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">query_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;within&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;query_type&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;any&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;end&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;within&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;first&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;last&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">_tgap</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">max_gap</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">max_gap</span>
+
+        <span class="n">all_overlaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generic_find_hits</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">_tgap</span><span class="p">,</span> <span class="n">_tgap</span><span class="p">,</span> <span class="n">max_gap</span><span class="p">,</span> <span class="n">min_overlap</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">delete_index</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">all_overlaps</span></div>
+
+
+<div class="viewcode-block" id="IRanges.count_overlaps">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.count_overlaps">[docs]</a>
+    <span class="k">def</span> <span class="nf">count_overlaps</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span>
+        <span class="n">query_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;within&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">max_gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Count number of overlaps with ``query`` `IRanges` object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            subject (IRanges): Query `IRanges`.</span>
+<span class="sd">            query_type (Literal[&quot;any&quot;, &quot;start&quot;, &quot;end&quot;, &quot;within&quot;], optional): Overlap query type,</span>
+<span class="sd">                must be one of</span>
+
+<span class="sd">                - &quot;any&quot;: Any overlap is good</span>
+<span class="sd">                - &quot;start&quot;: Overlap at the beginning of the intervals</span>
+<span class="sd">                - &quot;end&quot;: Must overlap at the end of the intervals</span>
+<span class="sd">                - &quot;within&quot;: Fully contain the query interval</span>
+
+<span class="sd">                Defaults to &quot;any&quot;.</span>
+<span class="sd">            max_gap (int, optional): Maximum gap allowed in the overlap.</span>
+<span class="sd">                Defaults to -1 (no gap allowed).</span>
+<span class="sd">            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``query`` is not an `IRanges` object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A List with number of overlaps.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_overlaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span>
+            <span class="n">query</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">,</span> <span class="n">max_gap</span><span class="o">=</span><span class="n">max_gap</span><span class="p">,</span> <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_overlaps</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="IRanges.subset_by_overlaps">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.subset_by_overlaps">[docs]</a>
+    <span class="k">def</span> <span class="nf">subset_by_overlaps</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span>
+        <span class="n">query_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;within&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span><span class="p">,</span>
+        <span class="n">max_gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">min_overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Subset by overlap intervals in ``query`` `IRanges` object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            subject (IRanges): Query `IRanges`.</span>
+<span class="sd">            query_type (Literal[&quot;any&quot;, &quot;start&quot;, &quot;end&quot;, &quot;within&quot;], optional): Overlap query type,</span>
+<span class="sd">                must be one of</span>
+
+<span class="sd">                - &quot;any&quot;: Any overlap is good</span>
+<span class="sd">                - &quot;start&quot;: Overlap at the beginning of the intervals</span>
+<span class="sd">                - &quot;end&quot;: Must overlap at the end of the intervals</span>
+<span class="sd">                - &quot;within&quot;: Fully contain the query interval</span>
+
+<span class="sd">                Defaults to &quot;any&quot;.</span>
+<span class="sd">            max_gap (int, optional): Maximum gap allowed in the overlap.</span>
+<span class="sd">                Defaults to -1 (no gap allowed).</span>
+<span class="sd">            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``query`` is not of type `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            IRanges: A new `IRanges` object containing only subsets.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_overlaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span>
+            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">,</span> <span class="n">max_gap</span><span class="o">=</span><span class="n">max_gap</span><span class="p">,</span> <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span>
+        <span class="p">)</span>
+        <span class="n">_all_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">_overlaps</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">_all_indices</span><span class="p">]</span></div>
+
+
+    <span class="c1">###########################</span>
+    <span class="c1">#### search operations ####</span>
+    <span class="c1">###########################</span>
+
+    <span class="k">def</span> <span class="nf">_generic_search</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">step_start</span><span class="p">,</span> <span class="n">step_end</span><span class="p">,</span> <span class="n">max_gap</span><span class="p">,</span> <span class="n">min_overlap</span><span class="p">,</span> <span class="n">select</span>
+    <span class="p">):</span>
+        <span class="n">min_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">max_end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">hits</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
+            <span class="n">_iterate</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">_hits</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">_tmin_overlap</span> <span class="o">=</span> <span class="n">min_overlap</span>
+            <span class="k">if</span> <span class="n">_tmin_overlap</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">_tmin_overlap</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="k">while</span> <span class="n">_iterate</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">all_overlaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generic_find_hits</span><span class="p">(</span>
+                    <span class="n">val</span><span class="p">,</span>
+                    <span class="n">counter</span> <span class="o">*</span> <span class="n">step_start</span><span class="p">,</span>
+                    <span class="n">counter</span> <span class="o">*</span> <span class="n">step_end</span><span class="p">,</span>
+                    <span class="n">max_gap</span><span class="p">,</span>
+                    <span class="n">_tmin_overlap</span><span class="p">,</span>
+                    <span class="n">select</span><span class="p">,</span>
+                    <span class="n">delete_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_overlaps</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">_iterate</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">_hits</span> <span class="o">=</span> <span class="n">all_overlaps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">break</span>
+
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">min_start</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span>
+                        <span class="n">step_end</span> <span class="o">==</span> <span class="mi">0</span>
+                        <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">min_start</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span>
+                        <span class="n">step_start</span> <span class="o">==</span> <span class="mi">0</span>
+                        <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">_iterate</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">_hits</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">break</span>
+
+            <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_hits</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hits</span>
+
+<div class="viewcode-block" id="IRanges.nearest">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.nearest">[docs]</a>
+    <span class="k">def</span> <span class="nf">nearest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search nearest positions both upstream and downstream that overlap with each range in ``query``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (IRanges): Query `IRanges` to find nearest positions.</span>
+<span class="sd">            select (Literal[&quot;all&quot;, &quot;arbitrary&quot;]): Determine what hit to</span>
+<span class="sd">                choose when there are multiple hits for an interval in ``subject``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``query`` is not of type `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[List[int]]: List of indices for each interval in query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">hits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generic_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">select</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">hits</span></div>
+
+
+<div class="viewcode-block" id="IRanges.precede">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.precede">[docs]</a>
+    <span class="k">def</span> <span class="nf">precede</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search nearest positions only downstream that overlap with each range in ``query``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (IRanges): Query `IRanges` to find nearest positions.</span>
+<span class="sd">            select (Literal[&quot;all&quot;, &quot;first&quot;]) Determine what hit to</span>
+<span class="sd">                choose when there are multiple hits for an interval in ``subject``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``query`` is not of type `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[List[int]]: List of indices for each interval in query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;first&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="n">hits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generic_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">select</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">hits</span></div>
+
+
+<div class="viewcode-block" id="IRanges.follow">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.follow">[docs]</a>
+    <span class="k">def</span> <span class="nf">follow</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search nearest positions only downstream that overlap with each range in ``query``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (IRanges): Query `IRanges` to find nearest positions.</span>
+<span class="sd">            select (Literal[&quot;all&quot;, &quot;last&quot;]) Determine what hit to</span>
+<span class="sd">                choose when there are multiple hits for an interval in ``subject``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If ``query`` is not of type `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[List[int]]: List of indices for each interval in query.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;last&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="n">hits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generic_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">select</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">hits</span></div>
+
+
+<div class="viewcode-block" id="IRanges.distance">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.distance">[docs]</a>
+    <span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the pair-wise distance with intervals in query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (IRanges): Query `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: A list containing distances.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;query&#39; does not contain the same number of intervals.&quot;</span><span class="p">)</span>
+
+        <span class="n">all_distances</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">i_self</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">i_query</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">_gap</span><span class="p">,</span> <span class="n">_overlap</span> <span class="o">=</span> <span class="n">calc_gap_and_overlap</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">i_self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i_self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">i_query</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i_query</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">)</span>
+
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">_gap</span>
+            <span class="k">if</span> <span class="n">_gap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">all_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">all_distances</span></div>
 </div>
 
 
@@ -962,7 +2250,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>

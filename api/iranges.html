@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="iranges" href="modules.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>iranges package - IRanges 0.0.1 documentation</title>
+        <title>iranges package - IRanges 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">IRanges 0.0.1 documentation</div></a>
+      <a href="../index.html"><div class="brand">IRanges 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -251,7 +251,7 @@ sequence. The interpretation of the start position depends on the application; f
 <dd><p>Subset the IRanges.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>subset</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#slice" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#range" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">range</span></code></a>]) – Integer indices, a boolean filter, or (if the current object is
+<dd class="field-odd"><p><strong>subset</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Union" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Sequence" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#slice" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a>, <a class="reference internal" href="#iranges.IRanges.IRanges.range" title="iranges.IRanges.IRanges.range"><code class="xref py py-class docutils literal notranslate"><span class="pre">range</span></code></a>]) – Integer indices, a boolean filter, or (if the current object is
 named) names specifying the ranges to be extracted, see
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">normalize_subscript()</span></code>.</p>
 </dd>
@@ -260,6 +260,17 @@ named) names specifying the ranges to be extracted, see
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object containing the ranges of interest.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__iter__" title="Link to this definition">#</a></dt>
+<dd><p>Iterator over intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRangesIter" title="iranges.IRanges.IRangesIter"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRangesIter</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -308,6 +319,124 @@ to be replaced, as specified by <code class="docutils literal notranslate"><span
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.clip_intervals">
+<span class="sig-name descname"><span class="pre">clip_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.clip_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.clip_intervals" title="Link to this definition">#</a></dt>
+<dd><p>Clip intervals. Starts are always clipped to positive interval ranges (1, Inf).</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">width</span></code> is specified, the intervals are clipped to (1, width).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Shift all starts before clipping. Defaults to 0.</p></li>
+<li><p><strong>width</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – Clip width of each interval. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object, with the clipped intervals.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.count_overlaps">
+<span class="sig-name descname"><span class="pre">count_overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'any'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.count_overlaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.count_overlaps" title="Link to this definition">#</a></dt>
+<dd><p>Count number of overlaps with <code class="docutils literal notranslate"><span class="pre">query</span></code> <cite>IRanges</cite> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subject</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite>.</p></li>
+<li><p><strong>query_type</strong> (<em>Literal</em><em>[</em><em>&quot;any&quot;</em><em>, </em><em>&quot;start&quot;</em><em>, </em><em>&quot;end&quot;</em><em>, </em><em>&quot;within&quot;</em><em>]</em><em>, </em><em>optional</em>) – <p>Overlap query type,
+must be one of</p>
+<ul>
+<li><p>”any”: Any overlap is good</p></li>
+<li><p>”start”: Overlap at the beginning of the intervals</p></li>
+<li><p>”end”: Must overlap at the end of the intervals</p></li>
+<li><p>”within”: Fully contain the query interval</p></li>
+</ul>
+<p>Defaults to “any”.</p>
+</p></li>
+<li><p><strong>max_gap</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum gap allowed in the overlap.
+Defaults to -1 (no gap allowed).</p></li>
+<li><p><strong>min_overlap</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum overlap with query. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">query</span></code> is not an <cite>IRanges</cite> object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A List with number of overlaps.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.coverage">
+<span class="sig-name descname"><span class="pre">coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.coverage" title="Link to this definition">#</a></dt>
+<dd><p>Calculate coverage, for each position, counts the number of intervals that cover it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Shift all intervals. Defaults to 0.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Restrict the width of all intervals. Defaults to None.</p></li>
+<li><p><strong>weight</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – Weight to use. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>- If 'weight' is not a number.</strong> – </p></li>
+<li><p><strong>- If 'width' is not a number.</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array with the coverage vector.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.disjoin">
+<span class="sig-name descname"><span class="pre">disjoin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">with_reverse_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.disjoin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.disjoin" title="Link to this definition">#</a></dt>
+<dd><p>Calculate disjoint intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>with_reverse_map</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to return a map of indices back to the original object.
+Defaults to False.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <cite>IRanges</cite> containing disjoint intervals.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.distance">
+<span class="sig-name descname"><span class="pre">distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.distance" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the pair-wise distance with intervals in query.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>query</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing distances.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.end">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#iranges.IRanges.IRanges.end" title="Link to this definition">#</a></dt>
@@ -316,6 +445,140 @@ to be replaced, as specified by <code class="docutils literal notranslate"><span
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>NumPy array of 32-bit signed integers containing the end position
 (not inclusive) for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.find_overlaps">
+<span class="sig-name descname"><span class="pre">find_overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'any'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.find_overlaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.find_overlaps" title="Link to this definition">#</a></dt>
+<dd><p>Find overlaps with <code class="docutils literal notranslate"><span class="pre">query</span></code> <cite>IRanges</cite> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite>.</p></li>
+<li><p><strong>query_type</strong> (<em>Literal</em><em>[</em><em>&quot;any&quot;</em><em>, </em><em>&quot;start&quot;</em><em>, </em><em>&quot;end&quot;</em><em>, </em><em>&quot;within&quot;</em><em>]</em><em>, </em><em>optional</em>) – <p>Overlap query type,
+must be one of</p>
+<ul>
+<li><p>”any”: Any overlap is good</p></li>
+<li><p>”start”: Overlap at the beginning of the intervals</p></li>
+<li><p>”end”: Must overlap at the end of the intervals</p></li>
+<li><p>”within”: Fully contain the query interval</p></li>
+</ul>
+<p>Defaults to “any”.</p>
+</p></li>
+<li><p><strong>select</strong> (<em>Literal</em><em>[</em><em>&quot;all&quot;</em><em>, </em><em>&quot;first&quot;</em><em>, </em><em>&quot;last&quot;</em><em>, </em><em>&quot;arbitrary&quot;</em><em>]</em>) – Determine what hit to choose when
+there are multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">subject</span></code>.</p></li>
+<li><p><strong>max_gap</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum gap allowed in the overlap.
+Defaults to -1 (no gap allowed).</p></li>
+<li><p><strong>min_overlap</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum overlap with query. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">query</span></code> is not an <cite>IRanges</cite> object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.List" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A List of indices that overlap with <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.flank">
+<span class="sig-name descname"><span class="pre">flank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">both</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.flank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.flank" title="Link to this definition">#</a></dt>
+<dd><p>Compute flanking ranges for each range. The logic is from the <cite>IRanges</cite> package.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">start</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> for a given range, the flanking occurs at the <cite>start</cite>,
+otherwise the <cite>end</cite>.
+The <cite>widths</cite> of the flanks are given by the <code class="docutils literal notranslate"><span class="pre">width</span></code> parameter.</p>
+<p><code class="docutils literal notranslate"><span class="pre">width</span></code> can be negative, in which case the flanking region is
+reversed so that it represents a prefix or suffix of the range.</p>
+<p>Usage:</p>
+<blockquote>
+<div><p><cite>ir.flank(3, True)</cite>, where “x” indicates a range in <code class="docutils literal notranslate"><span class="pre">ir</span></code> and “-” indicates the
+resulting flanking region:</p>
+<blockquote>
+<div><p>—xxxxxxx</p>
+</div></blockquote>
+<dl class="simple">
+<dt>If <code class="docutils literal notranslate"><span class="pre">start</span></code> were <code class="docutils literal notranslate"><span class="pre">False</span></code>, the range in <code class="docutils literal notranslate"><span class="pre">ir</span></code> becomes</dt><dd><p>xxxxxxx—</p>
+</dd>
+</dl>
+<p>For negative width, i.e. <cite>ir.flank(x, -3, FALSE)</cite>, where “*” indicates the overlap
+between “x” and the result:</p>
+<blockquote>
+<div><p>xxxx***</p>
+</div></blockquote>
+<p>If <code class="docutils literal notranslate"><span class="pre">both</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, then, for all ranges in “x”, the flanking regions are
+extended into (or out of, if <code class="docutils literal notranslate"><span class="pre">width</span></code> is negative) the range, so that the result
+straddles the given endpoint and has twice the width given by width.</p>
+<dl class="simple">
+<dt>This is illustrated below for <cite>ir.flank(3, both=TRUE)</cite>:</dt><dd><p>—<a href="#id1"><span class="problematic" id="id2">**</span></a><a href="#id3"><span class="problematic" id="id4">*</span></a>xxxx</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Width to flank by. May be negative.</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to only flank starts. Defaults to True.</p></li>
+<li><p><strong>both</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to flank both starts and ends. Defaults to False.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+flanked intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.follow">
+<span class="sig-name descname"><span class="pre">follow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.follow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.follow" title="Link to this definition">#</a></dt>
+<dd><p>Search nearest positions only downstream that overlap with each range in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite> to find nearest positions.</p></li>
+<li><p><strong>select</strong> (<em>Literal</em><em>[</em><em>&quot;all&quot;</em><em>, </em><em>&quot;last&quot;</em><em>]</em>) – choose when there are multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">subject</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">query</span></code> is not of type <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of indices for each interval in query.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[List[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.gaps">
+<span class="sig-name descname"><span class="pre">gaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.gaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.gaps" title="Link to this definition">#</a></dt>
+<dd><p>Gaps returns an <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object representing the set of integers that remain after the intervals are
+removed specified by the start and end arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Restrict start position. Defaults to 1.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Restrict end position. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the gaps.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -379,6 +642,33 @@ present.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_row">
+<span class="sig-name descname"><span class="pre">get_row</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index_or_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_row"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_row" title="Link to this definition">#</a></dt>
+<dd><p>Access a row by index or row name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>index_or_name</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – <p>Integer index of the row to access.</p>
+<p>Alternatively, you may provide a string specifying the row name to access,
+only if <a class="reference internal" href="#iranges.IRanges.IRanges.names" title="iranges.IRanges.IRanges.names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">names</span></code></a> are available.</p>
+</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">index_or_name</span></code> is not in row names.
+    If the integer index is greater than the number of rows.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">index_or_name</span></code> is neither a string nor an integer.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sliced IRanges object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.get_start">
 <span class="sig-name descname"><span class="pre">get_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.get_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.get_start" title="Link to this definition">#</a></dt>
 <dd><p>Get all start positions.</p>
@@ -404,6 +694,26 @@ ranges.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.intersect">
+<span class="sig-name descname"><span class="pre">intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.intersect" title="Link to this definition">#</a></dt>
+<dd><p>Find intersecting intervals with <cite>other</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>GenomicRanges</em>) – <cite>IRanges</cite> object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">other</span></code> is not <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new <cite>IRanges</cite> object with all intersecting intervals.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -438,6 +748,280 @@ ranges.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List containing the names for all ranges, or None if no names are
 present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.narrow">
+<span class="sig-name descname"><span class="pre">narrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.narrow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.narrow" title="Link to this definition">#</a></dt>
+<dd><p>Narrow genomic positions by provided <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> parameters.</p>
+<p>Important: These arguments are relative shift in positions for each range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Relative start position. Defaults to None.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Relative end position. Defaults to None.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Relative width of the interval. Defaults to None.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If <cite>width</cite> is provided, either <cite>start</cite> or <cite>end</cite> must be provided.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – Provide two of the three parameters - <cite>start</cite>, <cite>end</cite> and <cite>width</cite>
+    but not all.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+narrow intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.nearest">
+<span class="sig-name descname"><span class="pre">nearest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.nearest" title="Link to this definition">#</a></dt>
+<dd><p>Search nearest positions both upstream and downstream that overlap with each range in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite> to find nearest positions.</p></li>
+<li><p><strong>select</strong> (<em>Literal</em><em>[</em><em>&quot;all&quot;</em><em>, </em><em>&quot;arbitrary&quot;</em><em>]</em>) – Determine what hit to
+choose when there are multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">subject</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">query</span></code> is not of type <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of indices for each interval in query.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[List[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.order">
+<span class="sig-name descname"><span class="pre">order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decreasing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.order" title="Link to this definition">#</a></dt>
+<dd><p>Get the order of indices for sorting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>decreasing</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to sort in descending order. Defaults to False.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of integers indicating index position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.overlap_indices">
+<span class="sig-name descname"><span class="pre">overlap_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.overlap_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.overlap_indices" title="Link to this definition">#</a></dt>
+<dd><p>Find overlaps with the start and end positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Start position. Defaults to None.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – End position. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of indices that overlap with the given range.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.precede">
+<span class="sig-name descname"><span class="pre">precede</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.precede"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.precede" title="Link to this definition">#</a></dt>
+<dd><p>Search nearest positions only downstream that overlap with each range in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite> to find nearest positions.</p></li>
+<li><p><strong>select</strong> (<em>Literal</em><em>[</em><em>&quot;all&quot;</em><em>, </em><em>&quot;first&quot;</em><em>]</em>) – choose when there are multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">subject</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">query</span></code> is not of type <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of indices for each interval in query.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[List[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.promoters">
+<span class="sig-name descname"><span class="pre">promoters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downstream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.promoters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.promoters" title="Link to this definition">#</a></dt>
+<dd><p>Extend intervals to promoter regions.</p>
+<p>Generates promoter ranges relative to the transcription start site (TSS),
+where TSS is start(x). The promoter range is expanded around the TSS
+according to the upstream and downstream arguments. Upstream represents
+the number of nucleotides in the 5’ direction and downstream the number
+in the 3’ direction. The full range is defined as, (<cite>start(x) - upstream</cite>)
+to (<cite>start(x) + downstream - 1</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>upstream</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Number of positions to extend in the 5’ direction.
+Defaults to 2000.</p></li>
+<li><p><strong>downstream</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Number of positions to extend in the 3’ direction.
+Defaults to 200.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+promoter intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.range">
+<span class="sig-name descname"><span class="pre">range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.range" title="Link to this definition">#</a></dt>
+<dd><p>Concatenate all intervals. A tuple of minimum of all starts, maximum of all ends) in the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>with_reverse_map</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – return map of indices back to
+original object?. Defaults to False.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An new IRanges instance with a single range,
+from the minimum start to the maximum end of the concatenated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">with_reverse_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_empty_ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_gap_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.reduce" title="Link to this definition">#</a></dt>
+<dd><p><cite>Reduce</cite> orders the ranges, then merges overlapping or adjacent ranges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>with_reverse_map</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to return map of indices back to
+original object. Defaults to False.</p></li>
+<li><p><strong>drop_empty_ranges</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to drop empty ranges. Defaults to False.</p></li>
+<li><p><strong>min_gap_width</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Ranges separated by a gap of at least <code class="docutils literal notranslate"><span class="pre">min_gap_width</span></code>
+positions are not merged. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object with reduced intervals.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.reflect">
+<span class="sig-name descname"><span class="pre">reflect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.reflect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.reflect" title="Link to this definition">#</a></dt>
+<dd><p>Reverses each range in x relative to the corresponding range in bounds.</p>
+<p>Reflection preserves the width of a range, but shifts it such the distance
+from the left bound to the start of the range becomes the distance from the
+end of the range to the right bound. This is illustrated below, where x
+represents a range in x and [ and ] indicate the bounds:</p>
+<blockquote>
+<div><p>[..xxx…..]
+becomes
+[…..xxx..]</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounds</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – IRanges with the same length as the current object specifying the bounds.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+reflected intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.resize">
+<span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'start'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.resize" title="Link to this definition">#</a></dt>
+<dd><p>Resize ranges to the specified <code class="docutils literal notranslate"><span class="pre">width</span></code> where either the <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">end</span></code>, or <code class="docutils literal notranslate"><span class="pre">center</span></code> is used as an
+anchor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Width to resize, must be non-negative!</p></li>
+<li><p><strong>fix</strong> (<em>Literal</em><em>[</em><em>&quot;start&quot;</em><em>, </em><em>&quot;end&quot;</em><em>, </em><em>&quot;center&quot;</em><em>]</em><em>, </em><em>optional</em>) – Fix positions by “start”, “end”, or “center”.
+Defaults to “start”.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If parameter <code class="docutils literal notranslate"><span class="pre">fix</span></code> is neither <cite>start</cite>, <cite>end</cite>, nor <cite>center</cite>.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">width</span></code> is negative.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+resized intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.restrict">
+<span class="sig-name descname"><span class="pre">restrict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_all_ranges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.restrict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.restrict" title="Link to this definition">#</a></dt>
+<dd><p>Restrict ranges to a given start and end positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Start position. Defaults to None.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – End position. Defaults to None.</p></li>
+<li><p><strong>keep_all_ranges</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to keep intervals that do not overlap with start and end.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+restricted intervals.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -551,6 +1135,70 @@ and a reference to it is returned.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.setdiff">
+<span class="sig-name descname"><span class="pre">setdiff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.setdiff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.setdiff" title="Link to this definition">#</a></dt>
+<dd><p>Find set difference with <cite>other</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>GenomicRanges</em>) – <cite>IRanges</cite> object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">other</span></code> is not <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new <cite>IRanges</cite> object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.shift">
+<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.shift" title="Link to this definition">#</a></dt>
+<dd><p>Shifts all the intervals by the amount specified by the <code class="docutils literal notranslate"><span class="pre">shift</span></code> argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Amount to shift by.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+shifted intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decreasing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.sort" title="Link to this definition">#</a></dt>
+<dd><p>Sort the intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decreasing</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to sort in descending order. Defaults to False.</p></li>
+<li><p><strong>in_place</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether to modify the object in place. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+sorted intervals. Otherwise, the current object is directly
+modified and a reference to it is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.start">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#iranges.IRanges.IRanges.start" title="Link to this definition">#</a></dt>
@@ -559,6 +1207,61 @@ and a reference to it is returned.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>NumPy array of 32-bit signed integers containing the start
 positions for all ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.subset_by_overlaps">
+<span class="sig-name descname"><span class="pre">subset_by_overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'any'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_overlap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.subset_by_overlaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.subset_by_overlaps" title="Link to this definition">#</a></dt>
+<dd><p>Subset by overlap intervals in <code class="docutils literal notranslate"><span class="pre">query</span></code> <cite>IRanges</cite> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subject</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Query <cite>IRanges</cite>.</p></li>
+<li><p><strong>query_type</strong> (<em>Literal</em><em>[</em><em>&quot;any&quot;</em><em>, </em><em>&quot;start&quot;</em><em>, </em><em>&quot;end&quot;</em><em>, </em><em>&quot;within&quot;</em><em>]</em><em>, </em><em>optional</em>) – <p>Overlap query type,
+must be one of</p>
+<ul>
+<li><p>”any”: Any overlap is good</p></li>
+<li><p>”start”: Overlap at the beginning of the intervals</p></li>
+<li><p>”end”: Must overlap at the end of the intervals</p></li>
+<li><p>”within”: Fully contain the query interval</p></li>
+</ul>
+<p>Defaults to “any”.</p>
+</p></li>
+<li><p><strong>max_gap</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum gap allowed in the overlap.
+Defaults to -1 (no gap allowed).</p></li>
+<li><p><strong>min_overlap</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum overlap with query. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">query</span></code> is not of type <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new <cite>IRanges</cite> object containing only subsets.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.union">
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.union"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.union" title="Link to this definition">#</a></dt>
+<dd><p>Find union of intervals with <cite>other</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>GenomicRanges</em>) – <cite>IRanges</cite> object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#TypeError" title="(in Python v3.9)"><strong>TypeError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">other</span></code> is not <cite>IRanges</cite>.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new <cite>IRanges</cite> object with all ranges.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges">IRanges</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -578,6 +1281,72 @@ ranges.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="iranges.IRanges.IRangesIter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iranges.IRanges.</span></span><span class="sig-name descname"><span class="pre">IRangesIter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRangesIter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRangesIter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An iterator to <a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Object to iterate.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRangesIter.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRangesIter.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRangesIter.__iter__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRangesIter.__next__">
+<span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRangesIter.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRangesIter.__next__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-iranges.interval">
+<span id="iranges-interval-module"></span><h2>iranges.interval module<a class="headerlink" href="#module-iranges.interval" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="iranges.interval.calc_gap_and_overlap">
+<span class="sig-prename descclassname"><span class="pre">iranges.interval.</span></span><span class="sig-name descname"><span class="pre">calc_gap_and_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/interval.html#calc_gap_and_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.interval.calc_gap_and_overlap" title="Link to this definition">#</a></dt>
+<dd><p>Calculate gap and/or overlap between two intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first</strong> (<em>Tuple</em>) – Interval containing start and end positions. <cite>end</cite> is non-inclusive.</p></li>
+<li><p><strong>second</strong> (<em>Tuple</em>) – Interval containing start and end positions. <cite>end</cite> is non-inclusive.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Tuple" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Optional" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="iranges.interval.create_np_interval_vector">
+<span class="sig-prename descclassname"><span class="pre">iranges.interval.</span></span><span class="sig-name descname"><span class="pre">create_np_interval_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">intervals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_reverse_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dont_sum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/interval.html#create_np_interval_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.interval.create_np_interval_vector" title="Link to this definition">#</a></dt>
+<dd><p>Represent intervals and calculate coverage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intervals</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Input intervals.</p></li>
+<li><p><strong>with_reverse_map</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Return map of indices? Defaults to False.</p></li>
+<li><p><strong>force_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Force size of the array.</p></li>
+<li><p><strong>dont_sum</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Do not sum. Defaults to False.</p></li>
+<li><p><strong>value</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – Default value to increment. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array representing
+coverage from the intervals and optionally the index map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[ndarray, Optional[List]]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -640,28 +1409,66 @@ ranges.</p>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.__copy__"><code class="docutils literal notranslate"><span class="pre">IRanges.__copy__()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.__deepcopy__"><code class="docutils literal notranslate"><span class="pre">IRanges.__deepcopy__()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.__getitem__"><code class="docutils literal notranslate"><span class="pre">IRanges.__getitem__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.__iter__"><code class="docutils literal notranslate"><span class="pre">IRanges.__iter__()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.__len__"><code class="docutils literal notranslate"><span class="pre">IRanges.__len__()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.__repr__"><code class="docutils literal notranslate"><span class="pre">IRanges.__repr__()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.__setitem__"><code class="docutils literal notranslate"><span class="pre">IRanges.__setitem__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.clip_intervals"><code class="docutils literal notranslate"><span class="pre">IRanges.clip_intervals()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.count_overlaps"><code class="docutils literal notranslate"><span class="pre">IRanges.count_overlaps()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.coverage"><code class="docutils literal notranslate"><span class="pre">IRanges.coverage()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.disjoin"><code class="docutils literal notranslate"><span class="pre">IRanges.disjoin()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.distance"><code class="docutils literal notranslate"><span class="pre">IRanges.distance()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.end"><code class="docutils literal notranslate"><span class="pre">IRanges.end</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.find_overlaps"><code class="docutils literal notranslate"><span class="pre">IRanges.find_overlaps()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.flank"><code class="docutils literal notranslate"><span class="pre">IRanges.flank()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.follow"><code class="docutils literal notranslate"><span class="pre">IRanges.follow()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.gaps"><code class="docutils literal notranslate"><span class="pre">IRanges.gaps()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.get_end"><code class="docutils literal notranslate"><span class="pre">IRanges.get_end()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.get_mcols"><code class="docutils literal notranslate"><span class="pre">IRanges.get_mcols()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.get_metadata"><code class="docutils literal notranslate"><span class="pre">IRanges.get_metadata()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.get_names"><code class="docutils literal notranslate"><span class="pre">IRanges.get_names()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.get_row"><code class="docutils literal notranslate"><span class="pre">IRanges.get_row()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.get_start"><code class="docutils literal notranslate"><span class="pre">IRanges.get_start()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.get_width"><code class="docutils literal notranslate"><span class="pre">IRanges.get_width()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.intersect"><code class="docutils literal notranslate"><span class="pre">IRanges.intersect()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.mcols"><code class="docutils literal notranslate"><span class="pre">IRanges.mcols</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.metadata"><code class="docutils literal notranslate"><span class="pre">IRanges.metadata</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.names"><code class="docutils literal notranslate"><span class="pre">IRanges.names</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.narrow"><code class="docutils literal notranslate"><span class="pre">IRanges.narrow()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.nearest"><code class="docutils literal notranslate"><span class="pre">IRanges.nearest()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.order"><code class="docutils literal notranslate"><span class="pre">IRanges.order()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.overlap_indices"><code class="docutils literal notranslate"><span class="pre">IRanges.overlap_indices()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.precede"><code class="docutils literal notranslate"><span class="pre">IRanges.precede()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.promoters"><code class="docutils literal notranslate"><span class="pre">IRanges.promoters()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.range"><code class="docutils literal notranslate"><span class="pre">IRanges.range()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.reduce"><code class="docutils literal notranslate"><span class="pre">IRanges.reduce()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.reflect"><code class="docutils literal notranslate"><span class="pre">IRanges.reflect()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.resize"><code class="docutils literal notranslate"><span class="pre">IRanges.resize()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.restrict"><code class="docutils literal notranslate"><span class="pre">IRanges.restrict()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.set_mcols"><code class="docutils literal notranslate"><span class="pre">IRanges.set_mcols()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.set_metadata"><code class="docutils literal notranslate"><span class="pre">IRanges.set_metadata()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.set_names"><code class="docutils literal notranslate"><span class="pre">IRanges.set_names()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.set_start"><code class="docutils literal notranslate"><span class="pre">IRanges.set_start()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.set_width"><code class="docutils literal notranslate"><span class="pre">IRanges.set_width()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.setdiff"><code class="docutils literal notranslate"><span class="pre">IRanges.setdiff()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.shift"><code class="docutils literal notranslate"><span class="pre">IRanges.shift()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.sort"><code class="docutils literal notranslate"><span class="pre">IRanges.sort()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.start"><code class="docutils literal notranslate"><span class="pre">IRanges.start</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.subset_by_overlaps"><code class="docutils literal notranslate"><span class="pre">IRanges.subset_by_overlaps()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.union"><code class="docutils literal notranslate"><span class="pre">IRanges.union()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.width"><code class="docutils literal notranslate"><span class="pre">IRanges.width</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#iranges.IRanges.IRangesIter"><code class="docutils literal notranslate"><span class="pre">IRangesIter</span></code></a><ul>
+<li><a class="reference internal" href="#iranges.IRanges.IRangesIter.__iter__"><code class="docutils literal notranslate"><span class="pre">IRangesIter.__iter__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRangesIter.__next__"><code class="docutils literal notranslate"><span class="pre">IRangesIter.__next__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-iranges.interval">iranges.interval module</a><ul>
+<li><a class="reference internal" href="#iranges.interval.calc_gap_and_overlap"><code class="docutils literal notranslate"><span class="pre">calc_gap_and_overlap()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.interval.create_np_interval_vector"><code class="docutils literal notranslate"><span class="pre">create_np_interval_vector()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-iranges">Module contents</a></li>
@@ -676,7 +1483,7 @@ ranges.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../_static/documentation_options.js?v=01f34227"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>

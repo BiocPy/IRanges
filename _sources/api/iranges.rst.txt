@@ -12,6 +12,14 @@ iranges.IRanges module
    :undoc-members:
    :show-inheritance:
 
+iranges.interval module
+-----------------------
+
+.. automodule:: iranges.interval
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
