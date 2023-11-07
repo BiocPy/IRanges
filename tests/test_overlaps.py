@@ -42,7 +42,30 @@ def test_precede():
     subject = IRanges([3, 2, 10], [1, 12, 3])
 
     res = subject.precede(query)
-    assert res == [[3], [3], []]
+    assert res == [[2], [2], []]
 
     res = query.precede(subject)
-    assert res == [[3], [], []]
+    assert res == [[2], [], []]
+
+def test_follow():    
+    query = IRanges([1, 3, 9], [3, 5, 2])
+    subject = IRanges([3, 2, 10], [1, 12, 3])
+
+    res = subject.follow(query)
+    assert res == [[], [], [0]]
+
+    res = query.follow(subject)
+    assert res == [[], [], [1]]
+
+def test_distance():
+    x = IRanges([1], [5])
+    y = IRanges([7], [4])
+
+    res = x.distance(y)
+    assert res == [1]
+
+    x = IRanges([1], [5])
+    y = IRanges([6], [4])
+
+    res = x.distance(y)
+    assert res == [0]
