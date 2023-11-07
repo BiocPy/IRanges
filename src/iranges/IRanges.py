@@ -1742,8 +1742,7 @@ class IRanges:
     def nearest(
         self, query: "IRanges", select: Literal["all", "arbitrary"] = "all"
     ) -> List[List[int]]:
-        """Search nearest positions both upstream and downstream that overlap with
-        each range in ``query``.
+        """Search nearest positions both upstream and downstream that overlap with each range in ``query``.
 
         Args:
             query (IRanges): Query `IRanges` to find nearest positions.
@@ -1772,8 +1771,7 @@ class IRanges:
     def precede(
         self, query: "IRanges", select: Literal["all", "first"] = "all"
     ) -> List[List[int]]:
-        """Search nearest positions only downstream that overlap with
-        each range in ``query``.
+        """Search nearest positions only downstream that overlap with each range in ``query``.
 
         Args:
             query (IRanges): Query `IRanges` to find nearest positions.
