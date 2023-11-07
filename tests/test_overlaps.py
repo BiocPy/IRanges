@@ -24,3 +24,25 @@ def test_subset_overlaps():
     res = query.subset_by_overlaps(subject)
     assert all(np.equal(res.start, [1]))
     assert all(np.equal(res.width, [5]))
+
+
+def test_nearest():
+    query = IRanges([1, 3, 9], [2, 5, 2])
+    subject = IRanges([3, 5, 12], [1, 2, 1])
+
+    res = subject.nearest(query, select="all")
+    assert res == [[0], [0, 1], [2]]
+
+    res = query.nearest(subject)
+    assert res == [[0, 1], [1], [2]]
+
+
+def test_precede():
+    query = IRanges([1, 3, 9], [3, 5, 2])
+    subject = IRanges([3, 2, 10], [1, 12, 3])
+
+    res = subject.precede(query)
+    assert res == [[3], [3], []]
+
+    res = query.precede(subject)
+    assert res == [[3], [], []]

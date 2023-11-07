@@ -1,4 +1,5 @@
 from copy import deepcopy
+from itertools import chain
 from typing import List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
 
@@ -6,7 +7,6 @@ import biocutils as ut
 from biocframe import BiocFrame
 from biocgenerics import combine_rows, combine_seqs, show_as_cell
 from numpy import array, clip, int32, ndarray, printoptions, where, zeros
-from itertools import chain
 
 from .interval import calc_gap_and_overlap, create_np_interval_vector
 
@@ -1481,6 +1481,78 @@ class IRanges:
     #### Overlap operations ####
     ############################
 
+    def _build_ncls_index(self):
+        if not ut.package_utils.is_package_installed("ncls"):
+            raise ImportError("package: 'ncls' is not installed.")
+
+        from ncls import NCLS
+
+        if not hasattr(self, "_ncls"):
+            self._ncls = NCLS(
+                self.start, self.end, array([i for i in range(len(self))])
+            )
+
+    def _delete_ncls_index(self):
+        if hasattr(self, "_ncls"):
+            del self._ncls
+
+    def _generic_find_hits(
+        self,
+        query,
+        gap_start,
+        gap_end,
+        max_gap,
+        min_overlap,
+        select,
+        delete_index=False,
+    ):
+        self._build_ncls_index()
+
+        all_overlaps = []
+        for _, val in query:
+            print("in find hits:::", val)
+            _start = val.start[0]
+            _end = val.end[0]
+
+            _idx = []
+            new_start = _start - gap_start - 1
+            new_end = _end + gap_end + 1
+            _iter = self._ncls.find_overlap(new_start, new_end)
+
+            for i in _iter:
+                print("in iter", i)
+                _gap, _overlap = calc_gap_and_overlap((_start, _end), (i[0], i[1]))
+                _append = True
+
+                print("gaps and overlap", _gap, _overlap)
+                print("max, min::", max_gap, min_overlap)
+
+                if _gap is not None and _gap > max_gap:
+                    print("yes gap")
+                    _append = False
+
+                if _overlap is not None and _overlap < min_overlap:
+                    print("yes overlap")
+                    _append = False
+
+                if _append is True:
+                    _idx.append(i[2])
+
+            if len(_idx) <= 1:
+                all_overlaps.append(_idx)
+            else:
+                if select == "first" or select == "arbitrary":
+                    all_overlaps.append([_idx[0]])
+                elif select == "last":
+                    all_overlaps.append([_idx[-1]])
+                elif select == "all":
+                    all_overlaps.append(_idx)
+
+        if delete_index is True:
+            self._delete_ncls_index()
+
+        return all_overlaps
+
     def find_overlaps(
         self,
         query: "IRanges",
@@ -1528,44 +1600,11 @@ class IRanges:
                 f"'select' must be one of {', '.join(['all', 'first', 'last', 'arbitrary'])}."
             )
 
-        if not ut.package_utils.is_package_installed("ncls"):
-            raise ImportError("package: 'ncls' is not installed.")
+        _tgap = 0 if max_gap == -1 else max_gap
 
-        from ncls import NCLS
-
-        _index = NCLS(self.start, self.end, array([i for i in range(len(self))]))
-
-        all_overlaps = []
-        for _, val in query:
-            _start = val.start[0]
-            _end = val.end[0]
-
-            _idx = []
-            _tgap = 0 if max_gap == -1 else max_gap
-            _iter = _index.find_overlap(_start - _tgap - 1, _end + _tgap + 1)
-            for i in _iter:
-                _gap, _overlap = calc_gap_and_overlap((_start, _end), (i[0], i[1]))
-                _append = True
-
-                if _gap is not None and _gap > max_gap:
-                    _append = False
-
-                if _overlap is not None and _overlap < min_overlap:
-                    _append = False
-
-                if _append is True:
-                    _idx.append(i[2])
-
-            if len(_idx) <= 1:
-                all_overlaps.append(_idx)
-            else:
-                if select == "first" or select == "arbitrary":
-                    all_overlaps.append([_idx[0]])
-                elif select == "last":
-                    all_overlaps.append([_idx[-1]])
-                elif select == "all":
-                    all_overlaps.append(_idx)
-
+        all_overlaps = self._generic_find_hits(
+            query, _tgap, _tgap, max_gap, min_overlap, select, delete_index=True
+        )
         return all_overlaps
 
     def count_overlaps(
@@ -1638,6 +1677,125 @@ class IRanges:
         )
         _all_indices = list(set(chain(*_overlaps)))
         return self[_all_indices]
+
+    ###########################
+    #### search operations ####
+    ###########################
+
+    def _generic_search(
+        self, query, step_start, step_end, max_gap, min_overlap, select
+    ):
+        min_start = min(self.start)
+        max_end = max(self.end)
+
+        print("min and max:::", min_start, max_end)
+
+        hits = []
+        for _, val in query:
+            print("val,", val)
+            _iterate = True
+            counter = 0
+            _hits = []
+
+            while _iterate is True:
+                print(
+                    "counters",
+                    counter * step_start,
+                    counter * step_end,
+                    max_gap,
+                    min_overlap,
+                )
+
+                if min_overlap == -1:
+                    min_overlap = val.width[0]
+
+                all_overlaps = self._generic_find_hits(
+                    val,
+                    counter * step_start,
+                    counter * step_end,
+                    max_gap,
+                    min_overlap,
+                    select,
+                    delete_index=False,
+                )
+
+                if len(all_overlaps[0]) > 0:
+                    _iterate = False
+                    _hits = all_overlaps[0]
+                    break
+
+                counter += 1
+
+                if (
+                    val.end[0] + (counter * step_end) + 1 > max_end
+                    or val.start[0] - (counter * step_start) - 1 < min_start
+                ):
+                    print("beyond the ranges")
+                    _iterate = False
+                    _hits = []
+                    break
+
+            hits.append(_hits)
+
+        return hits
+
+    def nearest(
+        self, query: "IRanges", select: Literal["all", "arbitrary"] = "all"
+    ) -> List[List[int]]:
+        """Search nearest positions both upstream and downstream that overlap with
+        each range in ``query``.
+
+        Args:
+            query (IRanges): Query `IRanges` to find nearest positions.
+            select (Literal["all", "arbitrary"]): Determine what hit to
+                choose when there are multiple hits for an interval in ``subject``.
+
+        Raises:
+            TypeError: If ``query`` is not of type `IRanges`.
+
+        Returns:
+            List[List[int]]: List of indices for each interval in query.
+        """
+
+        if not isinstance(query, IRanges):
+            raise TypeError("`query` is not a `IRanges` object.")
+
+        if select not in ["all", "arbitrary"]:
+            raise ValueError(
+                f"'select' must be one of {', '.join(['all', 'arbitrary'])}."
+            )
+
+        hits = self._generic_search(query, 1, 1, 10000000, 1, select)
+        self._delete_ncls_index()
+        return hits
+
+    def precede(
+        self, query: "IRanges", select: Literal["all", "first"] = "all"
+    ) -> List[List[int]]:
+        """Search nearest positions only downstream that overlap with
+        each range in ``query``.
+
+        Args:
+            query (IRanges): Query `IRanges` to find nearest positions.
+            select (Literal["all", "first"]) Determine what hit to
+                choose when there are multiple hits for an interval in ``subject``.
+
+        Raises:
+            TypeError: If ``query`` is not of type `IRanges`.
+
+        Returns:
+            List[List[int]]: List of indices for each interval in query.
+        """
+
+        if not isinstance(query, IRanges):
+            raise TypeError("`query` is not a `IRanges` object.")
+
+        if select not in ["all", "first"]:
+            raise ValueError(f"'select' must be one of {', '.join(['all', 'first'])}.")
+
+        hits = self._generic_search(query, 0, 1, 10000000, -1, select)
+        self._delete_ncls_index()
+        return hits
 
 
 @combine_seqs.register
