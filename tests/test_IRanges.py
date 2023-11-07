@@ -6,6 +6,10 @@ from biocframe import BiocFrame
 from biocgenerics import combine_seqs
 from iranges import IRanges
 
+__author__ = "Aaron Lun"
+__copyright__ = "LTLA"
+__license__ = "MIT"
+
 
 def test_IRanges_basic():
     starts = [1, 2, 3, 4]
