@@ -1847,7 +1847,7 @@ class IRanges:
         return all_distances
 
     ########################
-    #### set operations ####
+    #### pandas interop ####
     ########################
 
     def to_pandas(self) -> "pandas.DataFrame":
