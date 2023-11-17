@@ -27,7 +27,7 @@ def test_reduce():
 
     assert all(np.equal(reduced.start, [-6, -2, 6, 9]))
     assert all(np.equal(reduced.width, [3, 7, 0, 6]))
-    assert reduced.mcols.colnames == ["revmap"]
+    assert reduced.mcols.colnames.as_list() == ["revmap"]
 
 
 def test_reduce_drop_ranges():
@@ -38,7 +38,7 @@ def test_reduce_drop_ranges():
     reduced = x.reduce(drop_empty_ranges=True)
     assert all(np.equal(reduced.start, [-6, -2, 9]))
     assert all(np.equal(reduced.width, [3, 7, 6]))
-    assert reduced.mcols.colnames == []
+    assert reduced.mcols.colnames.as_list() == []
 
 
 def test_reduce_drop_ranges_and_revmap():
@@ -49,7 +49,7 @@ def test_reduce_drop_ranges_and_revmap():
     reduced = x.reduce(drop_empty_ranges=True, with_reverse_map=True)
     assert all(np.equal(reduced.start, [-6, -2, 9]))
     assert all(np.equal(reduced.width, [3, 7, 6]))
-    assert reduced.mcols.colnames == ["revmap"]
+    assert reduced.mcols.colnames.as_list() == ["revmap"]
 
 
 def test_gap():
@@ -82,4 +82,4 @@ def test_disjoin_with_revmap():
     dj = x.disjoin(with_reverse_map=True)
     assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
     assert all(np.equal(dj.width, [2, 1, 2, 1, 2, 2, 1, 3, 2]))
-    assert dj.mcols.colnames == ["revmap"]
+    assert dj.mcols.colnames.as_list() == ["revmap"]
