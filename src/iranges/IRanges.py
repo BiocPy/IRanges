@@ -1846,6 +1846,70 @@ class IRanges:
 
         return all_distances
 
+    ########################
+    #### pandas interop ####
+    ########################
+
+    def to_pandas(self) -> "pandas.DataFrame":
+        """Convert this ``IRanges`` object into a :py:class:`~pandas.DataFrame`.
+
+        Returns:
+            A :py:class:`~pandas.DataFrame` object.
+        """
+        import pandas as pd
+
+        _starts = self._start
+        _widths = self._width
+        _ends = self.get_end
+
+        output = pd.DataFrame({"starts": _starts, "widths": _widths, "ends": _ends})
+
+        if self._mcols is not None and self._mcols.shape[1] > 0:
+            output = pd.concat([output, self._mcols.to_pandas()])
+
+        if self._names is not None:
+            output.index = self._names
+
+        return output
+
+    @classmethod
+    def from_pandas(cls, input: "pandas.DataFrame") -> "IRanges":
+        """Create a ``IRanges`` from a :py:class:`~pandas.DataFrame` object.
+
+        Args:
+            input:
+                Input data. must contain columns 'start' and 'width'.
+
+        Returns:
+            A ``IRanges`` object.
+        """
+
+        from pandas import DataFrame
+
+        if not isinstance(input, DataFrame):
+            raise TypeError("`input` is not a pandas `DataFrame` object.")
+
+        if "start" not in input.columns:
+            raise ValueError("'input' must contain column 'start'.")
+        start = input["start"].tolist()
+
+        if "width" not in input.columns:
+            raise ValueError("'input' must contain column 'width'.")
+        width = input["width"].tolist()
+
+        # mcols
+        mcols_df = input.drop(columns=["start", "width"])
+
+        mcols = None
+        if (not mcols_df.empty) or len(mcols_df.columns) > 0:
+            mcols = BiocFrame.from_pandas(mcols_df)
+
+        names = None
+        if input.index is not None:
+            names = [str(i) for i in input.index.to_list()]
+
+        return cls(start=start, width=width, names=names, mcols=mcols)
+
 
 @combine_sequences.register
 def _combine_IRanges(*x: IRanges) -> IRanges:
