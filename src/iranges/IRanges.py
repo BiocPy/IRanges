@@ -5,7 +5,7 @@ from warnings import warn
 
 import biocutils as ut
 from biocframe import BiocFrame
-from biocgenerics import combine_rows, combine_seqs, show_as_cell
+from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 from numpy import array, clip, int32, ndarray, printoptions, where, zeros
 
 from .interval import calc_gap_and_overlap, create_np_interval_vector
@@ -136,7 +136,7 @@ class IRanges:
         if names is None:
             return None
         elif not isinstance(names, list):
-            names = list(names)
+            names = Names(names)
 
         return names
 
@@ -308,7 +308,7 @@ class IRanges:
         """
         return self.get_end()
 
-    def get_names(self) -> Union[None, List[str]]:
+    def get_names(self) -> Optional[Names]:
         """Get all names.
 
         Returns:
@@ -339,7 +339,7 @@ class IRanges:
         return output
 
     @property
-    def names(self) -> Union[None, List[str]]:
+    def names(self) -> Optional[Names]:
         """Get all names.
 
         Returns:
@@ -1417,8 +1417,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an IRanges object.")
 
-        all_starts = combine_seqs(self.start, other.start)
-        all_widths = combine_seqs(self.width, other.width)
+        all_starts = combine_sequences(self.start, other.start)
+        all_widths = combine_sequences(self.width, other.width)
 
         output = IRanges(all_starts, all_widths)
         output = output.reduce(min_gap_width=0, drop_empty_ranges=True)
@@ -1440,8 +1440,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an IRanges object.")
 
-        all_starts = combine_seqs(self.start, other.start)
-        all_ends = combine_seqs(self.end, other.end)
+        all_starts = combine_sequences(self.start, other.start)
+        all_ends = combine_sequences(self.end, other.end)
         start = min(all_starts)
         end = max(all_ends)
 
@@ -1467,8 +1467,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an IRanges object.")
 
-        all_starts = combine_seqs(self.start, other.start)
-        all_ends = combine_seqs(self.end, other.end)
+        all_starts = combine_sequences(self.start, other.start)
+        all_ends = combine_sequences(self.end, other.end)
         start = min(all_starts)
         end = max(all_ends)
 
@@ -1814,7 +1814,7 @@ class IRanges:
         self._delete_ncls_index()
         return hits
 
-    def distance(self, query: "IRanges") -> List[int]:
+    def distance(self, query: "IRanges") -> List[Optional[int]]:
         """Calculate the pair-wise distance with intervals in query.
 
         Args:
@@ -1847,7 +1847,7 @@ class IRanges:
         return all_distances
 
 
-@combine_seqs.register
+@combine_sequences.register
 def _combine_IRanges(*x: IRanges) -> IRanges:
     has_names = False
     for y in x:
@@ -1865,8 +1865,8 @@ def _combine_IRanges(*x: IRanges) -> IRanges:
                 all_names += [""] * len(y)
 
     return IRanges(
-        start=combine_seqs(*[y._start for y in x]),
-        width=combine_seqs(*[y._width for y in x]),
+        start=combine_sequences(*[y._start for y in x]),
+        width=combine_sequences(*[y._width for y in x]),
         names=all_names,
         mcols=combine_rows(*[y._mcols for y in x]),
         metadata=x[0]._metadata,
