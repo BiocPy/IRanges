@@ -3,7 +3,7 @@ import copy
 import numpy as np
 import pytest
 from biocframe import BiocFrame
-from biocgenerics import combine_seqs
+from biocutils import combine_sequences
 from iranges import IRanges
 
 __author__ = "Aaron Lun"
@@ -171,22 +171,22 @@ def test_IRanges_combine():
 
     x = IRanges(starts, widths)
     y = IRanges(starts2, widths2)
-    comb = combine_seqs(x, y)
+    comb = combine_sequences(x, y)
     assert (comb.get_start() == np.array([1, 2, 3, 4, 10, 20, 30, 40])).all()
     assert (comb.get_width() == np.array([4, 5, 6, 7, 50, 60, 70, 80])).all()
     assert comb.get_names() is None
 
     x = IRanges(starts, widths, mcols=BiocFrame({"foo": ["a", "b", "c", "d"]}))
     y = IRanges(starts2, widths2, mcols=BiocFrame({"foo": ["A", "B", "C", "D"]}))
-    comb = combine_seqs(x, y)
+    comb = combine_sequences(x, y)
     assert comb.get_mcols().column("foo") == ["a", "b", "c", "d", "A", "B", "C", "D"]
 
     x = IRanges(starts, widths, names=["a", "b", "c", "d"])
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
-    comb = combine_seqs(x, y)
+    comb = combine_sequences(x, y)
     assert comb.get_names() == ["a", "b", "c", "d", "A", "B", "C", "D"]
 
     x = IRanges(starts, widths)
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
-    comb = combine_seqs(x, y)
+    comb = combine_sequences(x, y)
     assert comb.get_names() == ["", "", "", "", "A", "B", "C", "D"]
