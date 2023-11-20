@@ -52,6 +52,10 @@ def test_resize():
     assert all(np.equal(res.start, [18, 23, 31, 36]))
     assert all(np.equal(res.width, [2] * 4))
 
+    res = x.resize(2, fix="center")
+    assert all(np.equal(res.start, [9, 21, 28, 34]))
+    assert all(np.equal(res.width, [2] * 4))
+
 
 def test_flank():
     starts = [2, 5, 1]

@@ -2,6 +2,7 @@ from copy import deepcopy
 from itertools import chain
 from typing import List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
+from math import ceil
 
 import biocutils as ut
 import numpy as np
@@ -1278,11 +1279,13 @@ class IRanges:
             if _fix != "start":
                 if _fix == "end":
                     _start += _width - _twidth
-                elif fix == "center":
-                    _start += _width - (_twidth / 2)
+                elif _fix == "center":
+                    _start += int(_width) / 2 - int(_twidth) / 2
 
-            new_starts.append(_start)
+            new_starts.append(int(_start))
             counter += 1
+
+        print("in iranges", new_starts)
 
         output = self._define_output(in_place)
         output._start = np.array(new_starts)
