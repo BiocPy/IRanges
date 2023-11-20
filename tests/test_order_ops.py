@@ -33,4 +33,4 @@ def test_order():
     x = IRanges(starts, widths)
 
     order = x.order()
-    assert order == [6, 3, 0, 5, 4, 7, 1, 2, 8]
+    assert all(np.equal(order, [6, 3, 0, 5, 4, 7, 1, 2, 8]))

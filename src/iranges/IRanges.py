@@ -4,9 +4,9 @@ from typing import List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import biocutils as ut
+import numpy as np
 from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
-from numpy import array, clip, int32, ndarray, printoptions, where, zeros
 
 from .interval import calc_gap_and_overlap, create_np_interval_vector
 
@@ -26,7 +26,8 @@ class IRangesIter:
         """Initialize the iterator.
 
         Args:
-            obj (IRanges): Source object to iterate.
+            obj:
+                Source object to iterate.
         """
         self._iranges = obj
         self._current_index = 0
@@ -111,16 +112,16 @@ class IRanges:
             self._validate_metadata()
 
     def _sanitize_start(self, start):
-        if isinstance(start, ndarray) and start.dtype == int32:
+        if isinstance(start, np.ndarray) and start.dtype == np.int32:
             return start
 
-        return array(start, dtype=int32, copy=False)
+        return np.array(start, dtype=np.int32, copy=False)
 
     def _sanitize_width(self, width):
-        if isinstance(width, ndarray) and width.dtype == int32:
+        if isinstance(width, np.ndarray) and width.dtype == np.int32:
             return width
 
-        return array(width, dtype=int32, copy=False)
+        return np.array(width, dtype=np.int32, copy=False)
 
     def _validate_width(self):
         if len(self._start) != len(self._width):
@@ -181,7 +182,7 @@ class IRanges:
     #### Getter/setters ####
     ########################
 
-    def get_start(self) -> ndarray:
+    def get_start(self) -> np.ndarray:
         """Get all start positions.
 
         Returns:
@@ -213,7 +214,7 @@ class IRanges:
         return output
 
     @property
-    def start(self) -> ndarray:
+    def start(self) -> np.ndarray:
         """Get all start positions.
 
         Returns:
@@ -237,11 +238,11 @@ class IRanges:
 
         self.set_start(start, in_place=True)
 
-    def get_width(self) -> ndarray:
+    def get_width(self) -> np.ndarray:
         """Get width of each interval.
 
         Returns:
-            ndarray: NumPy array of 32-bit signed integers containing the widths for all
+            NumPy array of 32-bit signed integers containing the widths for all
             ranges.
         """
         return self._width
@@ -266,11 +267,11 @@ class IRanges:
         return output
 
     @property
-    def width(self) -> ndarray:
+    def width(self) -> np.ndarray:
         """Get width of each interval.
 
         Returns:
-            ndarray: NumPy array of 32-bit signed integers containing the widths for all
+            NumPy array of 32-bit signed integers containing the widths for all
             ranges.
         """
         return self.get_width()
@@ -289,7 +290,7 @@ class IRanges:
         )
         return self.set_width(width, in_place=True)
 
-    def get_end(self) -> ndarray:
+    def get_end(self) -> np.ndarray:
         """Get all end positions.
 
         Returns:
@@ -299,7 +300,7 @@ class IRanges:
         return self._start + self._width
 
     @property
-    def end(self) -> ndarray:
+    def end(self) -> np.ndarray:
         """Get all end positions (read-only).
 
         Returns:
@@ -344,7 +345,7 @@ class IRanges:
 
         Returns:
             List containing the names for all ranges, or None if no names are
-            present.
+            available.
         """
         return self.get_names()
 
@@ -511,7 +512,7 @@ class IRanges:
             start=self._start[idx],
             width=self._width[idx],
             names=ut.subset(self._names, idx) if self._names is not None else None,
-            mcols=self._mcols[idx, :],
+            mcols=self._mcols[list(idx), :],
             metadata=self._metadata,
         )
 
@@ -552,7 +553,7 @@ class IRanges:
     ##################
 
     def __repr__(self) -> str:
-        with printoptions(threshold=50, edgeitems=3):
+        with np.printoptions(threshold=50, edgeitems=3):
             message = "IRanges(start=" + repr(self._start)
             message += ", width=" + repr(self._width)
             if self._names:
@@ -692,7 +693,8 @@ class IRanges:
         """Access a row by index or row name.
 
         Args:
-            index_or_name (Union[str, int]): Integer index of the row to access.
+            index_or_name:
+                Integer index of the row to access.
 
                 Alternatively, you may provide a string specifying the row name to access,
                 only if :py:attr:`~iranges.IRanges.IRanges.names` are available.
@@ -701,11 +703,12 @@ class IRanges:
             ValueError:
                 If ``index_or_name`` is not in row names.
                 If the integer index is greater than the number of rows.
+
             TypeError:
                 If ``index_or_name`` is neither a string nor an integer.
 
         Returns:
-            IRanges: A sliced IRanges object
+            IRanges: A sliced IRanges object.
         """
 
         if not isinstance(index_or_name, (int, str)):
@@ -717,43 +720,69 @@ class IRanges:
         """Iterator over intervals."""
         return IRangesIter(self)
 
-    ############################
-    #### iter range methods ####
-    ############################
+    #############################
+    #### inter range methods ####
+    #############################
+
+    def _sanitize_vec_argument(
+        self,
+        vec: Union[int, List[int], np.ndarray],
+        allow_none: bool = False,
+    ):
+        _size = len(self)
+        if vec is None and allow_none is True:
+            return None
+
+        if isinstance(vec, int):
+            return vec
+        elif ut.is_list_of_type(vec, int, ignore_none=allow_none):
+            vec = np.array(vec)
+
+        return vec
 
     def clip_intervals(
-        self, shift: int = 0, width: Optional[Union[int, List[int]]] = None
+        self,
+        shift: Union[int, List[int], np.ndarray] = 0,
+        width: Optional[Union[int, List[int], np.ndarray]] = None,
     ) -> "IRanges":
         """Clip intervals. Starts are always clipped to positive interval ranges (1, Inf).
 
         If ``width`` is specified, the intervals are clipped to (1, width).
 
         Args:
-            shift (int, optional): Shift all starts before clipping. Defaults to 0.
-            width (Union[int, List[int]], optional): Clip width of each interval. Defaults to None.
+            shift:
+                Shift all starts before clipping. Defaults to 0.
+
+            width:
+                Clip width of each interval. Defaults to None.
 
         Returns:
-            IRanges: A ``IRanges`` object, with the clipped intervals.
+            A ``IRanges`` object, with the clipped intervals.
         """
 
         _clipped_starts = []
         _clipped_widths = []
         _clipped_names = []
 
+        _ashift = self._sanitize_vec_argument(shift, False)
+        _awidth = self._sanitize_vec_argument(width, True)
+
         counter = 0
         for name, val in self:
             _start = val.start[0]
             _width = val.width[0]
 
-            if shift > 0:
-                _start += shift
+            _pshift = shift if isinstance(shift, int) else _ashift[counter]
+            _pwidth = (
+                width if width is None or isinstance(width, int) else _awidth[counter]
+            )
 
-            if width is not None:
-                if not isinstance(width, int):
-                    raise TypeError("'width' must be either an integer or a vector.")
+            if _pshift > 0:
+                _start += _pshift
 
-                if _start + _width > width:
-                    _width = width - _start
+            if _pwidth is not None:
+                if _start + _width > _pwidth:
+                    _width = _pwidth - _start
 
             counter += 1
 
@@ -775,21 +804,30 @@ class IRanges:
         return IRanges(_clipped_starts, _clipped_widths, names=_clipped_names)
 
     def coverage(
-        self, shift: int = 0, width: Optional[int] = None, weight: Union[int, float] = 1
-    ) -> ndarray:
+        self,
+        shift: Union[int, List[int], np.ndarray] = 0,
+        width: Optional[Union[int, List[int], np.ndarray]] = None,
+        weight: Union[int, float] = 1,
+    ) -> np.ndarray:
         """Calculate coverage, for each position, counts the number of intervals that cover it.
 
         Args:
-            shift (int, optional): Shift all intervals. Defaults to 0.
-            width (int, optional): Restrict the width of all intervals. Defaults to None.
-            weight (Union[int, float], optional): Weight to use. Defaults to 1.
+            shift:
+                Shift all intervals. Defaults to 0.
+
+            width:
+                Restrict the width of all intervals. Defaults to None.
+
+            weight:
+                Weight to use. Defaults to 1.
 
         Raises:
-            - If 'weight' is not a number.
-            - If 'width' is not a number.
+            TypeError:
+                If 'weight' is not a number.
+                If 'width' is not an expected type.
 
         Returns:
-            ndarray:  A numpy array with the coverage vector.
+            A numpy array with the coverage vector.
         """
 
         new_ranges = self.clip_intervals(shift=shift, width=width)
@@ -797,19 +835,18 @@ class IRanges:
         if weight is not None and not isinstance(weight, (int, float)):
             raise TypeError("'width' must be an integer or float.")
 
+        if isinstance(width, (np.ndarray, list)):
+            width = max(width)
+
         cov, _ = create_np_interval_vector(new_ranges, force_size=width, value=weight)
         return cov
 
     def range(self) -> "IRanges":
-        """Concatenate all intervals. A tuple of minimum of all starts, maximum of all ends) in the object.
-
-        Args:
-            with_reverse_map (bool, optional): return map of indices back to
-                original object?. Defaults to False.
+        """Concatenate all intervals.
 
         Returns:
-            IRanges: An new IRanges instance with a single range,
-            from the minimum start to the maximum end of the concatenated object.
+            An new ``IRanges`` instance with a single range,
+            the minimum of all the start positions,  Maximum of all end positions.
         """
 
         min_start = min(self.start)
@@ -823,17 +860,22 @@ class IRanges:
         drop_empty_ranges: bool = False,
         min_gap_width: int = 1,
     ) -> "IRanges":
-        """`Reduce` orders the ranges, then merges overlapping or adjacent ranges.
+        """Reduce orders the ranges, then merges overlapping or adjacent ranges.
 
         Args:
-            with_reverse_map (bool, optional): Whether to return map of indices back to
+            with_reverse_map:
+                Whether to return map of indices back to
                 original object. Defaults to False.
-            drop_empty_ranges (bool, optional): Whether to drop empty ranges. Defaults to False.
-            min_gap_width (int, optional): Ranges separated by a gap of at least ``min_gap_width``
+
+            drop_empty_ranges:
+                Whether to drop empty ranges. Defaults to False.
+
+            min_gap_width:
+                Ranges separated by a gap of at least ``min_gap_width``
                 positions are not merged. Defaults to 1.
 
         Returns:
-            IRanges: A new ``IRanges`` object with reduced intervals.
+            A new ``IRanges`` object with reduced intervals.
         """
         if min_gap_width < 0:
             raise ValueError("'min_gap_width' cannot be negative.")
@@ -900,7 +942,7 @@ class IRanges:
         """Internal method to get intervals as a list of tuples.
 
         Returns:
-            List[Tuple[int, int, int]]: List of tuples containing the start, end and the index.
+            List of tuples containing the start, end and the index.
         """
         intvals = []
         for i in range(len(self)):
@@ -908,28 +950,32 @@ class IRanges:
 
         return intvals
 
-    def order(self, decreasing: bool = False) -> List[int]:
+    def order(self, decreasing: bool = False) -> np.ndarray:
         """Get the order of indices for sorting.
 
         Args:
-            decreasing (bool, optional): Whether to sort in descending order. Defaults to False.
+            decreasing:
+                Whether to sort in descending order. Defaults to False.
 
         Returns:
-            List[int]: List of integers indicating index position.
+            NumPy vector containing index positions in the sorted order.
         """
         intvals = sorted(self._get_intervals_as_list(), reverse=decreasing)
         order = [o[2] for o in intvals]
-        return order
+        return np.array(order)
 
     def sort(self, decreasing: bool = False, in_place: bool = False) -> "IRanges":
         """Sort the intervals.
 
         Args:
-            decreasing (bool): Whether to sort in descending order. Defaults to False.
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+            decreasing:
+                Whether to sort in descending order. Defaults to False.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             sorted intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
@@ -942,11 +988,14 @@ class IRanges:
         removed specified by the start and end arguments.
 
         Args:
-            start (int, optional): Restrict start position. Defaults to 1.
-            end (int, optional): Restrict end position. Defaults to None.
+            start:
+                Restrict start position. Defaults to 1.
+
+            end:
+                Restrict end position. Defaults to None.
 
         Returns:
-            IRanges: A new ``IRanges`` is returned with the gaps.
+            A new ``IRanges`` is with the gap regions.
         """
         _order = self.order()
 
@@ -1001,11 +1050,12 @@ class IRanges:
         """Calculate disjoint intervals.
 
         Args:
-            with_reverse_map (bool, optional): Whether to return a map of indices back to the original object.
+            with_reverse_map:
+                Whether to return a map of indices back to the original object.
                 Defaults to False.
 
         Returns:
-            IRanges: A new `IRanges` containing disjoint intervals.
+           A new `IRanges` containing disjoint intervals.
         """
         all_ints = []
         counter = 0
@@ -1048,20 +1098,24 @@ class IRanges:
     #### intra range methods ####
     #############################
 
-    def shift(self, shift: int, in_place: bool = False) -> "IRanges":
+    def shift(
+        self, shift: Union[int, List[int], np.ndarray], in_place: bool = False
+    ) -> "IRanges":
         """Shifts all the intervals by the amount specified by the ``shift`` argument.
 
         Args:
-            shift (int): Amount to shift by.
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+            shift:
+                Amount to shift by.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             shifted intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
-        if not isinstance(shift, int):
-            raise TypeError("'shift' must be an integer.")
+        shift = self._sanitize_vec_argument(shift, allow_none=False)
 
         output = self._define_output(in_place)
         output._start = output._start + shift
@@ -1070,9 +1124,9 @@ class IRanges:
     # TODO: not fully implemented
     def narrow(
         self,
-        start: Optional[int] = None,
-        width: Optional[int] = None,
-        end: Optional[int] = None,
+        start: Optional[Union[int, List[int], np.ndarray]] = None,
+        width: Optional[Union[int, List[int], np.ndarray]] = None,
+        end: Optional[Union[int, List[int], np.ndarray]] = None,
         in_place: bool = False,
     ) -> "IRanges":
         """Narrow genomic positions by provided ``start``, ``width`` and ``end`` parameters.
@@ -1080,18 +1134,26 @@ class IRanges:
         Important: These arguments are relative shift in positions for each range.
 
         Args:
-            start (int, optional): Relative start position. Defaults to None.
-            width (int, optional): Relative end position. Defaults to None.
-            end (int, optional): Relative width of the interval. Defaults to None.
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+            start:
+                Relative start position. Defaults to None.
+
+            width:
+                Relative end position. Defaults to None.
+
+            end:
+                Relative width of the interval. Defaults to None.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Raises:
-            ValueError: If `width` is provided, either `start` or `end` must be provided.
-            ValueError: Provide two of the three parameters - `start`, `end` and `width`
+            ValueError:
+                If `width` is provided, either `start` or `end` must be provided.
+                Provide two of the three parameters - `start`, `end` and `width`
                 but not all.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             narrow intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
@@ -1108,6 +1170,10 @@ class IRanges:
                     "If 'width' is provided, either 'start' or 'end' must be provided."
                 )
 
+        start = self._sanitize_vec_argument(start, allow_none=True)
+        end = self._sanitize_vec_argument(end, allow_none=True)
+        width = self._sanitize_vec_argument(width, allow_none=True)
+
         output = self._define_output(in_place)
 
         all_starts = output.start.copy()
@@ -1120,20 +1186,20 @@ class IRanges:
                 all_widths = all_widths - start + 1
             else:
                 all_starts = all_ends + start
-                all_widths = zeros(len(all_widths)) + start
+                all_widths = np.zeros(len(all_widths)) + start
 
             if width is not None:
-                all_widths = zeros(len(all_widths)) + width
+                all_widths = np.zeros(len(all_widths)) + width
             elif end is not None:
                 all_widths = all_widths + end + 1
         elif end is not None:
             if end < 0:
                 all_widths = all_widths + end - 1
             else:
-                all_widths = zeros(len(all_widths)) + end
+                all_widths = np.zeros(len(all_widths)) + end
 
             if width is not None:
-                all_widths = zeros(len(all_widths)) + width
+                all_widths = np.zeros(len(all_widths)) + width
             elif end is not None:
                 all_widths = all_widths + end + 1
 
@@ -1143,7 +1209,7 @@ class IRanges:
 
     def resize(
         self,
-        width: int,
+        width: Union[int, List[int], np.ndarray],
         fix: Literal["start", "end", "center"] = "start",
         in_place: bool = False,
     ) -> "IRanges":
@@ -1151,23 +1217,35 @@ class IRanges:
         anchor.
 
         Args:
-            width (int): Width to resize, must be non-negative!
-            fix (Literal["start", "end", "center"], optional): Fix positions by "start", "end", or "center".
+            width:
+                Width to resize, must be non-negative!
+
+            fix:
+                Fix positions by "start", "end", or "center".
                 Defaults to "start".
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Raises:
-            ValueError: If parameter ``fix`` is neither `start`, `end`, nor `center`.
-            ValueError: If ``width`` is negative.
+            ValueError:
+                If parameter ``fix`` is neither `start`, `end`, nor `center`.
+                If ``width`` is negative.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             resized intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
+        _width = self._sanitize_vec_argument(width, allow_none=False)
 
-        if width < 0:
+        if width is None:
+            raise ValueError("`width` cannot be None!")
+
+        if isinstance(width, int) and width < 0:
             raise ValueError("`width` cannot be negative!")
+        elif isinstance(width, np.ndarray) and any(x < 0 for x in width):
+            raise ValueError("`width` cannot contain negative values!")
 
         if fix not in ["start", "end", "center"]:
             raise ValueError(
@@ -1215,16 +1293,26 @@ class IRanges:
                 ---***xxxx
 
         Args:
-            width (int): Width to flank by. May be negative.
-            start (bool, optional): Whether to only flank starts. Defaults to True.
-            both (bool, optional): Whether to flank both starts and ends. Defaults to False.
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+            width:
+                Width to flank by. May be negative.
+
+            start:
+                Whether to only flank starts. Defaults to True.
+
+            both:
+                Whether to flank both starts and ends. Defaults to False.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             flanked intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
+
+        if width is None:
+            raise ValueError("`width` cannot be None!")
 
         output = self._define_output(in_place)
 
@@ -1235,7 +1323,7 @@ class IRanges:
             else:
                 output._start = output.end - width
 
-            output._width = zeros(len(output)) + (2 * width)
+            output._width = np.zeros(len(output)) + (2 * width)
         else:
             if start is True:
                 if width >= 0:
@@ -1246,7 +1334,7 @@ class IRanges:
                 else:
                     output._start = output.end + width
 
-            output._width = zeros(len(output)) + abs(width)
+            output._width = np.zeros(len(output)) + abs(width)
 
         return output
 
@@ -1263,14 +1351,19 @@ class IRanges:
         to (`start(x) + downstream - 1`).
 
         Args:
-            upstream (int, optional): Number of positions to extend in the 5' direction.
+            upstream:
+                Number of positions to extend in the 5' direction.
                 Defaults to 2000.
-            downstream (int, optional): Number of positions to extend in the 3' direction.
+
+            downstream:
+                Number of positions to extend in the 3' direction.
                 Defaults to 200.
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             promoter intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
@@ -1300,11 +1393,14 @@ class IRanges:
             [.....xxx..]
 
         Args:
-            bounds (IRanges): IRanges with the same length as the current object specifying the bounds.
-            in_place (bool): Whether to modify the object in place. Defaults to False.
+            bounds:
+                IRanges with the same length as the current object specifying the bounds.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
 
         Returns:
-            IRanges: If ``in_place = False``, a new ``IRanges`` is returned with the
+            If ``in_place = False``, a new ``IRanges`` is returned with the
             reflected intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
@@ -1321,33 +1417,39 @@ class IRanges:
 
     def restrict(
         self,
-        start: Optional[int] = None,
-        end: Optional[int] = None,
+        start: Optional[Union[int, List[int], np.ndarray]] = None,
+        end: Optional[Union[int, List[int], np.ndarray]] = None,
         keep_all_ranges: bool = False,
     ) -> "IRanges":
         """Restrict ranges to a given start and end positions.
 
         Args:
-            start (int, optional): Start position. Defaults to None.
-            end (int, optional): End position. Defaults to None.
-            keep_all_ranges (bool, optional): Whether to keep intervals that do not overlap with start and end.
+            start:
+                Start position. Defaults to None.
+
+            end:
+                End position. Defaults to None.
+
+            keep_all_ranges:
+                Whether to keep intervals that do not overlap with start and end.
                 Defaults to False.
 
         Returns:
-            IRanges: A new ``IRanges`` is returned with the
-            restricted intervals.
+            A new ``IRanges`` with the restricted intervals.
         """
         if start is None and end is None:
             warn("Both 'start' and 'end' are 'None'.")
             return self._define_output(False)
 
         if start is not None:
-            new_starts = clip(self.start, start, None)
+            _start = self._sanitize_vec_argument(start)
+            new_starts = np.clip(self.start, _start, None)
         else:
             new_starts = self.start
 
         if end is not None:
-            new_ends = clip(self.end, None, end + 1)
+            _end = self._sanitize_vec_argument(end)
+            new_ends = np.clip(self.end, None, _end + 1)
         else:
             new_ends = self.end
 
@@ -1355,9 +1457,9 @@ class IRanges:
         new_widths = new_ends - new_starts
 
         if keep_all_ranges is True:
-            new_widths = clip(new_widths, 0, None)
+            new_widths = np.clip(new_widths, 0, None)
         else:
-            _flt_idx = where(new_widths > -1)
+            _flt_idx = np.where(new_widths > -1)
             new_starts = new_starts[_flt_idx]
             new_widths = new_widths[_flt_idx]
 
@@ -1365,15 +1467,19 @@ class IRanges:
 
     def overlap_indices(
         self, start: Optional[int] = None, end: Optional[int] = None
-    ) -> List[int]:
+    ) -> np.ndarray:
         """Find overlaps with the start and end positions.
 
         Args:
-            start (int, optional): Start position. Defaults to None.
-            end (int, optional): End position. Defaults to None.
+            start:
+                Start position. Defaults to None.
+
+            end:
+                End position. Defaults to None.
 
         Returns:
-            List[int]: List of indices that overlap with the given range.
+            Numpy vector containing indices that overlap with
+            the given range.
         """
         counter = 0
         overlaps = []
@@ -1394,7 +1500,7 @@ class IRanges:
 
             counter += 1
 
-        return overlaps
+        return np.array(overlaps)
 
     ########################
     #### set operations ####
@@ -1405,17 +1511,19 @@ class IRanges:
         """Find union of intervals with `other`.
 
         Args:
-            other (GenomicRanges): `IRanges` object.
+            other:
+                An `IRanges` object.
 
         Raises:
-            TypeError: If ``other`` is not `IRanges`.
+            TypeError:
+                If ``other`` is not `IRanges`.
 
         Returns:
-            IRanges: A new `IRanges` object with all ranges.
+            A new ``IRanges`` object with all ranges.
         """
 
         if not isinstance(other, IRanges):
-            raise TypeError("'other' is not an IRanges object.")
+            raise TypeError("'other' is not an `IRanges` object.")
 
         all_starts = combine_sequences(self.start, other.start)
         all_widths = combine_sequences(self.width, other.width)
@@ -1428,17 +1536,19 @@ class IRanges:
         """Find set difference with `other`.
 
         Args:
-            other (GenomicRanges): `IRanges` object.
+            other:
+                An `IRanges` object.
 
         Raises:
-            TypeError: If ``other`` is not `IRanges`.
+            TypeError:
+                If ``other`` is not `IRanges`.
 
         Returns:
-            IRanges: A new `IRanges` object.
+            A new ``IRanges`` object.
         """
 
         if not isinstance(other, IRanges):
-            raise TypeError("'other' is not an IRanges object.")
+            raise TypeError("'other' is not an `IRanges` object.")
 
         all_starts = combine_sequences(self.start, other.start)
         all_ends = combine_sequences(self.end, other.end)
@@ -1455,17 +1565,19 @@ class IRanges:
         """Find intersecting intervals with `other`.
 
         Args:
-            other (GenomicRanges): `IRanges` object.
+            other:
+                An `IRanges` object.
 
         Raises:
-            TypeError: If ``other`` is not `IRanges`.
+            TypeError:
+                If ``other`` is not `IRanges`.
 
         Returns:
-            IRanges: A new `IRanges` object with all intersecting intervals.
+            A new ``IRanges`` object with all intersecting intervals.
         """
 
         if not isinstance(other, IRanges):
-            raise TypeError("'other' is not an IRanges object.")
+            raise TypeError("'other' is not an `IRanges` object.")
 
         all_starts = combine_sequences(self.start, other.start)
         all_ends = combine_sequences(self.end, other.end)
@@ -1489,7 +1601,7 @@ class IRanges:
 
         if not hasattr(self, "_ncls"):
             self._ncls = NCLS(
-                self.start, self.end, array([i for i in range(len(self))])
+                self.start, self.end, np.array([i for i in range(len(self))])
             )
 
     def _delete_ncls_index(self):
@@ -1557,9 +1669,11 @@ class IRanges:
         """Find overlaps with ``query`` `IRanges` object.
 
         Args:
-            query (IRanges): Query `IRanges`.
-            query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
-                must be one of
+            query:
+                Query `IRanges`.
+
+            query_type:
+                Overlap query type, must be one of
 
                 - "any": Any overlap is good
                 - "start": Overlap at the beginning of the intervals
@@ -1567,21 +1681,29 @@ class IRanges:
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
-            select (Literal["all", "first", "last", "arbitrary"]): Determine what hit to choose when
+
+            select:
+                Determine what hit to choose when
                 there are multiple hits for an interval in ``subject``.
-            max_gap (int, optional): Maximum gap allowed in the overlap.
+
+            max_gap:
+                Maximum gap allowed in the overlap.
                 Defaults to -1 (no gap allowed).
-            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.
+
+            min_overlap:
+                Minimum overlap with query. Defaults to 1.
 
         Raises:
-            TypeError: If ``query`` is not an `IRanges` object.
+            TypeError:
+                If ``query`` is not an ``IRanges`` object.
 
         Returns:
-            A List of indices that overlap with ``query``.
+            A List with the same length as the number of intervals ``query``.
+            Each element is a list of indices that overlap or, None if there are no overlaps.
         """
 
         if not isinstance(query, IRanges):
-            raise TypeError("`query` is not a `IRanges` object.")
+            raise TypeError("'query' is not a `IRanges` object.")
 
         if query_type not in ["any", "start", "end", "within"]:
             raise ValueError(
@@ -1606,13 +1728,15 @@ class IRanges:
         query_type: Literal["any", "start", "end", "within"] = "any",
         max_gap: int = -1,
         min_overlap: int = 1,
-    ) -> List[int]:
+    ) -> np.ndarray:
         """Count number of overlaps with ``query`` `IRanges` object.
 
         Args:
-            subject (IRanges): Query `IRanges`.
-            query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
-                must be one of
+            query:
+                Query `IRanges`.
+
+            query_type:
+                Overlap query type, must be one of
 
                 - "any": Any overlap is good
                 - "start": Overlap at the beginning of the intervals
@@ -1620,20 +1744,25 @@ class IRanges:
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
-            max_gap (int, optional): Maximum gap allowed in the overlap.
+
+            max_gap:
+                Maximum gap allowed in the overlap.
                 Defaults to -1 (no gap allowed).
-            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.
+
+            min_overlap:
+                Minimum overlap with query. Defaults to 1.
 
         Raises:
-            TypeError: If ``query`` is not an `IRanges` object.
+            TypeError:
+                If ``query`` is not an ``IRanges`` object.
 
         Returns:
-            A List with number of overlaps.
+            Numpy vector with the number of overlaps for each range in `query`.
         """
         _overlaps = self.find_overlaps(
             query, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
         )
-        return [len(x) for x in _overlaps]
+        return np.array([len(x) for x in _overlaps])
 
     def subset_by_overlaps(
         self,
@@ -1642,12 +1771,14 @@ class IRanges:
         max_gap: int = -1,
         min_overlap: int = 1,
     ) -> "IRanges":
-        """Subset by overlap intervals in ``query`` `IRanges` object.
+        """Subset by overlapping intervals in ``query``.
 
         Args:
-            subject (IRanges): Query `IRanges`.
-            query_type (Literal["any", "start", "end", "within"], optional): Overlap query type,
-                must be one of
+            query:
+                Query ``IRanges`` object.
+
+            query_type:
+                Overlap query type, must be one of
 
                 - "any": Any overlap is good
                 - "start": Overlap at the beginning of the intervals
@@ -1655,15 +1786,20 @@ class IRanges:
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
-            max_gap (int, optional): Maximum gap allowed in the overlap.
+
+            max_gap:
+                Maximum gap allowed in the overlap.
                 Defaults to -1 (no gap allowed).
-            min_overlap (int, optional): Minimum overlap with query. Defaults to 1.
+
+            min_overlap:
+                Minimum overlap with query. Defaults to 1.
 
         Raises:
-            TypeError: If ``query`` is not of type `IRanges`.
+            TypeError:
+                If ``query`` is not of type ``IRanges``.
 
         Returns:
-            IRanges: A new `IRanges` object containing only subsets.
+            A new ``IRanges`` object containing ranges that overlap with query.
         """
         _overlaps = self.find_overlaps(
             query=query, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
@@ -1737,15 +1873,21 @@ class IRanges:
         """Search nearest positions both upstream and downstream that overlap with each range in ``query``.
 
         Args:
-            query (IRanges): Query `IRanges` to find nearest positions.
-            select (Literal["all", "arbitrary"]): Determine what hit to
-                choose when there are multiple hits for an interval in ``subject``.
+            query:
+                Query `IRanges` to find nearest positions.
+
+            select:
+                Determine what hit to choose when there are
+                multiple hits for an interval in ``query``.
 
         Raises:
-            TypeError: If ``query`` is not of type `IRanges`.
+            TypeError:
+                If ``query`` is not of type ``IRanges``.
 
         Returns:
-            List[List[int]]: List of indices for each interval in query.
+            A List with the same lenth as the number of intervals in query.
+            Each element may contain indices nearest to the interval or
+            None if there are no nearest intervals.
         """
 
         if not isinstance(query, IRanges):
@@ -1766,15 +1908,21 @@ class IRanges:
         """Search nearest positions only downstream that overlap with each range in ``query``.
 
         Args:
-            query (IRanges): Query `IRanges` to find nearest positions.
-            select (Literal["all", "first"]) Determine what hit to
-                choose when there are multiple hits for an interval in ``subject``.
+            query:
+                Query `IRanges` to find nearest positions.
+
+            select:
+                Determine what hit to choose when there are
+                multiple hits for an interval in ``query``.
 
         Raises:
-            TypeError: If ``query`` is not of type `IRanges`.
+            TypeError:
+                If ``query`` is not of type ``IRanges``.
 
         Returns:
-            List[List[int]]: List of indices for each interval in query.
+            A List with the same lenth as the number of intervals in query.
+            Each element may contain indices nearest to the interval or
+            None if there are no nearest intervals.
         """
 
         if not isinstance(query, IRanges):
@@ -1793,15 +1941,21 @@ class IRanges:
         """Search nearest positions only downstream that overlap with each range in ``query``.
 
         Args:
-            query (IRanges): Query `IRanges` to find nearest positions.
-            select (Literal["all", "last"]) Determine what hit to
-                choose when there are multiple hits for an interval in ``subject``.
+            query:
+                Query `IRanges` to find nearest positions.
+
+            select:
+                Determine what hit to choose when there are
+                multiple hits for an interval in ``query``.
 
         Raises:
-            TypeError: If ``query`` is not of type `IRanges`.
+            TypeError:
+                If ``query`` is not of type ``IRanges``.
 
         Returns:
-            List[List[int]]: List of indices for each interval in query.
+            A List with the same lenth as the number of intervals in query.
+            Each element may contain indices nearest to the interval or
+            None if there are no nearest intervals.
         """
 
         if not isinstance(query, IRanges):
@@ -1814,14 +1968,15 @@ class IRanges:
         self._delete_ncls_index()
         return hits
 
-    def distance(self, query: "IRanges") -> List[Optional[int]]:
+    def distance(self, query: "IRanges") -> np.ndarray:
         """Calculate the pair-wise distance with intervals in query.
 
         Args:
-            query (IRanges): Query `IRanges`.
+            query: 
+                Query `IRanges`.
 
         Returns:
-            List[int]: A list containing distances.
+            Numpy vector containing distances for each interval in query.
         """
         if not isinstance(query, IRanges):
             raise TypeError("`query` is not a `IRanges` object.")
@@ -1844,7 +1999,7 @@ class IRanges:
 
             all_distances.append(distance)
 
-        return all_distances
+        return np.array(all_distances)
 
     ########################
     #### pandas interop ####

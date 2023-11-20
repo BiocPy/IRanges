@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple, Union
 
-from numpy import ndarray, zeros
+from numpy import ndarray, zeros, int32, float32
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -36,7 +36,11 @@ def create_np_interval_vector(
     else:
         max_end += 1
 
-    cov = zeros(max_end)
+    _type = int32
+    if isinstance(value, float):
+        _type = float32
+
+    cov = zeros(max_end, dtype=_type)
 
     revmap = None
     if with_reverse_map:
