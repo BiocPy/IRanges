@@ -1230,7 +1230,7 @@ class IRanges:
 
             fix:
                 Fix positions by "start", "end", or "center".
-                
+
                 Alternatively, `fix` may be a list with the same size
                 as this `IRanges` object, denoting what to use as an
                 anchor for each interval.
@@ -1286,7 +1286,9 @@ class IRanges:
 
         output = self._define_output(in_place)
         output._start = np.array(new_starts)
-        output._width = np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
+        output._width = (
+            np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
+        )
         return output
 
     def flank(
