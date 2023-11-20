@@ -1972,7 +1972,7 @@ class IRanges:
         """Calculate the pair-wise distance with intervals in query.
 
         Args:
-            query: 
+            query:
                 Query `IRanges`.
 
         Returns:
