@@ -738,6 +738,12 @@ class IRanges:
         elif ut.is_list_of_type(vec, int, ignore_none=allow_none):
             vec = np.array(vec)
 
+        if len(vec) < _size:
+            raise ValueError("Provided argument must match the number of intervals.")
+        elif len(vec) > _size:
+            warn("Truncating argument to the number of intervals.")
+            vec = vec[:_size]
+
         return vec
 
     def clip_intervals(
@@ -1210,7 +1216,9 @@ class IRanges:
     def resize(
         self,
         width: Union[int, List[int], np.ndarray],
-        fix: Literal["start", "end", "center"] = "start",
+        fix: Union[
+            Literal["start", "end", "center"], List[Literal["start", "end", "center"]]
+        ] = "start",
         in_place: bool = False,
     ) -> "IRanges":
         """Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an
@@ -1222,6 +1230,11 @@ class IRanges:
 
             fix:
                 Fix positions by "start", "end", or "center".
+                
+                Alternatively, `fix` may be a list with the same size
+                as this `IRanges` object, denoting what to use as an
+                anchor for each interval.
+
                 Defaults to "start".
 
             in_place:
@@ -1237,30 +1250,43 @@ class IRanges:
             resized intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
-        _width = self._sanitize_vec_argument(width, allow_none=False)
+        _FIX_VALS = ["start", "end", "center"]
+        _awidth = self._sanitize_vec_argument(width, allow_none=False)
 
         if width is None:
             raise ValueError("`width` cannot be None!")
 
-        if isinstance(width, int) and width < 0:
+        if isinstance(_awidth, int) and _awidth < 0:
             raise ValueError("`width` cannot be negative!")
-        elif isinstance(width, np.ndarray) and any(x < 0 for x in width):
+        elif isinstance(_awidth, np.ndarray) and any(x < 0 for x in _awidth):
             raise ValueError("`width` cannot contain negative values!")
 
-        if fix not in ["start", "end", "center"]:
-            raise ValueError(
-                f"`fix` must be either 'start', 'end' or 'center', provided {fix}"
-            )
+        if isinstance(fix, str) and fix not in _FIX_VALS:
+            raise ValueError("`fix` must be either 'start', 'end' or 'center'.")
+        elif ut.is_list_of_type(fix, str) and not all(x in _FIX_VALS for x in fix):
+            raise ValueError("`fix` must be either 'start', 'end' or 'center'.")
+
+        new_starts = []
+
+        counter = 0
+        for name, val in self:
+            _start = val.start[0]
+            _width = val.width[0]
+            _fix = fix if isinstance(fix, str) else fix[counter]
+            _twidth = _awidth if isinstance(_awidth, int) else _awidth[counter]
+
+            if _fix != "start":
+                if _fix == "end":
+                    _start += _width - _twidth
+                elif fix == "center":
+                    _start += _width - (_twidth / 2)
+
+            new_starts.append(_start)
+            counter += 1
 
         output = self._define_output(in_place)
-        if fix != "start":
-            if fix == "end":
-                output._start = output.start + output.width - width
-
-            if fix == "center":
-                output._start = output.start + output.width - (width / 2)
-
-        output._width = width
+        output._start = np.array(new_starts)
+        output._width = np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
         return output
 
     def flank(
