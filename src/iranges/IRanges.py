@@ -1487,14 +1487,12 @@ class IRanges:
         new_starts = new_starts
         new_widths = new_ends - new_starts
 
-        if keep_all_ranges is True:
-            new_widths = np.clip(new_widths, 0, None)
-        else:
+        if keep_all_ranges is False:
             _flt_idx = np.where(new_widths > -1)
             new_starts = new_starts[_flt_idx]
             new_widths = new_widths[_flt_idx]
 
-        return IRanges(new_starts, new_widths)
+        return IRanges(new_starts, new_widths, validate=False)
 
     def overlap_indices(
         self, start: Optional[int] = None, end: Optional[int] = None
