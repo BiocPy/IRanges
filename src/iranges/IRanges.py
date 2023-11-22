@@ -8,7 +8,11 @@ import numpy as np
 from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
-from .interval import calc_gap_and_overlap, create_np_interval_vector
+from .interval import (
+    calc_gap_and_overlap,
+    create_np_interval_vector,
+    solve_interval_args,
+)
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
 __copyright__ = "LTLA, jkanche"
@@ -726,7 +730,7 @@ class IRanges:
 
     def _sanitize_vec_argument(
         self,
-        vec: Union[int, List[int], np.ndarray],
+        vec: Optional[Union[int, List[int], np.ndarray]],
         allow_none: bool = False,
     ):
         _size = len(self)
@@ -750,6 +754,7 @@ class IRanges:
         self,
         shift: Union[int, List[int], np.ndarray] = 0,
         width: Optional[Union[int, List[int], np.ndarray]] = None,
+        adjust_width_by_shift: bool = False,
     ) -> "IRanges":
         """Clip intervals. Starts are always clipped to positive interval ranges (1, Inf).
 
@@ -761,6 +766,10 @@ class IRanges:
 
             width:
                 Clip width of each interval. Defaults to None.
+
+            adjust_width_by_shift:
+                Whether to adjust the width based on `shift`.
+                Defaults to False.
 
         Returns:
             A ``IRanges`` object, with the clipped intervals.
@@ -785,6 +794,8 @@ class IRanges:
 
             if _pshift > 0:
                 _start += _pshift
+                if adjust_width_by_shift is True:
+                    _width -= _pshift
 
             if _pwidth is not None:
                 if _start + _width > _pwidth:
@@ -807,6 +818,8 @@ class IRanges:
         if all(x is None for x in _clipped_names):
             _clipped_names = None
 
+        print("in clipping")
+        print(_clipped_starts, _clipped_widths)
         return IRanges(_clipped_starts, _clipped_widths, names=_clipped_names)
 
     def coverage(
@@ -1127,7 +1140,6 @@ class IRanges:
         output._start = output._start + shift
         return output
 
-    # TODO: not fully implemented
     def narrow(
         self,
         start: Optional[Union[int, List[int], np.ndarray]] = None,
@@ -1144,10 +1156,10 @@ class IRanges:
                 Relative start position. Defaults to None.
 
             width:
-                Relative end position. Defaults to None.
+                Width of each interval position. Defaults to None.
 
             end:
-                Relative width of the interval. Defaults to None.
+                Relative end position. Defaults to None.
 
             in_place:
                 Whether to modify the object in place. Defaults to False.
@@ -1163,54 +1175,94 @@ class IRanges:
             narrow intervals. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
+        start = self._sanitize_vec_argument(start, allow_none=True)
+        end = self._sanitize_vec_argument(end, allow_none=True)
+        width = self._sanitize_vec_argument(width, allow_none=True)
 
-        if start is not None and end is not None and width is not None:
+        if (all(x is not None for x in (start, end, width))) or (
+            all(x is None for x in (start, end, width))
+        ):
             raise ValueError(
-                "Only provide two of the three parameters - 'start', "
-                "'end' and 'width' but not all!"
+                "Two out of three ('start', 'end' or 'width') arguments must be provided."
             )
 
         if width is not None:
+            if (isinstance(width, int) and width < 0) or (
+                isinstance(width, np.ndarray) and any(x < 0 for x in width)
+            ):
+                raise ValueError("'width' cannot be negative.")
+
             if start is None and end is None:
                 raise ValueError(
                     "If 'width' is provided, either 'start' or 'end' must be provided."
                 )
 
-        start = self._sanitize_vec_argument(start, allow_none=True)
-        end = self._sanitize_vec_argument(end, allow_none=True)
-        width = self._sanitize_vec_argument(width, allow_none=True)
-
+        # solved_ir = solve_interval_args(start=start, end=end, width=width)
+        # print("solved::::", solved_ir)
         output = self._define_output(in_place)
 
-        all_starts = output.start.copy()
-        all_widths = output.width.copy()
-        all_ends = output.end.copy()
+        counter = 0
+        new_starts = []
+        new_widths = []
+        for _, value in output:
+            _start = value.start[0]
+            _width = value.width[0]
+            _oend = value.end[0]
 
-        if start is not None:
-            if start > 0:
-                all_starts = all_starts + start - 1
-                all_widths = all_widths - start + 1
-            else:
-                all_starts = all_ends + start
-                all_widths = np.zeros(len(all_widths)) + start
+            _pstart = (
+                start if start is None or isinstance(start, int) else start[counter]
+            )
+            _pwidth = (
+                width if width is None or isinstance(width, int) else width[counter]
+            )
+            _pend = end if end is None or isinstance(end, int) else end[counter]
 
-            if width is not None:
-                all_widths = np.zeros(len(all_widths)) + width
-            elif end is not None:
-                all_widths = all_widths + end + 1
-        elif end is not None:
-            if end < 0:
-                all_widths = all_widths + end - 1
-            else:
-                all_widths = np.zeros(len(all_widths)) + end
+            print("_pstart, width, end:::", _pstart, _pwidth, _pend)
+            print("start, width:::", _start, _width, _oend)
+            if _pstart is not None:
+                if _pstart > 0:
+                    _start += _pstart - 1
+                    _width -= _pstart - 1
+                else:
+                    _start = _oend + _pstart
 
-            if width is not None:
-                all_widths = np.zeros(len(all_widths)) + width
-            elif end is not None:
-                all_widths = all_widths + end + 1
+                print("after start start, width:::", _start, _width)
 
-        output._start = all_starts
-        output._width = all_widths
+                if _pwidth is not None:
+                    _width = _pwidth
+                elif _pend is not None:
+                    if _pend < 0:
+                        _width = _width + _pend + 1
+                    else:
+                        _width = _pend - _start
+            elif _pwidth is not None:
+                _width = _pwidth
+                if _pend is not None:
+                    if _pend > 0:
+                        _start = _start - (_pend - _pwidth) + 2
+                    else:
+                        _start = _oend + _pend - 1
+            elif _pend is not None:
+                if _pend > 0:
+                    _width = _pend
+                else:
+                    _width = _width + _pend + 1
+            print("after start start, width:::", _start, _width)
+
+            if _width < 0:
+                raise ValueError(
+                    f"Provided 'start' or 'end' arguments lead to negative width for interval: {counter}."
+                )
+
+            print("finally start, width:::", _start, _width)
+
+            new_starts.append(_start)
+            new_widths.append(_width)
+
+            counter += 1
+
+        output._start = np.array(new_starts)
+        output._width = np.array(new_widths)
         return output
 
     def resize(

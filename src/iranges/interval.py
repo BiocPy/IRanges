@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple, Union
 
-from numpy import ndarray, zeros, int32, float32
+import numpy as np
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -13,7 +13,7 @@ def create_np_interval_vector(
     force_size: Optional[int] = None,
     dont_sum: bool = False,
     value: Union[int, float] = 1,
-) -> Tuple[ndarray, Optional[List]]:
+) -> Tuple[np.ndarray, Optional[List]]:
     """Represent intervals and calculate coverage.
 
     Args:
@@ -28,7 +28,7 @@ def create_np_interval_vector(
         coverage from the intervals and optionally the index map.
     """
     if len(intervals) == 0:
-        return zeros(0), None
+        return np.zeros(0), None
 
     max_end = force_size
     if max_end is None:
@@ -36,11 +36,11 @@ def create_np_interval_vector(
     else:
         max_end += 1
 
-    _type = int32
+    _type = np.int32
     if isinstance(value, float):
-        _type = float32
+        _type = np.float32
 
-    cov = zeros(max_end, dtype=_type)
+    cov = np.zeros(max_end, dtype=_type)
 
     revmap = None
     if with_reverse_map:
@@ -89,3 +89,81 @@ def calc_gap_and_overlap(
             _gap = first[0] - second[1]
 
     return (_gap, _overlap)
+
+
+def solve_interval_args(
+    start: Optional[Union[int, List[int], np.ndarray]] = None,
+    end: Optional[Union[int, List[int], np.ndarray]] = None,
+    width: Optional[Union[int, List[int], np.ndarray]] = None,
+) -> "IRanges":
+    """Solve for interval arguments.
+
+    Args:
+        start:
+            Start position. Defaults to None.
+
+        end:
+            End position. Defaults to None.
+
+        width:
+            Width. Defaults to None.
+
+    Returns:
+        An ``IRanges`` object containing the solved interval.
+    """
+
+    print("incoming", start, width, end)
+    _start = None
+    _width = None
+
+    if (all(x is not None for x in (start, end, width))) or (
+        all(x is None for x in (start, end, width))
+    ):
+        raise ValueError(
+            "Two out of three ('start', 'end' or 'width') arguments must be provided."
+        )
+
+    print("WIDTHHHHH::", width)
+    if width is not None:
+        if (isinstance(width, int) and width < 0) or (
+            isinstance(width, np.ndarray) and any(x < 0 for x in width)
+        ):
+            raise ValueError("'width' cannot be negative.")
+
+        if start is None and end is None:
+            raise ValueError(
+                "If 'width' is provided, either 'start' or 'end' must be provided."
+            )
+
+    if start is not None:
+        _start = start
+
+        if width is not None:
+            _width = width
+        elif end is not None:
+            _width = end - start
+    elif end is not None:
+        if start is not None:
+            _start = start
+            _width = end - start
+        elif width is not None:
+            _width = width
+            _start = end - width
+    elif width is not None:
+        _width = width
+
+        if start is not None:
+            _start = start
+        elif end is not None:
+            _start = end - width
+
+    print("in solving", _start, _width)
+
+    # if (isinstance(_width, int) and _width < 0) or (
+    #     isinstance(_width, np.ndarray) and any(x < 0 for x in _width)
+    # ):
+    #     raise ValueError(
+    #         "Negative values not allowed for 'width'. Failed solving for provided arguments."
+    #     )
+
+    return _start, _width
