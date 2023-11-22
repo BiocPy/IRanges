@@ -817,8 +817,6 @@ class IRanges:
         if all(x is None for x in _clipped_names):
             _clipped_names = None
 
-        print("in clipping")
-        print(_clipped_starts, _clipped_widths)
         return IRanges(_clipped_starts, _clipped_widths, names=_clipped_names)
 
     def coverage(
@@ -1196,8 +1194,6 @@ class IRanges:
                     "If 'width' is provided, either 'start' or 'end' must be provided."
                 )
 
-        # solved_ir = solve_interval_args(start=start, end=end, width=width)
-        # print("solved::::", solved_ir)
         output = self._define_output(in_place)
 
         counter = 0
@@ -1216,8 +1212,11 @@ class IRanges:
             )
             _pend = end if end is None or isinstance(end, int) else end[counter]
 
-            print("_pstart, width, end:::", _pstart, _pwidth, _pend)
-            print("start, width:::", _start, _width, _oend)
+            if _pend is not None and _pend > 0 and _pend > _width:
+                raise ValueError(
+                    f"Provided 'end' is greater than width of the interval for: {counter}"
+                )
+
             if _pstart is not None:
                 if _pstart > 0:
                     _start += _pstart - 1
@@ -1225,15 +1224,13 @@ class IRanges:
                 else:
                     _start = _oend + _pstart
 
-                print("after start start, width:::", _start, _width)
-
                 if _pwidth is not None:
                     _width = _pwidth
                 elif _pend is not None:
                     if _pend < 0:
                         _width = _width + _pend + 1
                     else:
-                        _width = _pend - _start
+                        _width = _pend - _pstart + 1
             elif _pwidth is not None:
                 _width = _pwidth
                 if _pend is not None:
@@ -1246,14 +1243,11 @@ class IRanges:
                     _width = _pend
                 else:
                     _width = _width + _pend + 1
-            print("after start start, width:::", _start, _width)
 
             if _width < 0:
                 raise ValueError(
                     f"Provided 'start' or 'end' arguments lead to negative width for interval: {counter}."
                 )
-
-            print("finally start, width:::", _start, _width)
 
             new_starts.append(_start)
             new_widths.append(_width)
@@ -1334,8 +1328,6 @@ class IRanges:
 
             new_starts.append(int(_start))
             counter += 1
-
-        print("in iranges", new_starts)
 
         output = self._define_output(in_place)
         output._start = np.array(new_starts)
