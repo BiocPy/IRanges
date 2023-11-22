@@ -51,7 +51,6 @@ def create_np_interval_vector(
         _start = row.start[0]
         _end = row.end[0]
 
-        print(_start, _end)
         if dont_sum:
             cov[_start:_end] = value
         else:
