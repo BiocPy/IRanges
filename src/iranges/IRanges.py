@@ -11,7 +11,6 @@ from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 from .interval import (
     calc_gap_and_overlap,
     create_np_interval_vector,
-    solve_interval_args,
 )
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
