@@ -1621,10 +1621,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an `IRanges` object.")
 
-        all_starts = combine_sequences(self.start, other.start)
-        all_ends = combine_sequences(self.end, other.end)
-        start = min(all_starts)
-        end = max(all_ends)
+        start = min(min(self.start), min(other.start))
+        end = max(max(self.end), max(other.end))
 
         x_gaps = self.gaps(start=start, end=end)
         x_gaps_u = x_gaps.union(other)
@@ -1650,10 +1648,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an `IRanges` object.")
 
-        all_starts = combine_sequences(self.start, other.start)
-        all_ends = combine_sequences(self.end, other.end)
-        start = min(all_starts)
-        end = max(all_ends)
+        start = min(min(self.start), min(other.start))
+        end = max(max(self.end), max(other.end))
 
         _gaps = other.gaps(start=start, end=end)
         _inter = self.setdiff(_gaps)
