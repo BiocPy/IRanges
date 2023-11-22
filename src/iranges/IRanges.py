@@ -950,7 +950,7 @@ class IRanges:
         result = IRanges(result_starts, result_widths)
 
         if with_reverse_map is True:
-            result.set_mcols(BiocFrame({"revmap": result_revmaps}), in_place=True)
+            result._mcols.set_column("revmap", result_revmaps, in_place=True)
 
         return result
 
@@ -1106,7 +1106,7 @@ class IRanges:
         result = IRanges(result_starts, result_widths)
 
         if with_reverse_map is True:
-            result.set_mcols(BiocFrame({"revmap": result_revmaps}), in_place=True)
+            result._mcols.set_column("revmap", result_revmaps, in_place=True)
 
         return result
 
