@@ -190,3 +190,10 @@ def test_IRanges_combine():
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
     comb = combine_sequences(x, y)
     assert comb.get_names() == ["", "", "", "", "A", "B", "C", "D"]
+
+
+def test_empty():
+    r = IRanges.empty()
+
+    assert r is not None
+    assert isinstance(r, IRanges)

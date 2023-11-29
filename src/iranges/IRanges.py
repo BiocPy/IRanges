@@ -2132,6 +2132,15 @@ class IRanges:
 
         return cls(start=start, width=width, names=names, mcols=mcols)
 
+    @classmethod
+    def empty(cls):
+        """Create an zero-length ``IRanges`` object.
+
+        Returns:
+            same type as caller, in this case a ``IRanges``.
+        """
+        return cls([], [])
+
 
 @combine_sequences.register
 def _combine_IRanges(*x: IRanges) -> IRanges:
