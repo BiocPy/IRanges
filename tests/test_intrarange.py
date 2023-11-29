@@ -34,9 +34,37 @@ def test_narrow():
     assert all(np.equal(res.start, [16, 21, 29, 34]))
     assert all(np.equal(res.width, [2, 2, 2, 2]))
 
+    with pytest.raises(Exception):
+        res = x.narrow(start=4, width=-2)
+
     res = x.narrow(start=4, end=-2)
     assert all(np.equal(res.start, [4, 23, 28, 36]))
     assert all(np.equal(res.width, [15, 1, 4, 1]))
+
+    with pytest.raises(Exception):
+        res = x.narrow(start=4, end=2)
+
+    with pytest.raises(Exception):
+        res = x.narrow(start=4, end=20)
+
+    with pytest.raises(Exception):
+        res = x.narrow(start=4, end=10)
+
+    res = x.narrow(width=2, end=3)
+    assert all(np.equal(res.start, [2, 21, 26, 34]))
+    assert all(np.equal(res.width, [2] * 4))
+
+    res = x.narrow(width=2, end=-3)
+    assert all(np.equal(res.start, [16, 21, 29, 34]))
+    assert all(np.equal(res.width, [2] * 4))
+
+    res = x.narrow(end=-3)
+    assert all(np.equal(res.start, [1, 20, 25, 33]))
+    assert all(np.equal(res.width, [17, 3, 6, 3]))
+
+    res = x.narrow(end=3)
+    assert all(np.equal(res.start, [1, 20, 25, 33]))
+    assert all(np.equal(res.width, [3] * 4))
 
 
 def test_resize():
@@ -50,6 +78,10 @@ def test_resize():
 
     res = x.resize(2, fix="end")
     assert all(np.equal(res.start, [18, 23, 31, 36]))
+    assert all(np.equal(res.width, [2] * 4))
+
+    res = x.resize(2, fix="center")
+    assert all(np.equal(res.start, [9, 21, 28, 34]))
     assert all(np.equal(res.width, [2] * 4))
 
 

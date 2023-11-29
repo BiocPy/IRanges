@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple, Union
 
-from numpy import ndarray, zeros
+import numpy as np
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -13,7 +13,7 @@ def create_np_interval_vector(
     force_size: Optional[int] = None,
     dont_sum: bool = False,
     value: Union[int, float] = 1,
-) -> Tuple[ndarray, Optional[List]]:
+) -> Tuple[np.ndarray, Optional[List]]:
     """Represent intervals and calculate coverage.
 
     Args:
@@ -28,7 +28,7 @@ def create_np_interval_vector(
         coverage from the intervals and optionally the index map.
     """
     if len(intervals) == 0:
-        return zeros(0), None
+        return np.zeros(0), None
 
     max_end = force_size
     if max_end is None:
@@ -36,7 +36,11 @@ def create_np_interval_vector(
     else:
         max_end += 1
 
-    cov = zeros(max_end)
+    _type = np.int32
+    if isinstance(value, float):
+        _type = np.float32
+
+    cov = np.zeros(max_end, dtype=_type)
 
     revmap = None
     if with_reverse_map:
@@ -47,7 +51,6 @@ def create_np_interval_vector(
         _start = row.start[0]
         _end = row.end[0]
 
-        print(_start, _end)
         if dont_sum:
             cov[_start:_end] = value
         else:
