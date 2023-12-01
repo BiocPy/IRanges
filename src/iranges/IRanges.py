@@ -2082,7 +2082,7 @@ class IRanges:
 
         _starts = self._start
         _widths = self._width
-        _ends = self.get_end
+        _ends = self.get_end()
 
         output = pd.DataFrame({"starts": _starts, "widths": _widths, "ends": _ends})
 
@@ -2100,7 +2100,7 @@ class IRanges:
 
         Args:
             input:
-                Input data. must contain columns 'start' and 'width'.
+                Input data must contain columns 'start' and 'width'.
 
         Returns:
             A ``IRanges`` object.
