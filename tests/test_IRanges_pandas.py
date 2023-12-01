@@ -23,4 +23,4 @@ def test_pandas_export():
     y = x.to_pandas()
     assert y is not None
     assert isinstance(y, pd.DataFrame)
-    assert (y.columns == ["starts", "ends", "widths"]).all()
+    assert y.columns.tolist() == ["starts", "ends", "widths"]
