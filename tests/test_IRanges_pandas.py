@@ -16,6 +16,7 @@ def test_pandas():
     assert (x.get_width() == np.array(df["width"])).all()
     assert isinstance(x.mcols, BiocFrame)
 
+
 def test_pandas_export():
     x = IRanges([1, 2, 3, 4], [4, 5, 6, 7])
 
