@@ -15,3 +15,11 @@ def test_pandas():
     assert (x.get_start() == np.array(df["start"])).all()
     assert (x.get_width() == np.array(df["width"])).all()
     assert isinstance(x.mcols, BiocFrame)
+
+def test_pandas_export():
+    x = IRanges([1, 2, 3, 4], [4, 5, 6, 7])
+
+    y = x.to_pandas()
+    assert y is not None
+    assert isinstance(y, pd.DataFrame)
+    assert y.columns == ["starts", "ends", "widths"]
