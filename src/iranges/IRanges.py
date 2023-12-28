@@ -64,8 +64,8 @@ class IRanges:
 
     def __init__(
         self,
-        start: Sequence[int],
-        width: Sequence[int],
+        start: Sequence[int] = [],
+        width: Sequence[int] = [],
         names: Optional[Sequence[str]] = None,
         mcols: Optional[BiocFrame] = None,
         metadata: Optional[dict] = None,
@@ -512,8 +512,8 @@ class IRanges:
         """
         idx, _ = ut.normalize_subscript(subset, len(self), self._names)
         return type(self)(
-            start=self._start[idx],
-            width=self._width[idx],
+            start=self._start[idx] if len(self._start) > 0 else [],
+            width=self._width[idx] if len(self._width) > 0 else [],
             names=ut.subset(self._names, idx) if self._names is not None else None,
             mcols=self._mcols[list(idx), :],
             metadata=self._metadata,
