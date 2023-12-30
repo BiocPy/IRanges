@@ -197,3 +197,7 @@ def test_empty():
 
     assert r is not None
     assert isinstance(r, IRanges)
+
+    subset = r[1:10]
+    assert subset is not None
+    assert isinstance(subset, IRanges)
