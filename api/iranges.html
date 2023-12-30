@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="iranges" href="modules.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>iranges package - IRanges 0.2.1 documentation</title>
+        <title>iranges package - IRanges 0.2.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">IRanges 0.2.1 documentation</div></a>
+      <a href="../index.html"><div class="brand">IRanges 0.2.2 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.2.1 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.2.2 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -207,7 +207,7 @@
 <span id="iranges-iranges-module"></span><h2>iranges.IRanges module<a class="headerlink" href="#module-iranges.IRanges" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iranges.IRanges.</span></span><span class="sig-name descname"><span class="pre">IRanges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iranges.IRanges.</span></span><span class="sig-name descname"><span class="pre">IRanges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A collection of integer ranges, equivalent to the <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> class from the
 <a class="reference external" href="https://bioconductor.org/packages/IRanges">Bioconductor package</a> of the same name.</p>
@@ -578,7 +578,7 @@ None if there are no nearest intervals.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.from_pandas">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.from_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.from_pandas" title="Link to this definition">#</a></dt>
-<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> from a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
+<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> from a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>input</strong> (<span class="sphinx_autodoc_typehints-type">pandas.DataFrame</span>) – Input data must contain columns ‘start’ and ‘width’.</p>
@@ -1279,13 +1279,13 @@ Defaults to -1 (no gap allowed).</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.to_pandas">
 <span class="sig-name descname"><span class="pre">to_pandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.to_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.to_pandas" title="Link to this definition">#</a></dt>
-<dd><p>Convert this <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object into a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
+<dd><p>Convert this <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object into a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type">pandas.DataFrame</span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
+<dd class="field-even"><p>A <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1527,7 +1527,7 @@ coverage from the intervals and optionally the index map.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=37f418d5"></script>
+</div><script src="../_static/documentation_options.js?v=000c92bf"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
