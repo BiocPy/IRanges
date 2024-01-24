@@ -1836,7 +1836,11 @@ class IRanges:
             Numpy vector with the number of overlaps for each range in `query`.
         """
         _overlaps = self.find_overlaps(
-            query, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
+            query,
+            query_type=query_type,
+            max_gap=max_gap,
+            min_overlap=min_overlap,
+            delete_index=delete_index,
         )
         return np.array([len(x) for x in _overlaps])
 
@@ -1882,7 +1886,11 @@ class IRanges:
             A new ``IRanges`` object containing ranges that overlap with query.
         """
         _overlaps = self.find_overlaps(
-            query=query, query_type=query_type, max_gap=max_gap, min_overlap=min_overlap
+            query=query,
+            query_type=query_type,
+            max_gap=max_gap,
+            min_overlap=min_overlap,
+            delete_index=delete_index,
         )
         _all_indices = list(set(chain(*_overlaps)))
         return self[_all_indices]
