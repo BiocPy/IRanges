@@ -1687,38 +1687,39 @@ class IRanges:
     ):
         self._build_ncls_index()
 
-        all_overlaps = []
-        for _, val in query:
-            _start = val.start[0]
-            _end = val.end[0]
+        new_starts = query._start - gap_start - 1
+        new_ends = query.end + gap_end + 1
+        _res = self._ncls.all_overlaps_both(
+            new_starts, new_ends, np.array(range(len(query)))
+        )
+        all_overlaps = [[] for _ in range(len(query))]
 
-            _idx = []
-            new_start = _start - gap_start - 1
-            new_end = _end + gap_end + 1
-            _iter = self._ncls.find_overlap(new_start, new_end)
+        for i in range(len(_res[0])):
+            _q_idx = int(_res[0][i])
+            _s_idx = int(_res[1][i])
 
-            for i in _iter:
-                _gap, _overlap = calc_gap_and_overlap((_start, _end), (i[0], i[1]))
-                _append = True
+            if select != "all" and len(all_overlaps[_q_idx]) > 0:
+                continue
 
-                if _gap is not None and _gap > max_gap:
-                    _append = False
+            _gap, _overlap = calc_gap_and_overlap(
+                (query._start[_q_idx], query._start[_q_idx] + query._width[_q_idx]),
+                (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx]),
+            )
+            _append = True
 
-                if _overlap is not None and _overlap < min_overlap:
-                    _append = False
+            if _gap is not None and _gap > max_gap:
+                _append = False
 
-                if _append is True:
-                    _idx.append(i[2])
+            if _overlap is not None and _overlap < min_overlap:
+                _append = False
 
-            if len(_idx) <= 1:
-                all_overlaps.append(_idx)
-            else:
+            if _append is True:
                 if select == "first" or select == "arbitrary":
-                    all_overlaps.append([_idx[0]])
+                    all_overlaps[_q_idx].append(_s_idx)
                 elif select == "last":
-                    all_overlaps.append([_idx[-1]])
+                    all_overlaps[_q_idx].append(_s_idx)
                 elif select == "all":
-                    all_overlaps.append(_idx)
+                    all_overlaps[_q_idx].append(_s_idx)
 
         if delete_index is True:
             self._delete_ncls_index()
