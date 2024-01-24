@@ -1732,6 +1732,7 @@ class IRanges:
         select: Literal["all", "first", "last", "arbitrary"] = "all",
         max_gap: int = -1,
         min_overlap: int = 1,
+        delete_index: bool = True,
     ) -> List[List[int]]:
         """Find overlaps with ``query`` `IRanges` object.
 
@@ -1760,6 +1761,9 @@ class IRanges:
             min_overlap:
                 Minimum overlap with query. Defaults to 1.
 
+            delete_index:
+                Delete the cached ncls index. Internal use only.
+
         Raises:
             TypeError:
                 If ``query`` is not an ``IRanges`` object.
@@ -1785,7 +1789,7 @@ class IRanges:
         _tgap = 0 if max_gap == -1 else max_gap
 
         all_overlaps = self._generic_find_hits(
-            query, _tgap, _tgap, max_gap, min_overlap, select, delete_index=True
+            query, _tgap, _tgap, max_gap, min_overlap, select, delete_index=delete_index
         )
         return all_overlaps
 
@@ -1795,6 +1799,7 @@ class IRanges:
         query_type: Literal["any", "start", "end", "within"] = "any",
         max_gap: int = -1,
         min_overlap: int = 1,
+        delete_index: bool = True,
     ) -> np.ndarray:
         """Count number of overlaps with ``query`` `IRanges` object.
 
@@ -1819,6 +1824,9 @@ class IRanges:
             min_overlap:
                 Minimum overlap with query. Defaults to 1.
 
+            delete_index:
+                Delete the cached ncls index. Internal use only.
+
         Raises:
             TypeError:
                 If ``query`` is not an ``IRanges`` object.
@@ -1837,6 +1845,7 @@ class IRanges:
         query_type: Literal["any", "start", "end", "within"] = "any",
         max_gap: int = -1,
         min_overlap: int = 1,
+        delete_index: bool = True,
     ) -> "IRanges":
         """Subset by overlapping intervals in ``query``.
 
@@ -1861,6 +1870,9 @@ class IRanges:
             min_overlap:
                 Minimum overlap with query. Defaults to 1.
 
+            delete_index:
+                Delete the cached ncls index. Internal use only.
+
         Raises:
             TypeError:
                 If ``query`` is not of type ``IRanges``.
@@ -1879,7 +1891,14 @@ class IRanges:
     ###########################
 
     def _generic_search(
-        self, query, step_start, step_end, max_gap, min_overlap, select
+        self,
+        query,
+        step_start,
+        step_end,
+        max_gap,
+        min_overlap,
+        select,
+        delete_index=False,
     ):
         min_start = min(self.start)
         max_end = max(self.end)
@@ -1901,7 +1920,7 @@ class IRanges:
                     max_gap,
                     _tmin_overlap,
                     select,
-                    delete_index=False,
+                    delete_index=delete_index,
                 )
 
                 if len(all_overlaps[0]) > 0:
@@ -1935,7 +1954,10 @@ class IRanges:
         return hits
 
     def nearest(
-        self, query: "IRanges", select: Literal["all", "arbitrary"] = "all"
+        self,
+        query: "IRanges",
+        select: Literal["all", "arbitrary"] = "all",
+        delete_index: bool = True,
     ) -> List[List[int]]:
         """Search nearest positions both upstream and downstream that overlap with each range in ``query``.
 
@@ -1946,6 +1968,9 @@ class IRanges:
             select:
                 Determine what hit to choose when there are
                 multiple hits for an interval in ``query``.
+
+            delete_index:
+                Delete the cached ncls index. Internal use only.
 
         Raises:
             TypeError:
@@ -1965,12 +1990,15 @@ class IRanges:
                 f"'select' must be one of {', '.join(['all', 'arbitrary'])}."
             )
 
-        hits = self._generic_search(query, 1, 1, 10000000, 1, select)
+        hits = self._generic_search(query, 1, 1, 10000000, 1, select, delete_index)
         self._delete_ncls_index()
         return hits
 
     def precede(
-        self, query: "IRanges", select: Literal["all", "first"] = "all"
+        self,
+        query: "IRanges",
+        select: Literal["all", "first"] = "all",
+        delete_index: bool = True,
     ) -> List[List[int]]:
         """Search nearest positions only downstream that overlap with each range in ``query``.
 
@@ -1981,6 +2009,9 @@ class IRanges:
             select:
                 Determine what hit to choose when there are
                 multiple hits for an interval in ``query``.
+
+            delete_index:
+                Delete the cached ncls index. Internal use only.
 
         Raises:
             TypeError:
@@ -1998,12 +2029,15 @@ class IRanges:
         if select not in ["all", "first"]:
             raise ValueError(f"'select' must be one of {', '.join(['all', 'first'])}.")
 
-        hits = self._generic_search(query, 0, 1, 10000000, -1, select)
+        hits = self._generic_search(query, 0, 1, 10000000, -1, select, delete_index)
         self._delete_ncls_index()
         return hits
 
     def follow(
-        self, query: "IRanges", select: Literal["all", "last"] = "all"
+        self,
+        query: "IRanges",
+        select: Literal["all", "last"] = "all",
+        delete_index: bool = True,
     ) -> List[List[int]]:
         """Search nearest positions only downstream that overlap with each range in ``query``.
 
@@ -2014,6 +2048,9 @@ class IRanges:
             select:
                 Determine what hit to choose when there are
                 multiple hits for an interval in ``query``.
+
+            delete_index:
+                Delete the cached ncls index. Internal use only.
 
         Raises:
             TypeError:
@@ -2031,7 +2068,7 @@ class IRanges:
         if select not in ["all", "last"]:
             raise ValueError(f"'select' must be one of {', '.join(['all', 'last'])}.")
 
-        hits = self._generic_search(query, 1, 0, 10000000, -1, select)
+        hits = self._generic_search(query, 1, 0, 10000000, -1, select, delete_index)
         self._delete_ncls_index()
         return hits
 
