@@ -9,9 +9,9 @@ kernelspec:
 
 Python implementation of the [**IRanges**](https://bioconductor.org/packages/IRanges) Bioconductor package.
 
-An `IRanges` holds a **start** position and a **width**, and is typically used to represent coordinates along a genomic sequence. The interpretation of the **start** position depends on the application; for sequences, the **start** is usually a 1-based position, but other use cases may allow zero or even negative values, e.g., circular genomes. 
+An `IRanges` holds a **start** position and a **width**, and is typically used to represent coordinates along a genomic sequence. The interpretation of the **start** position depends on the application; for sequences, the **start** is usually a 1-based position, but other use cases may allow zero or even negative values, e.g., circular genomes.
 
-`IRanges` uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search based operations. 
+`IRanges` uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search based operations.
 
 These classes follow a functional paradigm for accessing or setting properties, with further details discussed in [functional paradigm](https://biocpy.github.io/tutorial/chapters/philosophy.html) section.
 
@@ -60,7 +60,7 @@ print("end positions:", ir.end)
 
 # Reduced ranges (Normality)
 
-`reduce` method reduces the intervals to an `IRanges` where the intervals are: 
+`reduce` method reduces the intervals to an `IRanges` where the intervals are:
 
 - not empty
 - not overlapping
@@ -74,7 +74,7 @@ print(reduced)
 
 # Overlap operations
 
-`IRanges` uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search-based operations. 
+`IRanges` uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search-based operations.
 
 ```{code-cell}
 subject = IRanges([2, 2, 10], [1, 2, 3])
