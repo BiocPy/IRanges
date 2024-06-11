@@ -2178,6 +2178,72 @@ class IRanges:
 
         return cls(start=start, width=width, names=names, mcols=mcols)
 
+    ########################
+    #### polars interop ####
+    ########################
+
+    def to_polars(self) -> "polars.DataFrame":
+        """Convert this ``IRanges`` object into a :py:class:`~polars.DataFrame`.
+
+        Returns:
+            A :py:class:`~polars.DataFrame` object.
+        """
+        import polars as pl
+
+        _starts = self._start
+        _widths = self._width
+        _ends = self.get_end()
+
+        output = pl.DataFrame({"starts": _starts, "widths": _widths, "ends": _ends})
+
+        if self._mcols is not None and self._mcols.shape[1] > 0:
+            output = pl.concat([output, self._mcols.to_polars()])
+
+        if self._names is not None:
+            output["rownames"] = self._names
+
+        return output
+
+    @classmethod
+    def from_polars(cls, input: "polars.DataFrame") -> "IRanges":
+        """Create a ``IRanges`` from a :py:class:`~polars.DataFrame` object.
+
+        Args:
+            input:
+                Input data must contain columns 'start' and 'width'.
+
+        Returns:
+            A ``IRanges`` object.
+        """
+
+        from polars import DataFrame
+
+        if not isinstance(input, DataFrame):
+            raise TypeError("`input` is not a polars `DataFrame` object.")
+
+        if "start" not in input.columns:
+            raise ValueError("'input' must contain column 'start'.")
+        start = input["start"].to_list()
+
+        if "width" not in input.columns:
+            raise ValueError("'input' must contain column 'width'.")
+        width = input["width"].to_list()
+
+        # mcols
+        mcols_df = input.drop(columns=["start", "width"])
+
+        mcols = None
+        if (not mcols_df.is_empty()) or len(mcols_df.columns) > 0:
+            mcols = BiocFrame.from_polars(mcols_df)
+
+        names = None
+
+        return cls(start=start, width=width, names=names, mcols=mcols)
+
+    ##############
+    #### misc ####
+    ##############
+
     @classmethod
     def empty(cls):
         """Create an zero-length ``IRanges`` object.
