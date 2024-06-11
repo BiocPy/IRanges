@@ -22,6 +22,9 @@ To get started, install the package from [PyPI](https://pypi.org/project/IRanges
 
 ```bash
 pip install iranges
+
+# To install optional dependencies
+pip install iranges[optional]
 ```
 
 ## IRanges
