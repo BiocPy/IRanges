@@ -25,8 +25,11 @@ def test_to_polars_export():
     assert isinstance(y, pl.DataFrame)
     assert set(y.columns).issubset(["starts", "ends", "widths"])
 
+
 def test_to_polars_names():
-    x = IRanges([1, 2, 3, 4], [4, 5, 6, 7], names=["range1", "range2", "range3", "range4"])
+    x = IRanges(
+        [1, 2, 3, 4], [4, 5, 6, 7], names=["range1", "range2", "range3", "range4"]
+    )
 
     y = x.to_polars()
     assert y is not None

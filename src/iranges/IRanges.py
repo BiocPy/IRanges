@@ -2200,9 +2200,7 @@ class IRanges:
             output = pl.concat([output, self._mcols.to_polars()])
 
         if self._names is not None:
-            output = output.with_columns(
-                names = self._names
-            )
+            output = output.with_columns(names=self._names)
 
         return output
 
