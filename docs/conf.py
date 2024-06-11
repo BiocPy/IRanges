@@ -72,7 +72,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinx_autodoc_typehints",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -80,7 +79,8 @@ templates_path = ["_templates"]
 
 
 # Enable markdown
-extensions.append("myst_parser")
+# extensions.append("myst_parser")
+extensions.append("myst_nb")
 
 # Configure MyST-Parser
 myst_enable_extensions = [
@@ -170,9 +170,9 @@ todo_emit_warnings = True
 autodoc_default_options = {
     # 'members': 'var1, var2',
     # 'member-order': 'bysource',
-    'special-members': True,
-    'undoc-members': True,
-    'exclude-members': '__weakref__, __dict__, __str__, __module__, __init__'
+    "special-members": True,
+    "undoc-members": True,
+    "exclude-members": "__weakref__, __dict__, __str__, __module__",
 }
 
 autosummary_generate = True
@@ -311,6 +311,9 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "setuptools": ("https://setuptools.pypa.io/en/stable/", None),
     "pyscaffold": ("https://pyscaffold.org/en/stable", None),
+    "biocutils": ("https://biocpy.github.io/BiocUtils", None),
+    "biocframe": ("https://biocpy.github.io/BiocFrame", None),
+    "polars": ("https://docs.pola.rs/api/python/stable/", None),
 }
 
 print(f"loading configurations for {project} {version} ...", file=sys.stderr)

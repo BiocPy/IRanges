@@ -1,7 +1,10 @@
 # Changelog
 
-## Version 0.1 (development)
+## Version 0.2.4
 
-- Feature A added
-- FIX: nasty bug #1729 fixed
-- add your changes here!
+- Support coersion from `IRanges` to Polars and vice-versa
+- Setting up `myst_nb` to execute snippets in tutorial/documentation markdown files
+
+## Version 0.2.3
+
+- Feature complete implementation of IRanges from Bioconductor
