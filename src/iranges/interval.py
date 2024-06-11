@@ -17,19 +17,19 @@ def create_np_interval_vector(
     """Represent intervals and calculate coverage.
 
     Args:
-        intervals: 
+        intervals:
             Input intervals.
-        
-        with_reverse_map: 
+
+        with_reverse_map:
             Return map of indices? Defaults to False.
-        
-        force_size: 
+
+        force_size:
             Force size of the array.
-        
-        dont_sum: 
+
+        dont_sum:
             Do not sum. Defaults to False.
-        
-        value: 
+
+        value:
             Default value to increment. Defaults to 1.
 
     Returns:
@@ -81,12 +81,12 @@ def calc_gap_and_overlap(
     """Calculate gap and/or overlap between two intervals.
 
     Args:
-        first: 
-            Interval containing start and end positions. 
+        first:
+            Interval containing start and end positions.
             `end` is non-inclusive.
-        
-        second: 
-            Interval containing start and end positions. 
+
+        second:
+            Interval containing start and end positions.
             `end` is non-inclusive.
     """
     _gap = None
