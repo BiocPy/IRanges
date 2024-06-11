@@ -2197,7 +2197,7 @@ class IRanges:
         output = pl.DataFrame({"starts": _starts, "widths": _widths, "ends": _ends})
 
         if self._mcols is not None and self._mcols.shape[1] > 0:
-            output = pl.concat([output, self._mcols.to_polars()])
+            output = pl.concat([output, self._mcols.to_polars()], how="horizontal")
 
         if self._names is not None:
             output = output.with_columns(names=self._names)
