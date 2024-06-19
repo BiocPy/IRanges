@@ -739,7 +739,7 @@ class IRanges:
         if isinstance(vec, int):
             return vec
         elif ut.is_list_of_type(vec, int, ignore_none=allow_none):
-            vec = np.array(vec)
+            vec = np.asarray(vec)
 
         if len(vec) < _size:
             raise ValueError("Provided argument must match the number of intervals.")
@@ -852,7 +852,7 @@ class IRanges:
             raise TypeError("'width' must be an integer or float.")
 
         if isinstance(width, (np.ndarray, list)):
-            width = max(width)
+            width = width.max()
 
         cov, _ = create_np_interval_vector(new_ranges, force_size=width, value=weight)
         return cov
@@ -865,8 +865,8 @@ class IRanges:
             the minimum of all the start positions,  Maximum of all end positions.
         """
 
-        min_start = min(self.start)
-        max_end = max(self.end)
+        min_start = self.start.min()
+        max_end = self.end.max()
 
         return IRanges([min_start], [max_end - min_start])
 
@@ -976,9 +976,14 @@ class IRanges:
         Returns:
             NumPy vector containing index positions in the sorted order.
         """
-        intvals = sorted(self._get_intervals_as_list(), reverse=decreasing)
-        order = [o[2] for o in intvals]
-        return np.array(order)
+        order_buf = sorted(
+            range(len(self)), key=lambda i: (self._start[i], self._width[i])
+        )
+
+        if decreasing:
+            return np.asarray(order_buf[::-1])
+
+        return np.asarray(order_buf)
 
     def sort(self, decreasing: bool = False, in_place: bool = False) -> "IRanges":
         """Sort the intervals.
@@ -1000,8 +1005,9 @@ class IRanges:
         return output[order]
 
     def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
-        """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
-        removed specified by the start and end arguments.
+        """Gaps returns an ``IRanges`` object representing the set of integers
+        that remain after the intervals are removed specified by the start and end
+        arguments.
 
         Args:
             start:
@@ -1013,52 +1019,44 @@ class IRanges:
         Returns:
             A new ``IRanges`` is with the gap regions.
         """
-        _order = self.order()
+        out_ranges = []
+        order_buf = self.order()
 
-        overlap_start = min(self.start) if start is None else start
-        overlap_end = overlap_start - 1 if start is not None else None
+        if start is not None:
+            max_end = start - 1
+        else:
+            max_end = float("inf")
 
-        result_starts = []
-        result_widths = []
-
-        def get_elem_counter(idx):
-            elem = self[idx]
-            start = elem.start[0]
-            end = elem.end[0] - 1
-            width = elem.width[0]
-            return start, end, width
-
-        for i in range(len(_order)):
-            _start, _end, _width = get_elem_counter(_order[i])
-
-            if _width == 0:
+        for i in order_buf:
+            width_j = self._width[i]
+            if width_j == 0:
                 continue
+            start_j = self._start[i]
+            end_j = start_j + width_j - 1
 
-            if overlap_end is None:
-                overlap_end = _end
+            if max_end == float("inf"):
+                max_end = end_j
             else:
-                _gap_start = overlap_end + 1
+                gapstart = max_end + 1
+                if end is not None and start_j > end + 1:
+                    start_j = end + 1
+                gapwidth = start_j - gapstart
+                if gapwidth >= 1:
+                    out_ranges.append((gapstart, gapwidth))
+                    max_end = end_j
+                elif end_j > max_end:
+                    max_end = end_j
 
-                if end is not None and _start > end + 1:
-                    _start = end + 1
-
-                _gap_width = _start - _gap_start
-
-                if _gap_width >= 1:
-                    result_starts.append(_gap_start)
-                    result_widths.append(_gap_width)
-                    overlap_end = _end
-                elif _end > overlap_end:
-                    overlap_end = _end
-
-            if end is not None and overlap_end >= end:
+            if end is not None and max_end >= end:
                 break
 
-        if end is not None and overlap_end is not None and overlap_end < end:
-            result_starts.append(overlap_end + 1)
-            result_widths.append(end - overlap_end)
+        if end is not None and max_end is not None and max_end < end:
+            gapstart = max_end + 1
+            gapwidth = end - max_end
+            out_ranges.append((gapstart, gapwidth))
 
-        return IRanges(result_starts, result_widths)
+        _gapstarts, _gapends = zip(*out_ranges)
+        return IRanges(_gapstarts, _gapends)
 
     # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
     # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389
@@ -1254,8 +1252,8 @@ class IRanges:
 
             counter += 1
 
-        output._start = np.array(new_starts)
-        output._width = np.array(new_widths)
+        output._start = np.asarray(new_starts)
+        output._width = np.asarray(new_widths)
         return output
 
     def resize(
@@ -1330,7 +1328,7 @@ class IRanges:
             counter += 1
 
         output = self._define_output(in_place)
-        output._start = np.array(new_starts)
+        output._start = np.asarray(new_starts)
         output._width = (
             np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
         )
@@ -1571,7 +1569,7 @@ class IRanges:
 
             counter += 1
 
-        return np.array(overlaps)
+        return np.asarray(overlaps)
 
     ########################
     #### set operations ####
@@ -1621,8 +1619,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an `IRanges` object.")
 
-        start = min(min(self.start), min(other.start))
-        end = max(max(self.end), max(other.end))
+        start = min(self.start.min(), other.start.min())
+        end = max(self.end.max(), other.end.max())
 
         x_gaps = self.gaps(start=start, end=end)
         x_gaps_u = x_gaps.union(other)
@@ -1648,8 +1646,8 @@ class IRanges:
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an `IRanges` object.")
 
-        start = min(min(self.start), min(other.start))
-        end = max(max(self.end), max(other.end))
+        start = min(self.start.min(), other.start.min())
+        end = max(self.end.max(), other.end.max())
 
         _gaps = other.gaps(start=start, end=end)
         _inter = self.setdiff(_gaps)
@@ -1668,7 +1666,7 @@ class IRanges:
 
         if not hasattr(self, "_ncls"):
             self._ncls = NCLS(
-                self.start, self.end, np.array([i for i in range(len(self))])
+                self.start, self.end, np.asarray([i for i in range(len(self))])
             )
 
     def _delete_ncls_index(self):
@@ -1690,7 +1688,7 @@ class IRanges:
         new_starts = query._start - gap_start - 1
         new_ends = query.end + gap_end + 1
         _res = self._ncls.all_overlaps_both(
-            new_starts, new_ends, np.array(range(len(query)))
+            new_starts, new_ends, np.asarray(range(len(query)))
         )
         all_overlaps = [[] for _ in range(len(query))]
 
@@ -1842,7 +1840,7 @@ class IRanges:
             min_overlap=min_overlap,
             delete_index=delete_index,
         )
-        return np.array([len(x) for x in _overlaps])
+        return np.asarray([len(x) for x in _overlaps])
 
     def subset_by_overlaps(
         self,
@@ -1909,8 +1907,8 @@ class IRanges:
         select,
         delete_index=False,
     ):
-        min_start = min(self.start)
-        max_end = max(self.end)
+        min_start = self.start.min()
+        max_end = self.end.max()
         hits = []
         for _, val in query:
             _iterate = True
@@ -2112,7 +2110,7 @@ class IRanges:
 
             all_distances.append(distance)
 
-        return np.array(all_distances)
+        return np.asarray(all_distances)
 
     ########################
     #### pandas interop ####
