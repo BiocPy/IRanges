@@ -118,13 +118,13 @@ class IRanges:
         if isinstance(start, np.ndarray) and start.dtype == np.int32:
             return start
 
-        return np.array(start, dtype=np.int32, copy=False)
+        return np.asarray(start, dtype=np.int32)
 
     def _sanitize_width(self, width):
         if isinstance(width, np.ndarray) and width.dtype == np.int32:
             return width
 
-        return np.array(width, dtype=np.int32, copy=False)
+        return np.asarray(width, dtype=np.int32)
 
     def _validate_width(self):
         if len(self._start) != len(self._width):
