@@ -1005,9 +1005,8 @@ class IRanges:
         return output[order]
 
     def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
-        """Gaps returns an ``IRanges`` object representing the set of integers
-        that remain after the intervals are removed specified by the start and end
-        arguments.
+        """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
+        removed specified by the start and end arguments.
 
         Args:
             start:
