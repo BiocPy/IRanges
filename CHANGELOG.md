@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.2.8
+
+Optimizing a couple of methods in `IRanges`:
+
+- Update `gaps` and `reduce` to slightly faster NumPy based operations.
+- Switch `np.array` to `np.asarray`
+
 ## Version 0.2.7
 
 Changes to be compatible with NumPy's 2.0 release:
@@ -9,7 +16,7 @@ Changes to be compatible with NumPy's 2.0 release:
 
 ## Version 0.2.4
 
-- Support coersion from `IRanges` to Polars and vice-versa
+- Support coercion from `IRanges` to Polars and vice-versa
 - Setting up `myst_nb` to execute snippets in tutorial/documentation markdown files
 
 ## Version 0.2.3
