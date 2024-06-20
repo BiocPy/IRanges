@@ -896,60 +896,43 @@ class IRanges:
         if min_gap_width < 0:
             raise ValueError("'min_gap_width' cannot be negative.")
 
-        _order = self.order()
+        order = self.order()
+        starts = self._start[order]
+        widths = self._width[order]
+        ends = starts + widths - 1
+
+        if drop_empty_ranges:
+            valid_mask = widths > 0
+            starts = starts[valid_mask]
+            ends = ends[valid_mask]
+            widths = widths[valid_mask]
+            order = np.array(order)[valid_mask]
+
+        gaps = np.r_[starts[1:] - ends[:-1], np.inf]
+        merge_mask = np.r_[True, gaps <= min_gap_width][:-1]
+        merge_groups = np.cumsum(~merge_mask)
+        unique_groups = np.unique(merge_groups)
 
         result_starts = []
         result_widths = []
         result_revmaps = []
-        counter = 0
 
-        def get_elem_counter(idx):
-            elem = self[idx]
-            start = elem.start[0]
-            end = elem.end[0] - 1
-            width = elem.width[0]
-            return start, end, width
+        for group in unique_groups:
+            group_mask = merge_groups == group
+            group_starts = starts[group_mask]
+            group_ends = ends[group_mask]
+            group_indices = order[group_mask]
 
-        current_start, current_end, _ = get_elem_counter(_order[counter])
-        current_revmaps = [_order[counter]]
+            start = group_starts.min()
+            end = group_ends.max()
+            width = end - start + 1
 
-        counter += 1
-        while counter < len(_order):
-            merge = False
-
-            o = _order[counter]
-            _idx_start, _idx_end, _idx_width = get_elem_counter(o)
-            _gap_width = _idx_start - current_end
-
-            if _gap_width <= min_gap_width:
-                merge = True
-
-            if merge is True:
-                if current_end < _idx_end:
-                    current_end = _idx_end
-
-                current_revmaps.append(o)
-                counter += 1
-            else:
-                if not (
-                    drop_empty_ranges is True and current_end - current_start + 1 == 0
-                ):
-                    result_starts.append(current_start)
-                    result_widths.append(current_end - current_start + 1)
-                    result_revmaps.append(current_revmaps)
-
-                current_revmaps = [o]
-                current_start = _idx_start
-                current_end = _idx_end
-                counter += 1
-
-        result_starts.append(current_start)
-        result_widths.append(current_end - current_start + 1)
-        result_revmaps.append(current_revmaps)
+            result_starts.append(start)
+            result_widths.append(width)
+            result_revmaps.append(group_indices.tolist())
 
         result = IRanges(result_starts, result_widths)
-
-        if with_reverse_map is True:
+        if with_reverse_map:
             result._mcols.set_column("revmap", result_revmaps, in_place=True)
 
         return result
