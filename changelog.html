@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Contributors" href="authors.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>Changelog - IRanges 0.2.7 documentation</title>
+        <title>Changelog - IRanges 0.2.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -180,7 +180,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">IRanges 0.2.7 documentation</div></a>
+      <a href="index.html"><div class="brand">IRanges 0.2.8 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -204,7 +204,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.2.7 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.2.8 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -270,10 +270,26 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
+<section id="version-0-2-8">
+<h2>Version 0.2.8<a class="headerlink" href="#version-0-2-8" title="Link to this heading">¶</a></h2>
+<p>Optimizing a couple of methods in <code class="docutils literal notranslate"><span class="pre">IRanges</span></code>:</p>
+<ul class="simple">
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">gaps</span></code> and <code class="docutils literal notranslate"><span class="pre">reduce</span></code> to slightly faster NumPy based operations.</p></li>
+<li><p>Switch <code class="docutils literal notranslate"><span class="pre">np.array</span></code> to <code class="docutils literal notranslate"><span class="pre">np.asarray</span></code></p></li>
+</ul>
+</section>
+<section id="version-0-2-7">
+<h2>Version 0.2.7<a class="headerlink" href="#version-0-2-7" title="Link to this heading">¶</a></h2>
+<p>Changes to be compatible with NumPy’s 2.0 release:</p>
+<blockquote>
+<div><p>If using <code class="docutils literal notranslate"><span class="pre">np.array(obj,</span> <span class="pre">copy=False)</span></code> replace it with <code class="docutils literal notranslate"><span class="pre">np.asarray(obj)</span></code> to allow a copy when needed (no behavior change in NumPy 1.x).
+For more details, see <a class="reference external" href="https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword">https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword</a>.</p>
+</div></blockquote>
+</section>
 <section id="version-0-2-4">
 <h2>Version 0.2.4<a class="headerlink" href="#version-0-2-4" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>Support coersion from <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> to Polars and vice-versa</p></li>
+<li><p>Support coercion from <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> to Polars and vice-versa</p></li>
 <li><p>Setting up <code class="docutils literal notranslate"><span class="pre">myst_nb</span></code> to execute snippets in tutorial/documentation markdown files</p></li>
 </ul>
 </section>
@@ -333,6 +349,8 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#version-0-2-8">Version 0.2.8</a></li>
+<li><a class="reference internal" href="#version-0-2-7">Version 0.2.7</a></li>
 <li><a class="reference internal" href="#version-0-2-4">Version 0.2.4</a></li>
 <li><a class="reference internal" href="#version-0-2-3">Version 0.2.3</a></li>
 </ul>
@@ -346,7 +364,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=58050c01"></script>
+</div><script src="_static/documentation_options.js?v=b01fafc3"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=4e2eecee"></script>

@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>iranges.IRanges - IRanges 0.2.7 documentation</title>
+        <title>iranges.IRanges - IRanges 0.2.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -179,7 +179,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">IRanges 0.2.7 documentation</div></a>
+      <a href="../../index.html"><div class="brand">IRanges 0.2.8 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -203,7 +203,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.2.7 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.2.8 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -1077,7 +1077,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">vec</span>
         <span class="k">elif</span> <span class="n">ut</span><span class="o">.</span><span class="n">is_list_of_type</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ignore_none</span><span class="o">=</span><span class="n">allow_none</span><span class="p">):</span>
-            <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+            <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_size</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided argument must match the number of intervals.&quot;</span><span class="p">)</span>
@@ -1195,7 +1195,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;width&#39; must be an integer or float.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">width</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="n">cov</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_np_interval_vector</span><span class="p">(</span><span class="n">new_ranges</span><span class="p">,</span> <span class="n">force_size</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cov</span></div>
@@ -1211,8 +1211,8 @@
 <span class="sd">            the minimum of all the start positions,  Maximum of all end positions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">min_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
-        <span class="n">max_end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">min_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">max_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">IRanges</span><span class="p">([</span><span class="n">min_start</span><span class="p">],</span> <span class="p">[</span><span class="n">max_end</span> <span class="o">-</span> <span class="n">min_start</span><span class="p">])</span></div>
 
@@ -1245,60 +1245,43 @@
         <span class="k">if</span> <span class="n">min_gap_width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;min_gap_width&#39; cannot be negative.&quot;</span><span class="p">)</span>
 
-        <span class="n">_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="n">starts</span> <span class="o">+</span> <span class="n">widths</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">drop_empty_ranges</span><span class="p">:</span>
+            <span class="n">valid_mask</span> <span class="o">=</span> <span class="n">widths</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="n">starts</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">]</span>
+            <span class="n">ends</span> <span class="o">=</span> <span class="n">ends</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">]</span>
+            <span class="n">widths</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">valid_mask</span><span class="p">]</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">order</span><span class="p">)[</span><span class="n">valid_mask</span><span class="p">]</span>
+
+        <span class="n">gaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">starts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ends</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+        <span class="n">merge_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="n">gaps</span> <span class="o">&lt;=</span> <span class="n">min_gap_width</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">merge_groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="o">~</span><span class="n">merge_mask</span><span class="p">)</span>
+        <span class="n">unique_groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">merge_groups</span><span class="p">)</span>
 
         <span class="n">result_starts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">result_widths</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">result_revmaps</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">def</span> <span class="nf">get_elem_counter</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>
-            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">unique_groups</span><span class="p">:</span>
+            <span class="n">group_mask</span> <span class="o">=</span> <span class="n">merge_groups</span> <span class="o">==</span> <span class="n">group</span>
+            <span class="n">group_starts</span> <span class="o">=</span> <span class="n">starts</span><span class="p">[</span><span class="n">group_mask</span><span class="p">]</span>
+            <span class="n">group_ends</span> <span class="o">=</span> <span class="n">ends</span><span class="p">[</span><span class="n">group_mask</span><span class="p">]</span>
+            <span class="n">group_indices</span> <span class="o">=</span> <span class="n">order</span><span class="p">[</span><span class="n">group_mask</span><span class="p">]</span>
 
-        <span class="n">current_start</span><span class="p">,</span> <span class="n">current_end</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_elem_counter</span><span class="p">(</span><span class="n">_order</span><span class="p">[</span><span class="n">counter</span><span class="p">])</span>
-        <span class="n">current_revmaps</span> <span class="o">=</span> <span class="p">[</span><span class="n">_order</span><span class="p">[</span><span class="n">counter</span><span class="p">]]</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">group_starts</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">group_ends</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span>
 
-        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">_order</span><span class="p">):</span>
-            <span class="n">merge</span> <span class="o">=</span> <span class="kc">False</span>
-
-            <span class="n">o</span> <span class="o">=</span> <span class="n">_order</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
-            <span class="n">_idx_start</span><span class="p">,</span> <span class="n">_idx_end</span><span class="p">,</span> <span class="n">_idx_width</span> <span class="o">=</span> <span class="n">get_elem_counter</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-            <span class="n">_gap_width</span> <span class="o">=</span> <span class="n">_idx_start</span> <span class="o">-</span> <span class="n">current_end</span>
-
-            <span class="k">if</span> <span class="n">_gap_width</span> <span class="o">&lt;=</span> <span class="n">min_gap_width</span><span class="p">:</span>
-                <span class="n">merge</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="k">if</span> <span class="n">merge</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">current_end</span> <span class="o">&lt;</span> <span class="n">_idx_end</span><span class="p">:</span>
-                    <span class="n">current_end</span> <span class="o">=</span> <span class="n">_idx_end</span>
-
-                <span class="n">current_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-                    <span class="n">drop_empty_ranges</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">current_end</span> <span class="o">-</span> <span class="n">current_start</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span>
-                <span class="p">):</span>
-                    <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_start</span><span class="p">)</span>
-                    <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_end</span> <span class="o">-</span> <span class="n">current_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">result_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_revmaps</span><span class="p">)</span>
-
-                <span class="n">current_revmaps</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="p">]</span>
-                <span class="n">current_start</span> <span class="o">=</span> <span class="n">_idx_start</span>
-                <span class="n">current_end</span> <span class="o">=</span> <span class="n">_idx_end</span>
-                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_start</span><span class="p">)</span>
-        <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_end</span> <span class="o">-</span> <span class="n">current_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">result_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_revmaps</span><span class="p">)</span>
+            <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+            <span class="n">result_revmaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_indices</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 
         <span class="n">result</span> <span class="o">=</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">result_starts</span><span class="p">,</span> <span class="n">result_widths</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">with_reverse_map</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">with_reverse_map</span><span class="p">:</span>
             <span class="n">result</span><span class="o">.</span><span class="n">_mcols</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="s2">&quot;revmap&quot;</span><span class="p">,</span> <span class="n">result_revmaps</span><span class="p">,</span> <span class="n">in_place</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">result</span></div>
@@ -1328,9 +1311,14 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            NumPy vector containing index positions in the sorted order.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">intvals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_intervals_as_list</span><span class="p">(),</span> <span class="n">reverse</span><span class="o">=</span><span class="n">decreasing</span><span class="p">)</span>
-        <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">intvals</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">order</span><span class="p">)</span></div>
+        <span class="n">order_buf</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">decreasing</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">order_buf</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">order_buf</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IRanges.sort">
@@ -1371,52 +1359,44 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            A new ``IRanges`` is with the gap regions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+        <span class="n">out_ranges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">order_buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
 
-        <span class="n">overlap_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">start</span>
-        <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">overlap_start</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">max_end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_end</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
 
-        <span class="n">result_starts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">result_widths</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">def</span> <span class="nf">get_elem_counter</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>
-            <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">end</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_order</span><span class="p">)):</span>
-            <span class="n">_start</span><span class="p">,</span> <span class="n">_end</span><span class="p">,</span> <span class="n">_width</span> <span class="o">=</span> <span class="n">get_elem_counter</span><span class="p">(</span><span class="n">_order</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-            <span class="k">if</span> <span class="n">_width</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">order_buf</span><span class="p">:</span>
+            <span class="n">width_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">width_j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
+            <span class="n">start_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">end_j</span> <span class="o">=</span> <span class="n">start_j</span> <span class="o">+</span> <span class="n">width_j</span> <span class="o">-</span> <span class="mi">1</span>
 
-            <span class="k">if</span> <span class="n">overlap_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">_end</span>
+            <span class="k">if</span> <span class="n">max_end</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+                <span class="n">max_end</span> <span class="o">=</span> <span class="n">end_j</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">_gap_start</span> <span class="o">=</span> <span class="n">overlap_end</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">gapstart</span> <span class="o">=</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">start_j</span> <span class="o">&gt;</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">start_j</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">gapwidth</span> <span class="o">=</span> <span class="n">start_j</span> <span class="o">-</span> <span class="n">gapstart</span>
+                <span class="k">if</span> <span class="n">gapwidth</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">out_ranges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">gapstart</span><span class="p">,</span> <span class="n">gapwidth</span><span class="p">))</span>
+                    <span class="n">max_end</span> <span class="o">=</span> <span class="n">end_j</span>
+                <span class="k">elif</span> <span class="n">end_j</span> <span class="o">&gt;</span> <span class="n">max_end</span><span class="p">:</span>
+                    <span class="n">max_end</span> <span class="o">=</span> <span class="n">end_j</span>
 
-                <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_start</span> <span class="o">&gt;</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">_start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
-
-                <span class="n">_gap_width</span> <span class="o">=</span> <span class="n">_start</span> <span class="o">-</span> <span class="n">_gap_start</span>
-
-                <span class="k">if</span> <span class="n">_gap_width</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_gap_start</span><span class="p">)</span>
-                    <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_gap_width</span><span class="p">)</span>
-                    <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">_end</span>
-                <span class="k">elif</span> <span class="n">_end</span> <span class="o">&gt;</span> <span class="n">overlap_end</span><span class="p">:</span>
-                    <span class="n">overlap_end</span> <span class="o">=</span> <span class="n">_end</span>
-
-            <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">overlap_end</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_end</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
                 <span class="k">break</span>
 
-        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">overlap_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">overlap_end</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
-            <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">overlap_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">result_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">overlap_end</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_end</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+            <span class="n">gapstart</span> <span class="o">=</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">gapwidth</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">max_end</span>
+            <span class="n">out_ranges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">gapstart</span><span class="p">,</span> <span class="n">gapwidth</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">result_starts</span><span class="p">,</span> <span class="n">result_widths</span><span class="p">)</span></div>
+        <span class="n">_gapstarts</span><span class="p">,</span> <span class="n">_gapends</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">out_ranges</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">_gapstarts</span><span class="p">,</span> <span class="n">_gapends</span><span class="p">)</span></div>
 
 
     <span class="c1"># folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals</span>
@@ -1621,8 +1601,8 @@
 
             <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_starts</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_widths</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_starts</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_widths</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">output</span></div>
 
 
@@ -1700,7 +1680,7 @@
             <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_starts</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_starts</span><span class="p">)</span>
         <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">_awidth</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_awidth</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">_awidth</span>
         <span class="p">)</span>
@@ -1956,7 +1936,7 @@
 
             <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">overlaps</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">overlaps</span><span class="p">)</span></div>
 
 
     <span class="c1">########################</span>
@@ -2012,8 +1992,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;other&#39; is not an `IRanges` object.&quot;</span><span class="p">)</span>
 
-        <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
-        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
         <span class="n">x_gaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaps</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="n">x_gaps_u</span> <span class="o">=</span> <span class="n">x_gaps</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
@@ -2042,8 +2022,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;other&#39; is not an `IRanges` object.&quot;</span><span class="p">)</span>
 
-        <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">))</span>
-        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">))</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
         <span class="n">_gaps</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">gaps</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">)</span>
         <span class="n">_inter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setdiff</span><span class="p">(</span><span class="n">_gaps</span><span class="p">)</span>
@@ -2063,7 +2043,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span> <span class="o">=</span> <span class="n">NCLS</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))])</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_delete_ncls_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2085,7 +2065,7 @@
         <span class="n">new_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="n">gap_start</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">new_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">gap_end</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span>
-            <span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)))</span>
+            <span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)))</span>
         <span class="p">)</span>
         <span class="n">all_overlaps</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">))]</span>
 
@@ -2242,7 +2222,7 @@
             <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span><span class="p">,</span>
             <span class="n">delete_index</span><span class="o">=</span><span class="n">delete_index</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_overlaps</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_overlaps</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="IRanges.subset_by_overlaps">
@@ -2313,8 +2293,8 @@
         <span class="n">select</span><span class="p">,</span>
         <span class="n">delete_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">min_start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
-        <span class="n">max_end</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">min_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">max_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
         <span class="n">hits</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
             <span class="n">_iterate</span> <span class="o">=</span> <span class="kc">True</span>
@@ -2527,7 +2507,7 @@
 
             <span class="n">all_distances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_distances</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">all_distances</span><span class="p">)</span></div>
 
 
     <span class="c1">########################</span>
@@ -2743,7 +2723,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=58050c01"></script>
+</div><script src="../../_static/documentation_options.js?v=b01fafc3"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
