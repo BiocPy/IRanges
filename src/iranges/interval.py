@@ -41,7 +41,7 @@ def create_np_interval_vector(
 
     max_end = force_size
     if max_end is None:
-        max_end = max(intervals.get_end())
+        max_end = intervals.get_end().max()
     else:
         max_end += 1
 
@@ -89,16 +89,14 @@ def calc_gap_and_overlap(
             Interval containing start and end positions.
             `end` is non-inclusive.
     """
-    _gap = None
-    _overlap = None
-
-    if first[0] < second[1] and first[1] > second[0]:
+    if min(first[1], second[1]) > max(first[0], second[0]):
         _overlap = min(first[1], second[1]) - max(first[0], second[0])
-    else:
-        _gap = None
-        if second[0] >= first[1]:
-            _gap = second[0] - first[1]
-        elif first[0] >= second[1]:
-            _gap = first[0] - second[1]
+        return (None, _overlap)
 
-    return (_gap, _overlap)
+    _gap = None
+    if second[0] >= first[1]:
+        _gap = second[0] - first[1]
+    elif first[0] >= second[1]:
+        _gap = first[0] - second[1]
+
+    return (_gap, None)
