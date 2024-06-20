@@ -1037,7 +1037,11 @@ class IRanges:
             gapwidth = end - max_end
             out_ranges.append((gapstart, gapwidth))
 
-        _gapstarts, _gapends = zip(*out_ranges)
+        _gapstarts = []
+        _gapends = []
+        if len(out_ranges):
+            _gapstarts, _gapends = zip(*out_ranges)
+
         return IRanges(_gapstarts, _gapends)
 
     # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
