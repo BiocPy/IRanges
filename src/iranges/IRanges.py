@@ -115,15 +115,9 @@ class IRanges:
             self._validate_metadata()
 
     def _sanitize_start(self, start):
-        if isinstance(start, np.ndarray) and start.dtype == np.int32:
-            return start
-
         return np.asarray(start, dtype=np.int32)
 
     def _sanitize_width(self, width):
-        if isinstance(width, np.ndarray) and width.dtype == np.int32:
-            return width
-
         return np.asarray(width, dtype=np.int32)
 
     def _validate_width(self):
@@ -1001,48 +995,70 @@ class IRanges:
         Returns:
             A new ``IRanges`` is with the gap regions.
         """
-        out_ranges = []
-        order_buf = self.order()
+        order = np.argsort(self._start)
+        starts = self._start[order]
+        widths = self._width[order]
+        ends = starts + widths
+
+        gaps = np.r_[starts[1:] - ends[:-1], np.inf]
+        merge_mask = np.r_[True, gaps <= 0][:-1]
+        merge_groups = np.cumsum(~merge_mask)
+        unique_groups = np.unique(merge_groups)
+
+        result_starts = []
+        result_ends = []
+
+        for group in unique_groups:
+            group_mask = merge_groups == group
+            group_starts = starts[group_mask]
+            group_ends = ends[group_mask]
+
+            _start = group_starts.min()
+            _end = group_ends.max()
+
+            result_starts.append(_start)
+            result_ends.append(_end)
+
+        result_starts = np.array(result_starts)
+        result_ends = np.array(result_ends) - 1
+
+        if len(result_starts) == 0:
+            if start is not None and end is not None:
+                return IRanges([start], [end - start + 1])
+            return IRanges([], [])
 
         if start is not None:
-            max_end = start - 1
-        else:
-            max_end = float("inf")
+            result_starts = np.maximum(result_starts, start)
+        if end is not None:
+            result_ends = np.minimum(result_ends, end)
 
-        for i in order_buf:
-            width_j = self._width[i]
-            if width_j == 0:
-                continue
-            start_j = self._start[i]
-            end_j = start_j + width_j - 1
+        mask = result_starts <= result_ends
+        result_starts = result_starts[mask]
+        result_ends = result_ends[mask]
 
-            if max_end == float("inf"):
-                max_end = end_j
-            else:
-                gapstart = max_end + 1
-                if end is not None and start_j > end + 1:
-                    start_j = end + 1
-                gapwidth = start_j - gapstart
-                if gapwidth >= 1:
-                    out_ranges.append((gapstart, gapwidth))
-                    max_end = end_j
-                elif end_j > max_end:
-                    max_end = end_j
+        if len(result_starts) == 0:
+            if start is not None and end is not None:
+                return IRanges([start], [end - start + 1])
+            return IRanges([], [])
 
-            if end is not None and max_end >= end:
-                break
+        gap_starts = result_ends[:-1] + 1
+        gap_ends = result_starts[1:]
 
-        if end is not None and max_end is not None and max_end < end:
-            gapstart = max_end + 1
-            gapwidth = end - max_end
-            out_ranges.append((gapstart, gapwidth))
+        # Add gaps at the beginning and end if necessary
+        if start is not None and start < result_starts[0]:
+            gap_starts = np.insert(gap_starts, 0, start)
+            gap_ends = np.insert(gap_ends, 0, result_starts[0])
+        if end is not None and end > result_ends[-1]:
+            gap_starts = np.append(gap_starts, result_ends[-1] + 1)
+            gap_ends = np.append(gap_ends, end + 1)
 
-        _gapstarts = []
-        _gapends = []
-        if len(out_ranges):
-            _gapstarts, _gapends = zip(*out_ranges)
+        # Remove invalid gaps
+        valid_gaps = gap_ends > gap_starts
+        gap_starts = gap_starts[valid_gaps]
+        gap_ends = gap_ends[valid_gaps]
 
-        return IRanges(_gapstarts, _gapends)
+        gap_widths = gap_ends - gap_starts
+        return IRanges(gap_starts, gap_widths)
 
     # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
     # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389
@@ -1635,8 +1651,12 @@ class IRanges:
         start = min(self.start.min(), other.start.min())
         end = max(self.end.max(), other.end.max())
 
-        _gaps = other.gaps(start=start, end=end)
-        _inter = self.setdiff(_gaps)
+        if len(other) > len(self):
+            _gaps = other.gaps(start=start, end=end)
+            _inter = self.setdiff(_gaps)
+        else:
+            _gaps = self.gaps(start=start, end=end)
+            _inter = other.setdiff(_gaps)
 
         return _inter
 
