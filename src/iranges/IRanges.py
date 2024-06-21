@@ -115,15 +115,9 @@ class IRanges:
             self._validate_metadata()
 
     def _sanitize_start(self, start):
-        if isinstance(start, np.ndarray) and start.dtype == np.int32:
-            return start
-
         return np.asarray(start, dtype=np.int32)
 
     def _sanitize_width(self, width):
-        if isinstance(width, np.ndarray) and width.dtype == np.int32:
-            return width
-
         return np.asarray(width, dtype=np.int32)
 
     def _validate_width(self):
@@ -1044,6 +1038,77 @@ class IRanges:
 
         return IRanges(_gapstarts, _gapends)
 
+    def gaps_numpy(
+        self, start: Optional[int] = None, end: Optional[int] = None
+    ) -> "IRanges":
+        """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
+        removed specified by the start and end arguments.
+
+        This function uses a vectorized approach using numpy vectors.
+        The normal :py:meth:`~.gaps` method performs better in most cases.
+
+        Args:
+            start:
+                Restrict start position. Defaults to 1.
+
+            end:
+                Restrict end position. Defaults to None.
+
+        Returns:
+            A new ``IRanges`` is with the gap regions.
+        """
+        mask = self._width > 0
+        starts = self._start[mask]
+        widths = self._width[mask]
+
+        order = np.argsort(starts)
+        starts = starts[order]
+        widths = widths[order]
+        ends = starts + widths
+
+        gaps = np.r_[starts[1:] - ends[:-1], np.inf]
+        merge_mask = np.r_[True, gaps <= 0][:-1]
+        merge_groups = np.cumsum(~merge_mask)
+        unique_groups = np.unique(merge_groups)
+
+        result_starts = []
+        result_ends = []
+
+        first = merge_groups == unique_groups[0]
+        current_start = starts[first].min()
+        current_end = ends[first].max()
+
+        if start is not None and start < current_start:
+            result_starts.append(start)
+            result_ends.append(current_start)
+
+        for group in unique_groups[1:]:
+            group_mask = merge_groups == group
+            group_starts = starts[group_mask]
+            group_ends = ends[group_mask]
+
+            _start = group_starts.min()
+            _end = group_ends.max()
+
+            if _start - current_end > 0:
+                result_starts.append(current_end)
+                result_ends.append(_start)
+
+                current_start = _start
+                current_end = _end
+            else:
+                current_end = _end
+
+        if end is not None and end > current_end:
+            result_starts.append(current_end)
+            result_ends.append(end + 1)
+
+        result_starts = np.array(result_starts)
+        result_ends = np.array(result_ends)
+
+        result_widths = result_ends - result_starts
+        return IRanges(result_starts, result_widths)
+
     # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
     # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389
     def disjoin(self, with_reverse_map: bool = False) -> "IRanges":
@@ -1640,6 +1705,48 @@ class IRanges:
 
         return _inter
 
+    # Inspired by pyranges intersection using NCLS
+    # https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py
+    def intersect_ncls(self, other: "IRanges", delete_index: bool = True) -> "IRanges":
+        """Find intersecting intervals with `other`. Uses the NCLS index.
+
+        Args:
+            other:
+                An `IRanges` object.
+
+        Raises:
+            TypeError:
+                If ``other`` is not `IRanges`.
+
+        Returns:
+            A new ``IRanges`` object with all intersecting intervals.
+        """
+
+        other._build_ncls_index()
+
+        self_indexes, other_indexes = other._ncls.all_overlaps_both(
+            self.start, self.end, np.arange(len(self))
+        )
+
+        if delete_index:
+            other._delete_ncls_index()
+
+        self_new_starts = self.start[self_indexes]
+        other_new_starts = other.start[other_indexes]
+
+        new_starts = np.where(
+            self_new_starts > other_new_starts, self_new_starts, other_new_starts
+        )
+
+        self_new_ends = self.end[self_indexes]
+        other_new_ends = other.end[other_indexes]
+
+        new_ends = np.where(
+            self_new_ends < other_new_ends, self_new_ends, other_new_ends
+        )
+
+        return IRanges(new_starts, new_ends - new_starts).reduce()
+
     ############################
     #### Overlap operations ####
     ############################
@@ -1651,9 +1758,7 @@ class IRanges:
         from ncls import NCLS
 
         if not hasattr(self, "_ncls"):
-            self._ncls = NCLS(
-                self.start, self.end, np.asarray([i for i in range(len(self))])
-            )
+            self._ncls = NCLS(self.start, self.end, np.arange(len(self)))
 
     def _delete_ncls_index(self):
         if hasattr(self, "_ncls"):
@@ -1673,9 +1778,7 @@ class IRanges:
 
         new_starts = query._start - gap_start - 1
         new_ends = query.end + gap_end + 1
-        _res = self._ncls.all_overlaps_both(
-            new_starts, new_ends, np.asarray(range(len(query)))
-        )
+        _res = self._ncls.all_overlaps_both(new_starts, new_ends, np.arange(len(query)))
         all_overlaps = [[] for _ in range(len(query))]
 
         for i in range(len(_res[0])):
