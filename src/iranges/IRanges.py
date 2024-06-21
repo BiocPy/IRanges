@@ -1017,7 +1017,6 @@ class IRanges:
         current_end = ends[first].max()
 
         if start is not None and start < current_start:
-            print("start", start)
             result_starts.append(start)
             result_ends.append(current_start)
 
@@ -1039,7 +1038,6 @@ class IRanges:
                 current_end = _end
 
         if end is not None and end > current_end:
-            print("end", end)
             result_starts.append(current_end)
             result_ends.append(end + 1)
 
@@ -1640,14 +1638,40 @@ class IRanges:
         start = min(self.start.min(), other.start.min())
         end = max(self.end.max(), other.end.max())
 
-        if len(other) > len(self):
-            _gaps = other.gaps(start=start, end=end)
-            _inter = self.setdiff(_gaps)
-        else:
-            _gaps = self.gaps(start=start, end=end)
-            _inter = other.setdiff(_gaps)
+        _gaps = other.gaps(start=start, end=end)
+        _inter = self.setdiff(_gaps)
 
         return _inter
+
+    # Inspired by pyranges intersection using NCLS
+    # https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py
+    def intersect_ncls(self, other: "IRanges", delete_index: bool = True) -> "IRanges":
+        # self._build_ncls_index()
+
+        other._build_ncls_index()
+
+        self_indexes, other_indexes = other._ncls.all_overlaps_both(
+            self.start, self.end, np.arange(len(self))
+        )
+
+        if delete_index:
+            other._delete_ncls_index()
+
+        self_new_starts = self.start[self_indexes]
+        other_new_starts = other.start[other_indexes]
+
+        new_starts = np.where(
+            self_new_starts > other_new_starts, self_new_starts, other_new_starts
+        )
+
+        self_new_ends = self.end[self_indexes]
+        other_new_ends = other.end[other_indexes]
+
+        new_ends = np.where(
+            self_new_ends < other_new_ends, self_new_ends, other_new_ends
+        )
+
+        return IRanges(new_starts, new_ends - new_starts).reduce()
 
     ############################
     #### Overlap operations ####
@@ -1660,9 +1684,7 @@ class IRanges:
         from ncls import NCLS
 
         if not hasattr(self, "_ncls"):
-            self._ncls = NCLS(
-                self.start, self.end, np.asarray([i for i in range(len(self))])
-            )
+            self._ncls = NCLS(self.start, self.end, np.arange(len(self)))
 
     def _delete_ncls_index(self):
         if hasattr(self, "_ncls"):
@@ -1682,9 +1704,7 @@ class IRanges:
 
         new_starts = query._start - gap_start - 1
         new_ends = query.end + gap_end + 1
-        _res = self._ncls.all_overlaps_both(
-            new_starts, new_ends, np.asarray(range(len(query)))
-        )
+        _res = self._ncls.all_overlaps_both(new_starts, new_ends, np.arange(len(query)))
         all_overlaps = [[] for _ in range(len(query))]
 
         for i in range(len(_res[0])):
