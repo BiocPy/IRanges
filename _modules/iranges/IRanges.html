@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>iranges.IRanges - IRanges 0.2.9 documentation</title>
+        <title>iranges.IRanges - IRanges 0.2.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -179,7 +179,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">IRanges 0.2.9 documentation</div></a>
+      <a href="../../index.html"><div class="brand">IRanges 0.2.10 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -203,7 +203,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.2.9 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.2.10 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -396,15 +396,9 @@
 
 
     <span class="k">def</span> <span class="nf">_sanitize_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">start</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">start</span>
-
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_sanitize_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">width</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">width</span>
-
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_validate_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1403,6 +1397,80 @@
         <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">_gapstarts</span><span class="p">,</span> <span class="n">_gapends</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="IRanges.gaps_numpy">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.gaps_numpy">[docs]</a>
+    <span class="k">def</span> <span class="nf">gaps_numpy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are</span>
+<span class="sd">        removed specified by the start and end arguments.</span>
+
+<span class="sd">        This function uses a vectorized approach using numpy vectors.</span>
+<span class="sd">        The normal :py:meth:`~.gaps` method performs better in most cases.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start:</span>
+<span class="sd">                Restrict start position. Defaults to 1.</span>
+
+<span class="sd">            end:</span>
+<span class="sd">                Restrict end position. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A new ``IRanges`` is with the gap regions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="n">starts</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+        <span class="n">widths</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="n">starts</span> <span class="o">+</span> <span class="n">widths</span>
+
+        <span class="n">gaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">starts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">ends</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+        <span class="n">merge_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="n">gaps</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">merge_groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="o">~</span><span class="n">merge_mask</span><span class="p">)</span>
+        <span class="n">unique_groups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">merge_groups</span><span class="p">)</span>
+
+        <span class="n">result_starts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result_ends</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">first</span> <span class="o">=</span> <span class="n">merge_groups</span> <span class="o">==</span> <span class="n">unique_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">current_start</span> <span class="o">=</span> <span class="n">starts</span><span class="p">[</span><span class="n">first</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">current_end</span> <span class="o">=</span> <span class="n">ends</span><span class="p">[</span><span class="n">first</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">current_start</span><span class="p">:</span>
+            <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">result_ends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_start</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">unique_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">group_mask</span> <span class="o">=</span> <span class="n">merge_groups</span> <span class="o">==</span> <span class="n">group</span>
+            <span class="n">group_starts</span> <span class="o">=</span> <span class="n">starts</span><span class="p">[</span><span class="n">group_mask</span><span class="p">]</span>
+            <span class="n">group_ends</span> <span class="o">=</span> <span class="n">ends</span><span class="p">[</span><span class="n">group_mask</span><span class="p">]</span>
+
+            <span class="n">_start</span> <span class="o">=</span> <span class="n">group_starts</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">_end</span> <span class="o">=</span> <span class="n">group_ends</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">_start</span> <span class="o">-</span> <span class="n">current_end</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_end</span><span class="p">)</span>
+                <span class="n">result_ends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_start</span><span class="p">)</span>
+
+                <span class="n">current_start</span> <span class="o">=</span> <span class="n">_start</span>
+                <span class="n">current_end</span> <span class="o">=</span> <span class="n">_end</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_end</span> <span class="o">=</span> <span class="n">_end</span>
+
+        <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end</span> <span class="o">&gt;</span> <span class="n">current_end</span><span class="p">:</span>
+            <span class="n">result_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_end</span><span class="p">)</span>
+            <span class="n">result_ends</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">result_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result_starts</span><span class="p">)</span>
+        <span class="n">result_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result_ends</span><span class="p">)</span>
+
+        <span class="n">result_widths</span> <span class="o">=</span> <span class="n">result_ends</span> <span class="o">-</span> <span class="n">result_starts</span>
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">result_starts</span><span class="p">,</span> <span class="n">result_widths</span><span class="p">)</span></div>
+
+
     <span class="c1"># folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals</span>
     <span class="c1"># otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389</span>
 <div class="viewcode-block" id="IRanges.disjoin">
@@ -2035,6 +2103,51 @@
         <span class="k">return</span> <span class="n">_inter</span></div>
 
 
+    <span class="c1"># Inspired by pyranges intersection using NCLS</span>
+    <span class="c1"># https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py</span>
+<div class="viewcode-block" id="IRanges.intersect_ncls">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.intersect_ncls">[docs]</a>
+    <span class="k">def</span> <span class="nf">intersect_ncls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find intersecting intervals with `other`. Uses the NCLS index.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other:</span>
+<span class="sd">                An `IRanges` object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError:</span>
+<span class="sd">                If ``other`` is not `IRanges`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A new ``IRanges`` object with all intersecting intervals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">other</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
+
+        <span class="n">self_indexes</span><span class="p">,</span> <span class="n">other_indexes</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
+            <span class="n">other</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
+
+        <span class="n">self_new_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">self_indexes</span><span class="p">]</span>
+        <span class="n">other_new_starts</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">other_indexes</span><span class="p">]</span>
+
+        <span class="n">new_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">self_new_starts</span> <span class="o">&gt;</span> <span class="n">other_new_starts</span><span class="p">,</span> <span class="n">self_new_starts</span><span class="p">,</span> <span class="n">other_new_starts</span>
+        <span class="p">)</span>
+
+        <span class="n">self_new_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">self_indexes</span><span class="p">]</span>
+        <span class="n">other_new_ends</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">other_indexes</span><span class="p">]</span>
+
+        <span class="n">new_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">self_new_ends</span> <span class="o">&lt;</span> <span class="n">other_new_ends</span><span class="p">,</span> <span class="n">self_new_ends</span><span class="p">,</span> <span class="n">other_new_ends</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span> <span class="o">-</span> <span class="n">new_starts</span><span class="p">)</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span></div>
+
+
     <span class="c1">############################</span>
     <span class="c1">#### Overlap operations ####</span>
     <span class="c1">############################</span>
@@ -2046,9 +2159,7 @@
         <span class="kn">from</span> <span class="nn">ncls</span> <span class="kn">import</span> <span class="n">NCLS</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span> <span class="o">=</span> <span class="n">NCLS</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))])</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span> <span class="o">=</span> <span class="n">NCLS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
 
     <span class="k">def</span> <span class="nf">_delete_ncls_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
@@ -2068,9 +2179,7 @@
 
         <span class="n">new_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="n">gap_start</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">new_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">gap_end</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span>
-            <span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)))</span>
-        <span class="p">)</span>
+        <span class="n">_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)))</span>
         <span class="n">all_overlaps</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">))]</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_res</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
@@ -2727,7 +2836,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=14672bda"></script>
+</div><script src="../../_static/documentation_options.js?v=8db09a1e"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
