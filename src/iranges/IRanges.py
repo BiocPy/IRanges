@@ -995,6 +995,65 @@ class IRanges:
         Returns:
             A new ``IRanges`` is with the gap regions.
         """
+        out_ranges = []
+        order_buf = self.order()
+
+        if start is not None:
+            max_end = start - 1
+        else:
+            max_end = float("inf")
+
+        for i in order_buf:
+            width_j = self._width[i]
+            if width_j == 0:
+                continue
+            start_j = self._start[i]
+            end_j = start_j + width_j - 1
+
+            if max_end == float("inf"):
+                max_end = end_j
+            else:
+                gapstart = max_end + 1
+                if end is not None and start_j > end + 1:
+                    start_j = end + 1
+                gapwidth = start_j - gapstart
+                if gapwidth >= 1:
+                    out_ranges.append((gapstart, gapwidth))
+                    max_end = end_j
+                elif end_j > max_end:
+                    max_end = end_j
+
+            if end is not None and max_end >= end:
+                break
+
+        if end is not None and max_end is not None and max_end < end:
+            gapstart = max_end + 1
+            gapwidth = end - max_end
+            out_ranges.append((gapstart, gapwidth))
+
+        _gapstarts = []
+        _gapends = []
+        if len(out_ranges):
+            _gapstarts, _gapends = zip(*out_ranges)
+
+        return IRanges(_gapstarts, _gapends)
+
+    def gaps_numpy(
+        self, start: Optional[int] = None, end: Optional[int] = None
+    ) -> "IRanges":
+        """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
+        removed specified by the start and end arguments.
+
+        Args:
+            start:
+                Restrict start position. Defaults to 1.
+
+            end:
+                Restrict end position. Defaults to None.
+
+        Returns:
+            A new ``IRanges`` is with the gap regions.
+        """
         mask = self._width > 0
         starts = self._start[mask]
         widths = self._width[mask]
