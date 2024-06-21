@@ -4,7 +4,7 @@
 
 - Added a numpy vectorized version of finding gaps (tldr: not fast compared to the traditional version). May be needs a better implementation
 - Added NCLS based intersection operation (based on what pyranges does in their internals)
-- Added tests for intersection operations. 
+- Added tests for intersection operations.
 
 ## Version 0.2.8 - 0.2.9
 
