@@ -1044,6 +1044,9 @@ class IRanges:
         """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
         removed specified by the start and end arguments.
 
+        This function uses a vectorized approach using numpy vectors.
+        The normal :py:meth:`~.gaps` method performs better in most cases.
+
         Args:
             start:
                 Restrict start position. Defaults to 1.
@@ -1705,7 +1708,19 @@ class IRanges:
     # Inspired by pyranges intersection using NCLS
     # https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py
     def intersect_ncls(self, other: "IRanges", delete_index: bool = True) -> "IRanges":
-        # self._build_ncls_index()
+        """Find intersecting intervals with `other`. Uses the NCLS index.
+
+        Args:
+            other:
+                An `IRanges` object.
+
+        Raises:
+            TypeError:
+                If ``other`` is not `IRanges`.
+
+        Returns:
+            A new ``IRanges`` object with all intersecting intervals.
+        """
 
         other._build_ncls_index()
 
