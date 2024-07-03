@@ -2317,7 +2317,7 @@ class IRanges:
         width = input["width"].to_list()
 
         # mcols
-        mcols_df = input.drop(columns=["start", "width"])
+        mcols_df = input.drop(["start", "width"])
 
         mcols = None
         if (not mcols_df.is_empty()) or len(mcols_df.columns) > 0:
