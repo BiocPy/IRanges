@@ -1772,7 +1772,7 @@ class IRanges:
         max_gap,
         min_overlap,
         select,
-        query_type = "any",
+        query_type="any",
         delete_index=False,
     ):
         self._build_ncls_index()
