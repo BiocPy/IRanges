@@ -9,7 +9,7 @@ from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
 from .interval import (
-    calc_gap_and_overlap,
+    calc_gap_and_overlap_position,
     create_np_interval_vector,
 )
 
@@ -1772,6 +1772,7 @@ class IRanges:
         max_gap,
         min_overlap,
         select,
+        query_type = "any",
         delete_index=False,
     ):
         self._build_ncls_index()
@@ -1788,10 +1789,14 @@ class IRanges:
             if select != "all" and len(all_overlaps[_q_idx]) > 0:
                 continue
 
-            _gap, _overlap = calc_gap_and_overlap(
+            _gap, _overlap, _position = calc_gap_and_overlap_position(
                 (query._start[_q_idx], query._start[_q_idx] + query._width[_q_idx]),
                 (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx]),
             )
+
+            if query_type != "any" and query_type != _position:
+                continue
+
             _append = True
 
             if _gap is not None and _gap > max_gap:
@@ -1877,7 +1882,14 @@ class IRanges:
         _tgap = 0 if max_gap == -1 else max_gap
 
         all_overlaps = self._generic_find_hits(
-            query, _tgap, _tgap, max_gap, min_overlap, select, delete_index=delete_index
+            query,
+            _tgap,
+            _tgap,
+            max_gap,
+            min_overlap,
+            select,
+            query_type=query_type,
+            delete_index=delete_index,
         )
         return all_overlaps
 
@@ -2189,7 +2201,7 @@ class IRanges:
         for i in range(len(self)):
             i_self = self[i]
             i_query = query[i]
-            _gap, _overlap = calc_gap_and_overlap(
+            _gap, _overlap, _position = calc_gap_and_overlap_position(
                 (i_self.start[0], i_self.end[0]), (i_query.start[0], i_query.end[0])
             )
 
