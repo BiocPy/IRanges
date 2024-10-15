@@ -2220,7 +2220,7 @@ class IRanges:
         output = pd.DataFrame({"starts": _starts, "widths": _widths, "ends": _ends})
 
         if self._mcols is not None and self._mcols.shape[1] > 0:
-            output = pd.concat([output, self._mcols.to_pandas()])
+            output = pd.concat([output, self._mcols.to_pandas()], axis=1)
 
         if self._names is not None:
             output.index = self._names
