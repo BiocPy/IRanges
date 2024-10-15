@@ -25,8 +25,11 @@ def test_pandas_export():
     assert isinstance(y, pd.DataFrame)
     assert set(y.columns.tolist()).issubset(["starts", "ends", "widths"])
 
+
 def test_pandas_with_mcols():
-    x = IRanges([1, 2, 3, 4], [4, 5, 6, 7], mcols=BiocFrame({"temp": ["a", "t", "g", "c"]}))
+    x = IRanges(
+        [1, 2, 3, 4], [4, 5, 6, 7], mcols=BiocFrame({"temp": ["a", "t", "g", "c"]})
+    )
 
     y = x.to_pandas()
     assert y is not None
