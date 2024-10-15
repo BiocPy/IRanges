@@ -1,10 +1,11 @@
 # Changelog
 
-## Version 0.2.10
+## Version 0.2.10 - 0.2.12
 
 - Added a numpy vectorized version of finding gaps (tldr: not fast compared to the traditional version). May be needs a better implementation
 - Added NCLS based intersection operation (based on what pyranges does in their internals)
 - Added tests for intersection operations.
+- Fixed and issue when coercing `IRanges` containing mcols.
 
 ## Version 0.2.8 - 0.2.9
 
