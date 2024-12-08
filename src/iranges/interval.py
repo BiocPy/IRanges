@@ -66,18 +66,13 @@ def create_np_interval_vector(
             cov[_start:_end] += value
 
         if with_reverse_map:
-            _ = [
-                revmap[x].append(name if name is not None else counter + 1)
-                for x in range(_start, _end)
-            ]
+            _ = [revmap[x].append(name if name is not None else counter + 1) for x in range(_start, _end)]
 
         counter += 1
     return cov[1:], revmap
 
 
-def calc_gap_and_overlap(
-    first: Tuple[int, int], second: Tuple[int, int]
-) -> Tuple[Optional[int], Optional[int]]:
+def calc_gap_and_overlap(first: Tuple[int, int], second: Tuple[int, int]) -> Tuple[Optional[int], Optional[int]]:
     """Calculate gap and/or overlap between two intervals.
 
     Args:
