@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.3.0
+
+- chore: Remove Python 3.8 (EOL)
+- precommit: Replace docformatter with ruff's formatter
+
 ## Version 0.2.10 - 0.2.12
 
 - Added a numpy vectorized version of finding gaps (tldr: not fast compared to the traditional version). May be needs a better implementation
