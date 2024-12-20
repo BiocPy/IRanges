@@ -4,8 +4,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>iranges.IRanges - IRanges 0.2.12 documentation</title>
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>iranges.IRanges - IRanges 0.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">IRanges 0.2.12 documentation</div></a>
+      <a href="../../index.html"><div class="brand">IRanges 0.3.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.2.12 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.3.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -301,11 +301,7 @@
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRangesIter.__next__">[docs]</a>
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="p">):</span>
-            <span class="n">iter_row_index</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span><span class="p">]</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="kc">None</span>
-            <span class="p">)</span>
+            <span class="n">iter_row_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
             <span class="n">iter_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iranges</span><span class="o">.</span><span class="n">get_row</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_current_index</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -427,9 +423,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;mcols&#39; should be a BiocFrame&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcols</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Number of rows in &#39;mcols&#39; should be equal to length of &#39;start&#39;&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of rows in &#39;mcols&#39; should be equal to length of &#39;start&#39;&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_sanitize_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -603,9 +597,7 @@
 
 <div class="viewcode-block" id="IRanges.set_names">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.set_names">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_names</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            names:</span>
@@ -667,9 +659,7 @@
 
 <div class="viewcode-block" id="IRanges.set_mcols">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.set_mcols">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_mcols</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">mcols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BiocFrame</span><span class="p">],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_mcols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mcols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BiocFrame</span><span class="p">],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set new metadata about ranges.</span>
 
 <span class="sd">        Args:</span>
@@ -728,9 +718,7 @@
 
 <div class="viewcode-block" id="IRanges.set_metadata">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.set_metadata">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_metadata</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set or replace metadata.</span>
 
 <span class="sd">        Args:</span>
@@ -796,9 +784,7 @@
 
 <div class="viewcode-block" id="IRanges.__getitem__">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.__getitem__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">subset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="nb">range</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="nb">range</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Subset the IRanges.</span>
 
 <span class="sd">        Args:</span>
@@ -822,9 +808,7 @@
 
 <div class="viewcode-block" id="IRanges.__setitem__">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.__setitem__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="nb">range</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="nb">range</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add or update positions (in-place operation).</span>
 
 <span class="sd">        Args:</span>
@@ -932,9 +916,7 @@
                     <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcols</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
                     <span class="n">showed</span> <span class="o">=</span> <span class="n">show_as_cell</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
                     <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">print_type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
-                    <span class="n">showed</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">truncate_strings</span><span class="p">(</span>
-                        <span class="n">showed</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                    <span class="p">)</span>
+                    <span class="n">showed</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">truncate_strings</span><span class="p">(</span><span class="n">showed</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
                     <span class="k">if</span> <span class="n">insert_ellipsis</span><span class="p">:</span>
                         <span class="n">showed</span> <span class="o">=</span> <span class="n">showed</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;...&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">showed</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
                     <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">showed</span><span class="p">)</span>
@@ -1108,9 +1090,7 @@
             <span class="n">_width</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="n">_pshift</span> <span class="o">=</span> <span class="n">shift</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">_ashift</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
-            <span class="n">_pwidth</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">width</span> <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">_awidth</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">_pwidth</span> <span class="o">=</span> <span class="n">width</span> <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">_awidth</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">_pshift</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_start</span> <span class="o">+=</span> <span class="n">_pshift</span>
@@ -1292,9 +1272,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            NumPy vector containing index positions in the sorted order.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">order_buf</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-            <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="p">)</span>
+        <span class="n">order_buf</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 
         <span class="k">if</span> <span class="n">decreasing</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">order_buf</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -1386,9 +1364,7 @@
 
 <div class="viewcode-block" id="IRanges.gaps_numpy">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.gaps_numpy">[docs]</a>
-    <span class="k">def</span> <span class="nf">gaps_numpy</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">gaps_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are</span>
 <span class="sd">        removed specified by the start and end arguments.</span>
 
@@ -1517,9 +1493,7 @@
 
 <div class="viewcode-block" id="IRanges.shift">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.shift">[docs]</a>
-    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shifts all the intervals by the amount specified by the ``shift`` argument.</span>
 
 <span class="sd">        Args:</span>
@@ -1582,23 +1556,15 @@
         <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_vec_argument</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitize_vec_argument</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">)))</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">))</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Two out of three (&#39;start&#39;, &#39;end&#39; or &#39;width&#39;) arguments must be provided.&quot;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">)))</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Two out of three (&#39;start&#39;, &#39;end&#39; or &#39;width&#39;) arguments must be provided.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-                <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">width</span><span class="p">)</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">width</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;width&#39; cannot be negative.&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;If &#39;width&#39; is provided, either &#39;start&#39; or &#39;end&#39; must be provided.&quot;</span>
-                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If &#39;width&#39; is provided, either &#39;start&#39; or &#39;end&#39; must be provided.&quot;</span><span class="p">)</span>
 
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
 
@@ -1610,18 +1576,12 @@
             <span class="n">_width</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">width</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">_oend</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="n">_pstart</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">start</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">start</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">_pwidth</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">width</span> <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">width</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="n">_pstart</span> <span class="o">=</span> <span class="n">start</span> <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">start</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
+            <span class="n">_pwidth</span> <span class="o">=</span> <span class="n">width</span> <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">width</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
             <span class="n">_pend</span> <span class="o">=</span> <span class="n">end</span> <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">end</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">_pend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_pend</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">_pend</span> <span class="o">&gt;</span> <span class="n">_width</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Provided &#39;end&#39; is greater than width of the interval for: </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Provided &#39;end&#39; is greater than width of the interval for: </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">_pstart</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_pstart</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1651,9 +1611,7 @@
                     <span class="n">_width</span> <span class="o">=</span> <span class="n">_width</span> <span class="o">+</span> <span class="n">_pend</span> <span class="o">+</span> <span class="mi">1</span>
 
             <span class="k">if</span> <span class="n">_width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Provided &#39;start&#39; or &#39;end&#39; arguments lead to negative width for interval: </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Provided &#39;start&#39; or &#39;end&#39; arguments lead to negative width for interval: </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
             <span class="n">new_starts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_start</span><span class="p">)</span>
             <span class="n">new_widths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_width</span><span class="p">)</span>
@@ -1670,9 +1628,7 @@
     <span class="k">def</span> <span class="nf">resize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">width</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">fix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">]]</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
+        <span class="n">fix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
         <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an</span>
@@ -1740,17 +1696,13 @@
 
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_define_output</span><span class="p">(</span><span class="n">in_place</span><span class="p">)</span>
         <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_starts</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">_awidth</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_awidth</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">_awidth</span>
-        <span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">_awidth</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_awidth</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">_awidth</span>
         <span class="k">return</span> <span class="n">output</span></div>
 
 
 <div class="viewcode-block" id="IRanges.flank">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.flank">[docs]</a>
-    <span class="k">def</span> <span class="nf">flank</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">both</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">flank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">both</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute flanking ranges for each range. The logic is from the `IRanges` package.</span>
 
 <span class="sd">        If ``start`` is ``True`` for a given range, the flanking occurs at the `start`,</span>
@@ -1826,9 +1778,7 @@
 
 <div class="viewcode-block" id="IRanges.promoters">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.promoters">[docs]</a>
-    <span class="k">def</span> <span class="nf">promoters</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">upstream</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">downstream</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">promoters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">upstream</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">downstream</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="n">in_place</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend intervals to promoter regions.</span>
 
 <span class="sd">        Generates promoter ranges relative to the transcription start site (TSS),</span>
@@ -1960,9 +1910,7 @@
 
 <div class="viewcode-block" id="IRanges.overlap_indices">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.overlap_indices">[docs]</a>
-    <span class="k">def</span> <span class="nf">overlap_indices</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">overlap_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find overlaps with the start and end positions.</span>
 
 <span class="sd">        Args:</span>
@@ -2111,9 +2059,7 @@
 
         <span class="n">other</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
 
-        <span class="n">self_indexes</span><span class="p">,</span> <span class="n">other_indexes</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-        <span class="p">)</span>
+        <span class="n">self_indexes</span><span class="p">,</span> <span class="n">other_indexes</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
 
         <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
             <span class="n">other</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
@@ -2121,16 +2067,12 @@
         <span class="n">self_new_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">self_indexes</span><span class="p">]</span>
         <span class="n">other_new_starts</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">other_indexes</span><span class="p">]</span>
 
-        <span class="n">new_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="n">self_new_starts</span> <span class="o">&gt;</span> <span class="n">other_new_starts</span><span class="p">,</span> <span class="n">self_new_starts</span><span class="p">,</span> <span class="n">other_new_starts</span>
-        <span class="p">)</span>
+        <span class="n">new_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">self_new_starts</span> <span class="o">&gt;</span> <span class="n">other_new_starts</span><span class="p">,</span> <span class="n">self_new_starts</span><span class="p">,</span> <span class="n">other_new_starts</span><span class="p">)</span>
 
         <span class="n">self_new_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">self_indexes</span><span class="p">]</span>
         <span class="n">other_new_ends</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">other_indexes</span><span class="p">]</span>
 
-        <span class="n">new_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="n">self_new_ends</span> <span class="o">&lt;</span> <span class="n">other_new_ends</span><span class="p">,</span> <span class="n">self_new_ends</span><span class="p">,</span> <span class="n">other_new_ends</span>
-        <span class="p">)</span>
+        <span class="n">new_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">self_new_ends</span> <span class="o">&lt;</span> <span class="n">other_new_ends</span><span class="p">,</span> <span class="n">self_new_ends</span><span class="p">,</span> <span class="n">other_new_ends</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_ends</span> <span class="o">-</span> <span class="n">new_starts</span><span class="p">)</span><span class="o">.</span><span class="n">reduce</span><span class="p">()</span></div>
 
@@ -2255,14 +2197,10 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;query&#39; is not a `IRanges` object.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">query_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;any&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;within&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;query_type&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;any&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;end&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;within&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;query_type&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;any&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;start&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;end&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;within&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;first&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;last&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;first&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;last&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="n">_tgap</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">max_gap</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">max_gap</span>
 
@@ -2429,14 +2367,8 @@
                         <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span>
                         <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">min_start</span> <span class="o">-</span> <span class="mi">1</span>
                     <span class="p">)</span>
-                    <span class="ow">or</span> <span class="p">(</span>
-                        <span class="n">step_end</span> <span class="o">==</span> <span class="mi">0</span>
-                        <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">min_start</span> <span class="o">-</span> <span class="mi">1</span>
-                    <span class="p">)</span>
-                    <span class="ow">or</span> <span class="p">(</span>
-                        <span class="n">step_start</span> <span class="o">==</span> <span class="mi">0</span>
-                        <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span>
-                    <span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">step_end</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">min_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">step_start</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">val</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">counter</span> <span class="o">*</span> <span class="n">step_end</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">max_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="p">):</span>
                     <span class="n">_iterate</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">_hits</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2481,9 +2413,7 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
         <span class="n">hits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generic_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">delete_index</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
@@ -2597,9 +2527,7 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
             <span class="n">i_self</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">i_query</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">_gap</span><span class="p">,</span> <span class="n">_overlap</span> <span class="o">=</span> <span class="n">calc_gap_and_overlap</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">i_self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i_self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">i_query</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i_query</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">_gap</span><span class="p">,</span> <span class="n">_overlap</span> <span class="o">=</span> <span class="n">calc_gap_and_overlap</span><span class="p">((</span><span class="n">i_self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i_self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="n">i_query</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i_query</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
             <span class="n">distance</span> <span class="o">=</span> <span class="n">_gap</span>
             <span class="k">if</span> <span class="n">_gap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2823,8 +2751,8 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1e30946d"></script>
-    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+</div><script src="../../_static/documentation_options.js?v=e259d695"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
     </body>
