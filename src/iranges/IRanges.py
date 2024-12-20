@@ -40,11 +40,7 @@ class IRangesIter:
 
     def __next__(self):
         if self._current_index < len(self._iranges):
-            iter_row_index = (
-                self._iranges.names[self._current_index]
-                if self._iranges.names is not None
-                else None
-            )
+            iter_row_index = self._iranges.names[self._current_index] if self._iranges.names is not None else None
 
             iter_slice = self._iranges.get_row(self._current_index)
             self._current_index += 1
@@ -159,9 +155,7 @@ class IRanges:
             raise TypeError("'mcols' should be a BiocFrame")
 
         if self._mcols.shape[0] != len(self._start):
-            raise ValueError(
-                "Number of rows in 'mcols' should be equal to length of 'start'"
-            )
+            raise ValueError("Number of rows in 'mcols' should be equal to length of 'start'")
 
     def _sanitize_metadata(self, metadata):
         if metadata is None:
@@ -315,9 +309,7 @@ class IRanges:
         """
         return self._names
 
-    def set_names(
-        self, names: Optional[Sequence[str]], in_place: bool = False
-    ) -> "IRanges":
+    def set_names(self, names: Optional[Sequence[str]], in_place: bool = False) -> "IRanges":
         """
         Args:
             names:
@@ -373,9 +365,7 @@ class IRanges:
         """
         return self._mcols
 
-    def set_mcols(
-        self, mcols: Optional[BiocFrame], in_place: bool = False
-    ) -> "IRanges":
+    def set_mcols(self, mcols: Optional[BiocFrame], in_place: bool = False) -> "IRanges":
         """Set new metadata about ranges.
 
         Args:
@@ -428,9 +418,7 @@ class IRanges:
         """
         return self._metadata
 
-    def set_metadata(
-        self, metadata: Optional[dict], in_place: bool = False
-    ) -> "IRanges":
+    def set_metadata(self, metadata: Optional[dict], in_place: bool = False) -> "IRanges":
         """Set or replace metadata.
 
         Args:
@@ -490,9 +478,7 @@ class IRanges:
         """
         return len(self._start)
 
-    def __getitem__(
-        self, subset: Union[Sequence, int, str, bool, slice, range]
-    ) -> "IRanges":
+    def __getitem__(self, subset: Union[Sequence, int, str, bool, slice, range]) -> "IRanges":
         """Subset the IRanges.
 
         Args:
@@ -513,9 +499,7 @@ class IRanges:
             metadata=self._metadata,
         )
 
-    def __setitem__(
-        self, args: Union[Sequence, int, str, bool, slice, range], value: "IRanges"
-    ):
+    def __setitem__(self, args: Union[Sequence, int, str, bool, slice, range], value: "IRanges"):
         """Add or update positions (in-place operation).
 
         Args:
@@ -619,9 +603,7 @@ class IRanges:
                     data = self._mcols.column(col)
                     showed = show_as_cell(data, indices)
                     header = [col, "<" + ut.print_type(data) + ">"]
-                    showed = ut.truncate_strings(
-                        showed, width=max(40, len(header[0]), len(header[1]))
-                    )
+                    showed = ut.truncate_strings(showed, width=max(40, len(header[0]), len(header[1])))
                     if insert_ellipsis:
                         showed = showed[:3] + ["..."] + showed[3:]
                     columns.append(header + showed)
@@ -781,9 +763,7 @@ class IRanges:
             _width = val.width[0]
 
             _pshift = shift if isinstance(shift, int) else _ashift[counter]
-            _pwidth = (
-                width if width is None or isinstance(width, int) else _awidth[counter]
-            )
+            _pwidth = width if width is None or isinstance(width, int) else _awidth[counter]
 
             if _pshift > 0:
                 _start += _pshift
@@ -953,9 +933,7 @@ class IRanges:
         Returns:
             NumPy vector containing index positions in the sorted order.
         """
-        order_buf = sorted(
-            range(len(self)), key=lambda i: (self._start[i], self._width[i])
-        )
+        order_buf = sorted(range(len(self)), key=lambda i: (self._start[i], self._width[i]))
 
         if decreasing:
             return np.asarray(order_buf[::-1])
@@ -1038,9 +1016,7 @@ class IRanges:
 
         return IRanges(_gapstarts, _gapends)
 
-    def gaps_numpy(
-        self, start: Optional[int] = None, end: Optional[int] = None
-    ) -> "IRanges":
+    def gaps_numpy(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
         """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
         removed specified by the start and end arguments.
 
@@ -1163,9 +1139,7 @@ class IRanges:
     #### intra range methods ####
     #############################
 
-    def shift(
-        self, shift: Union[int, List[int], np.ndarray], in_place: bool = False
-    ) -> "IRanges":
+    def shift(self, shift: Union[int, List[int], np.ndarray], in_place: bool = False) -> "IRanges":
         """Shifts all the intervals by the amount specified by the ``shift`` argument.
 
         Args:
@@ -1225,23 +1199,15 @@ class IRanges:
         end = self._sanitize_vec_argument(end, allow_none=True)
         width = self._sanitize_vec_argument(width, allow_none=True)
 
-        if (all(x is not None for x in (start, end, width))) or (
-            all(x is None for x in (start, end, width))
-        ):
-            raise ValueError(
-                "Two out of three ('start', 'end' or 'width') arguments must be provided."
-            )
+        if (all(x is not None for x in (start, end, width))) or (all(x is None for x in (start, end, width))):
+            raise ValueError("Two out of three ('start', 'end' or 'width') arguments must be provided.")
 
         if width is not None:
-            if (isinstance(width, int) and width < 0) or (
-                isinstance(width, np.ndarray) and any(x < 0 for x in width)
-            ):
+            if (isinstance(width, int) and width < 0) or (isinstance(width, np.ndarray) and any(x < 0 for x in width)):
                 raise ValueError("'width' cannot be negative.")
 
             if start is None and end is None:
-                raise ValueError(
-                    "If 'width' is provided, either 'start' or 'end' must be provided."
-                )
+                raise ValueError("If 'width' is provided, either 'start' or 'end' must be provided.")
 
         output = self._define_output(in_place)
 
@@ -1253,18 +1219,12 @@ class IRanges:
             _width = value.width[0]
             _oend = value.end[0]
 
-            _pstart = (
-                start if start is None or isinstance(start, int) else start[counter]
-            )
-            _pwidth = (
-                width if width is None or isinstance(width, int) else width[counter]
-            )
+            _pstart = start if start is None or isinstance(start, int) else start[counter]
+            _pwidth = width if width is None or isinstance(width, int) else width[counter]
             _pend = end if end is None or isinstance(end, int) else end[counter]
 
             if _pend is not None and _pend > 0 and _pend > _width:
-                raise ValueError(
-                    f"Provided 'end' is greater than width of the interval for: {counter}"
-                )
+                raise ValueError(f"Provided 'end' is greater than width of the interval for: {counter}")
 
             if _pstart is not None:
                 if _pstart > 0:
@@ -1294,9 +1254,7 @@ class IRanges:
                     _width = _width + _pend + 1
 
             if _width < 0:
-                raise ValueError(
-                    f"Provided 'start' or 'end' arguments lead to negative width for interval: {counter}."
-                )
+                raise ValueError(f"Provided 'start' or 'end' arguments lead to negative width for interval: {counter}.")
 
             new_starts.append(_start)
             new_widths.append(_width)
@@ -1310,9 +1268,7 @@ class IRanges:
     def resize(
         self,
         width: Union[int, List[int], np.ndarray],
-        fix: Union[
-            Literal["start", "end", "center"], List[Literal["start", "end", "center"]]
-        ] = "start",
+        fix: Union[Literal["start", "end", "center"], List[Literal["start", "end", "center"]]] = "start",
         in_place: bool = False,
     ) -> "IRanges":
         """Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an
@@ -1380,14 +1336,10 @@ class IRanges:
 
         output = self._define_output(in_place)
         output._start = np.asarray(new_starts)
-        output._width = (
-            np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
-        )
+        output._width = np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
         return output
 
-    def flank(
-        self, width: int, start: bool = True, both: bool = False, in_place: bool = False
-    ) -> "IRanges":
+    def flank(self, width: int, start: bool = True, both: bool = False, in_place: bool = False) -> "IRanges":
         """Compute flanking ranges for each range. The logic is from the `IRanges` package.
 
         If ``start`` is ``True`` for a given range, the flanking occurs at the `start`,
@@ -1460,9 +1412,7 @@ class IRanges:
 
         return output
 
-    def promoters(
-        self, upstream: int = 2000, downstream: int = 200, in_place: bool = False
-    ) -> "IRanges":
+    def promoters(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> "IRanges":
         """Extend intervals to promoter regions.
 
         Generates promoter ranges relative to the transcription start site (TSS),
@@ -1585,9 +1535,7 @@ class IRanges:
 
         return IRanges(new_starts, new_widths, validate=False)
 
-    def overlap_indices(
-        self, start: Optional[int] = None, end: Optional[int] = None
-    ) -> np.ndarray:
+    def overlap_indices(self, start: Optional[int] = None, end: Optional[int] = None) -> np.ndarray:
         """Find overlaps with the start and end positions.
 
         Args:
@@ -1724,9 +1672,7 @@ class IRanges:
 
         other._build_ncls_index()
 
-        self_indexes, other_indexes = other._ncls.all_overlaps_both(
-            self.start, self.end, np.arange(len(self))
-        )
+        self_indexes, other_indexes = other._ncls.all_overlaps_both(self.start, self.end, np.arange(len(self)))
 
         if delete_index:
             other._delete_ncls_index()
@@ -1734,16 +1680,12 @@ class IRanges:
         self_new_starts = self.start[self_indexes]
         other_new_starts = other.start[other_indexes]
 
-        new_starts = np.where(
-            self_new_starts > other_new_starts, self_new_starts, other_new_starts
-        )
+        new_starts = np.where(self_new_starts > other_new_starts, self_new_starts, other_new_starts)
 
         self_new_ends = self.end[self_indexes]
         other_new_ends = other.end[other_indexes]
 
-        new_ends = np.where(
-            self_new_ends < other_new_ends, self_new_ends, other_new_ends
-        )
+        new_ends = np.where(self_new_ends < other_new_ends, self_new_ends, other_new_ends)
 
         return IRanges(new_starts, new_ends - new_starts).reduce()
 
@@ -1865,14 +1807,10 @@ class IRanges:
             raise TypeError("'query' is not a `IRanges` object.")
 
         if query_type not in ["any", "start", "end", "within"]:
-            raise ValueError(
-                f"'query_type' must be one of {', '.join(['any', 'start', 'end', 'within'])}."
-            )
+            raise ValueError(f"'query_type' must be one of {', '.join(['any', 'start', 'end', 'within'])}.")
 
         if select not in ["all", "first", "last", "arbitrary"]:
-            raise ValueError(
-                f"'select' must be one of {', '.join(['all', 'first', 'last', 'arbitrary'])}."
-            )
+            raise ValueError(f"'select' must be one of {', '.join(['all', 'first', 'last', 'arbitrary'])}.")
 
         _tgap = 0 if max_gap == -1 else max_gap
 
@@ -2032,14 +1970,8 @@ class IRanges:
                         val.end[0] + (counter * step_end) + 1 > max_end + 1
                         and val.start[0] - (counter * step_start) - 1 < min_start - 1
                     )
-                    or (
-                        step_end == 0
-                        and val.start[0] - (counter * step_start) - 1 < min_start - 1
-                    )
-                    or (
-                        step_start == 0
-                        and val.end[0] + (counter * step_end) + 1 > max_end + 1
-                    )
+                    or (step_end == 0 and val.start[0] - (counter * step_start) - 1 < min_start - 1)
+                    or (step_start == 0 and val.end[0] + (counter * step_end) + 1 > max_end + 1)
                 ):
                     _iterate = False
                     _hits = []
@@ -2082,9 +2014,7 @@ class IRanges:
             raise TypeError("`query` is not a `IRanges` object.")
 
         if select not in ["all", "arbitrary"]:
-            raise ValueError(
-                f"'select' must be one of {', '.join(['all', 'arbitrary'])}."
-            )
+            raise ValueError(f"'select' must be one of {', '.join(['all', 'arbitrary'])}.")
 
         hits = self._generic_search(query, 1, 1, 10000000, 1, select, delete_index)
         self._delete_ncls_index()
@@ -2189,9 +2119,7 @@ class IRanges:
         for i in range(len(self)):
             i_self = self[i]
             i_query = query[i]
-            _gap, _overlap = calc_gap_and_overlap(
-                (i_self.start[0], i_self.end[0]), (i_query.start[0], i_query.end[0])
-            )
+            _gap, _overlap = calc_gap_and_overlap((i_self.start[0], i_self.end[0]), (i_query.start[0], i_query.end[0]))
 
             distance = _gap
             if _gap is None:
