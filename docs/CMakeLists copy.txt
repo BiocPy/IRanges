@@ -33,7 +33,7 @@ pybind11_add_module(${TARGET}
 set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
 
 # Link libraries
-target_link_libraries(${TARGET} PRIVATE 
+target_link_libraries(${TARGET} PRIVATE
     pybind11::pybind11
 )
 

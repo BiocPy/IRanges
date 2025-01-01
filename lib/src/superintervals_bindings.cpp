@@ -15,7 +15,7 @@ public:
         auto starts_buf = starts.request();
         auto ends_buf = ends.request();
         auto data_buf = data.request();
-        
+
         if (starts_buf.size != ends_buf.size || starts_buf.size != data_buf.size) {
             throw std::runtime_error("Input arrays must have same length");
         }
@@ -32,22 +32,22 @@ public:
     py::tuple find_overlaps(py::array_t<S> query_starts, py::array_t<S> query_ends) {
         auto starts_buf = query_starts.request();
         auto ends_buf = query_ends.request();
-        
+
         if (starts_buf.size != ends_buf.size) {
             throw std::runtime_error("Query start and end arrays must have same length");
         }
 
         S* starts_ptr = static_cast<S*>(starts_buf.ptr);
         S* ends_ptr = static_cast<S*>(ends_buf.ptr);
-        
+
         std::vector<std::vector<size_t>> all_overlaps;
         std::vector<std::vector<T>> all_data;
-        
+
         for (size_t i = 0; i < starts_buf.size; ++i) {
             std::vector<T> overlaps;
             this->findOverlaps(starts_ptr[i], ends_ptr[i], overlaps);
             all_data.push_back(overlaps);
-            
+
             // Get corresponding indices
             std::vector<size_t> indices;
             for (const auto& val : overlaps) {
@@ -60,7 +60,7 @@ public:
             }
             all_overlaps.push_back(indices);
         }
-        
+
         return py::make_tuple(all_overlaps, all_data);
     }
 
