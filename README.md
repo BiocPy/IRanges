@@ -12,7 +12,7 @@
 
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
 [![PyPI-Server](https://img.shields.io/pypi/v/IRanges.svg)](https://pypi.org/project/IRanges/)
-![Unit tests](https://github.com/BiocPy/IRanges/actions/workflows/pypi-test.yml/badge.svg)
+![Unit tests](https://github.com/BiocPy/IRanges/actions/workflows/run-tests.yml/badge.svg)
 
 # Integer ranges in Python
 
