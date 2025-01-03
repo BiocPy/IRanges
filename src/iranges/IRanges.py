@@ -932,8 +932,8 @@ class IRanges:
 
         return IRanges(gap_starts, gap_widths)
 
-    # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
-    # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389
+    # follows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
+    # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/devel/R/inter-range-methods.R#L389
     def disjoin(self, with_reverse_map: bool = False) -> "IRanges":
         """Calculate disjoint intervals.
 
@@ -945,45 +945,82 @@ class IRanges:
         Returns:
            A new `IRanges` containing disjoint intervals.
         """
-        all_ints = []
-        counter = 0
-        for _, val in self:
-            all_ints.append((val.start[0], 1, counter))
-            all_ints.append((val.end[0], -1, counter))
 
-            counter += 1
+        ends = self.get_end()
+        unique_starts = np.unique(self._start)
+        unique_ends = np.unique(ends)
 
-        sorted_ints = sorted(all_ints)
+        adj_starts_temp = np.concatenate([unique_starts, unique_ends + 1])
+        adj_starts = np.unique(adj_starts_temp)[:-1]
 
-        counter = 0
-        _current_start = None
+        adj_ends_temp = np.concatenate([unique_ends, unique_starts - 1])
+        adj_ends = np.sort(np.unique(adj_ends_temp))[1:]
 
-        result_starts = []
-        result_widths = []
-        result_revmaps = []
+        adj_widths = adj_ends - adj_starts + 1
 
-        _curr_revmap = []
-        for x in sorted_ints:
-            _curr_revmap.append(x[2])
+        adj_ranges = IRanges(adj_starts, adj_widths)
+        # Find overlaps with original ranges
+        adj_indices = []
+        original_indices = []
 
-            if _current_start is not None and x[0] > _current_start and counter != 0:
-                result_starts.append(_current_start)
-                result_widths.append(x[0] - _current_start)
-                result_revmaps.append(list(set(_curr_revmap)))
-                _curr_revmap = []
+        for i in range(len(adj_starts)):
+            adj_start = adj_starts[i]
+            adj_end = adj_ends[i]
 
-            _current_start = x[0]
-            counter += x[1]
+            # Find overlapping original ranges
+            overlaps = (self._start <= adj_end) & (ends >= adj_start)
+            if np.any(overlaps):
+                adj_indices.append(i)
+                original_indices.extend(np.where(overlaps)[0])
 
-        result = IRanges(result_starts, result_widths)
+        # Subset to only ranges that overlap with original
+        adj_starts = adj_starts[adj_indices]
+        adj_widths = adj_widths[adj_indices]
+
+        result = IRanges(adj_starts, adj_widths)
 
         if with_reverse_map is True:
-            result._mcols.set_column("revmap", result_revmaps, in_place=True)
+            mapping = []
+            for i, adj_idx in enumerate(adj_indices):
+                adj_start = adj_starts[i]
+                adj_end = adj_starts[i] + adj_widths[i] - 1
+                overlaps = np.where((self._start <= adj_end) & (ends >= adj_start))[0]
+                mapping.append(overlaps)
+
+            result._mcols.set_column("revmap", mapping, in_place=True)
 
         return result
 
+    def is_disjoint(self) -> bool:
+        """Check if the ranges are disjoint.
+
+        Returns:
+            True if all ranges are non-overlapping.
+        """
+        if len(self) < 2:
+            return True
+
+        ends = self.get_end()
+        
+        oo = self.order()
+        sorted_start = self._start[oo]
+        sorted_end = ends[oo]
+        
+        return bool(np.all(sorted_start[1:] > sorted_end[:-1]))
+    
+    def disjoint_bins(self) -> np.ndarray:
+        """Split ranges into a set of bins so that the ranges in each bin are disjoint..
+
+        Returns:
+            An ndarray indicating the bin index for each range.
+        """
+        order = self.order()
+        result = libir.disjoint_bins(self._start[order], self._width[order])
+
+        return result[np.argsort(order)]
+
     #############################
-    #### intra range methods ####
+    #### intra-range methods ####
     #############################
 
     def shift(self, shift: Union[int, List[int], np.ndarray], in_place: bool = False) -> "IRanges":

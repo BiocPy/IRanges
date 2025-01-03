@@ -7,11 +7,13 @@
 
 namespace py = pybind11;
 
+// Similar implementations to 
 // https://github.com/Bioconductor/IRanges/blob/devel/src/inter_range_methods.c
 
 static std::vector<int32_t> get_order(
     const py::array_t<int32_t> &starts,
-    const py::array_t<int32_t> &widths) {
+    const py::array_t<int32_t> &widths
+) {
 
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
@@ -39,7 +41,8 @@ py::dict reduce_ranges(
     bool drop_empty_ranges,
     int32_t min_gapwidth,
     bool with_revmap,
-    bool with_inframe_start) {
+    bool with_inframe_start
+) {
 
     if (min_gapwidth < 0) {
         throw std::runtime_error("negative min_gapwidth not supported");
@@ -163,7 +166,8 @@ std::tuple<py::array_t<int32_t>, py::array_t<int32_t>> gaps_ranges(
     py::array_t<int32_t> starts,
     py::array_t<int32_t> widths,
     py::object restrict_start_obj,
-    py::object restrict_end_obj) {
+    py::object restrict_end_obj
+) {
 
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
@@ -242,6 +246,42 @@ std::tuple<py::array_t<int32_t>, py::array_t<int32_t>> gaps_ranges(
     return std::make_tuple(out_starts, out_widths);
 }
 
+py::array_t<int32_t> disjoint_bins(
+    py::array_t<int32_t> starts,
+    py::array_t<int32_t> widths
+) {
+
+    auto starts_r = starts.unchecked<1>();
+    auto widths_r = widths.unchecked<1>();
+    int n = starts_r.shape(0);
+    
+    auto result = py::array_t<int32_t>(n);
+    auto result_ptr = result.mutable_unchecked<1>();
+    
+    std::vector<int32_t> bin_ends;
+    bin_ends.reserve(128);
+    
+    for (int i = 0; i < n; i++) {
+        int32_t start = starts_r(i);
+        int32_t end = start + widths_r(i) - 1;
+        
+        // Find appropriate bin
+        int j = 0;
+        for (; j < static_cast<int>(bin_ends.size()) && bin_ends[j] >= start; j++);
+        
+        if (j == static_cast<int>(bin_ends.size())) {
+            bin_ends.push_back(end);
+        } else {
+            bin_ends[j] = end;
+        }
+        
+        result_ptr(i) = j;
+    }
+    
+    return result;
+}
+
+
 void init_interranges(pybind11::module &m) {
     m.def("get_order", &get_order,
           py::arg("starts"),
@@ -263,4 +303,9 @@ void init_interranges(pybind11::module &m) {
           py::arg("restrict_start") = py::none(),
           py::arg("restrict_end") = py::none(),
           "Find gaps between ranges");
+
+    m.def("disjoint_bins", &disjoint_bins,
+          py::arg("starts"),
+          py::arg("widths"),
+          "Assign ranges to disjoint bins");
 }

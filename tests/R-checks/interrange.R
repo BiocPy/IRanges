@@ -5,3 +5,11 @@ res1 <- range(ir)
 
 red1 <- reduce(ir)
 red2 <- reduce(ir, drop.empty.ranges = TRUE)
+red3 <- reduce(ir, min.gapwidth = 2)
+
+disj1 <- disjoin(ir)
+disj2 <- disjoin(ir, with.revmap=TRUE)
+mcols(disj2)[["revmap"]]
+
+disjointBins(ir)
+isDisjoint(ir)

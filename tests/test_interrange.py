@@ -77,18 +77,30 @@ def test_gap_with_restrictions():
     assert all(np.equal(gaps.width, [1, 4, 6]))
 
 
-# def test_disjoin():
-#     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+def test_disjoin():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
 
-#     dj = x.disjoin()
-#     assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
-#     assert all(np.equal(dj.width, [2, 1, 2, 1, 2, 2, 1, 3, 2]))
+    dj = x.disjoin()
+    assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
+    assert all(np.equal(dj.width, [2, 1, 2, 1, 2, 2, 1, 3, 2]))
 
 
-# def test_disjoin_with_revmap():
-#     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+def test_disjoin_with_revmap():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
 
-#     dj = x.disjoin(with_reverse_map=True)
-#     assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
-#     assert all(np.equal(dj.width, [2, 1, 2, 1, 2, 2, 1, 3, 2]))
-#     assert dj.mcols.colnames.as_list() == ["revmap"]
+    dj = x.disjoin(with_reverse_map=True)
+    assert all(np.equal(dj.start, [-6, -4, -2, 0, 1, 3, 9, 10, 13]))
+    assert all(np.equal(dj.width, [2, 1, 2, 1, 2, 2, 1, 3, 2]))
+    assert dj.mcols.colnames.as_list() == ["revmap"]
+    assert dj.mcols.get_column("revmap")[:3] == [[6], [3], [0]]
+    assert np.allclose(dj.mcols.get_column("revmap")[3], [0, 5])
+
+
+def test_is_disjoint():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+
+    assert x.is_disjoint() is False
+
+def test_disjoint_bins():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+    assert np.allclose(x.disjoint_bins(), [0,0,0,0,2,1,0,1])

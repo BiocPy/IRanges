@@ -8,15 +8,17 @@
 
 namespace py = pybind11;
 
-// exported to Python
+// Similar implementations to 
 // based on https://github.com/Bioconductor/IRanges/blob/devel/src/coverage_methods.c
+
 std::tuple<py::array_t<int32_t>, py::array_t<int32_t>, int32_t, bool>
 shift_and_clip_ranges(
     py::array_t<int32_t> starts,
     py::array_t<int32_t> widths,
     py::array_t<int32_t> shift,
     py::object width_obj,
-    py::object circle_len_obj) {
+    py::object circle_len_obj
+) {
 
     // // validate?
     // if (starts.dtype() != py::dtype::of<int32_t>() ||
@@ -132,7 +134,8 @@ static py::array_t<double> coverage_sort(
     const py::array_t<int32_t> &starts,
     const py::array_t<int32_t> &widths,
     const py::array_t<double> &weight,
-    int32_t cvg_len) {
+    int32_t cvg_len
+) {
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
     auto weight_r = weight.unchecked<1>();
@@ -185,7 +188,8 @@ static py::array_t<double> coverage_hash(
     const py::array_t<int32_t> &starts,
     const py::array_t<int32_t> &widths,
     const py::array_t<double> &weight,
-    int32_t cvg_len) {
+    int32_t cvg_len
+) {
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
     auto weight_r = weight.unchecked<1>();
@@ -222,7 +226,8 @@ static py::array_t<double> coverage_naive(
     const py::array_t<int32_t> &starts,
     const py::array_t<int32_t> &widths,
     const py::array_t<double> &weight,
-    int32_t cvg_len) {
+    int32_t cvg_len
+) {
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
     auto weight_r = weight.unchecked<1>();
@@ -254,7 +259,8 @@ py::array_t<double> coverage(
     py::object width,
     py::array_t<double> weight,
     py::object circle_len,
-    std::string method = "auto") {
+    std::string method = "auto"
+) {
 
     auto [shifted_starts, new_widths, cvg_len, out_ranges_are_tiles] =
         shift_and_clip_ranges(starts, widths, shift, width, circle_len);
