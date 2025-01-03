@@ -9,33 +9,33 @@
 namespace py = pybind11;
 
 static py::array_t<double> coverage_sort(
-    const py::array_t<int>& starts,
-    const py::array_t<int>& widths,
+    const py::array_t<int32>& starts,
+    const py::array_t<int32>& widths,
     const py::array_t<double>& weight,
-    int cvg_len
+    int32 cvg_len
 );
 
 static py::array_t<double> coverage_hash(
-    const py::array_t<int>& starts,
-    const py::array_t<int>& widths,
+    const py::array_t<int32>& starts,
+    const py::array_t<int32>& widths,
     const py::array_t<double>& weight,
-    int cvg_len
+    int32 cvg_len
 );
 
 static py::array_t<double> coverage_naive(
-    const py::array_t<int>& starts,
-    const py::array_t<int>& widths,
+    const py::array_t<int32>& starts,
+    const py::array_t<int32>& widths,
     const py::array_t<double>& weight,
-    int cvg_len
+    int32 cvg_len
 );
 
 // exported to Python
 // based on https://github.com/Bioconductor/IRanges/blob/devel/src/coverage_methods.c
-std::tuple<py::array_t<int>, py::array_t<int>, int, bool>
+std::tuple<py::array_t<int32>, py::array_t<int32>, int32, bool>
 shift_and_clip_ranges(
-    py::array_t<int> starts,
-    py::array_t<int> widths,
-    py::array_t<int> shift,
+    py::array_t<int32> starts,
+    py::array_t<int32> widths,
+    py::array_t<int32> shift,
     py::object width_obj,
     py::object circle_len_obj
 ) {
@@ -48,10 +48,10 @@ shift_and_clip_ranges(
 
     // Handle empty input
     if (x_len == 0) {
-        int width_val = width_obj.is_none() ? 0 : width_obj.cast<int>();
+        int width_val = width_obj.is_none() ? 0 : width_obj.cast<int32>();
         return std::make_tuple(
-            py::array_t<int>(),
-            py::array_t<int>(),
+            py::array_t<int32>(),
+            py::array_t<int32>(),
             width_val,
             true
         );
@@ -63,26 +63,26 @@ shift_and_clip_ranges(
 
     bool width_is_none = width_obj.is_none();
     bool circle_len_is_none = circle_len_obj.is_none();
-    int width = width_is_none ? -1 : width_obj.cast<int>();
-    int circle_len = circle_len_is_none ? -1 : circle_len_obj.cast<int>();
+    int32 width = width_is_none ? -1 : width_obj.cast<int32>();
+    int32 circle_len = circle_len_is_none ? -1 : circle_len_obj.cast<int32>();
 
     bool auto_cvg_len = width_is_none || (!circle_len_is_none && circle_len > 0);
-    int cvg_len = auto_cvg_len ? 0 : width;
+    int32 cvg_len = auto_cvg_len ? 0 : width;
 
-    auto shifted_starts = py::array_t<int>(x_len);
-    auto new_widths = py::array_t<int>(x_len);
+    auto shifted_starts = py::array_t<int32>(x_len);
+    auto new_widths = py::array_t<int32>(x_len);
     auto shifted_starts_ptr = shifted_starts.mutable_unchecked<1>();
     auto new_widths_ptr = new_widths.mutable_unchecked<1>();
 
     // Process ranges
-    std::vector<std::pair<int, int>> sorted_ranges;
+    std::vector<std::pair<int32, int32>> sorted_ranges;
     sorted_ranges.reserve(x_len);
 
     for (int i = 0; i < x_len; i++) {
         int j = i % shift_len;
-        int x_start = starts_r(i);
-        int x_end = x_start + widths_r(i) - 1;
-        int shift_val = shift_r(j);
+        int32 x_start = starts_r(i);
+        int32 x_end = x_start + widths_r(i) - 1;
+        int32 shift_val = shift_r(j);
 
         x_start += shift_val;
         x_end += shift_val;
@@ -140,9 +140,9 @@ shift_and_clip_ranges(
 }
 
 py::array_t<double> coverage(
-    py::array_t<int> starts,
-    py::array_t<int> widths,
-    py::array_t<int> shift,
+    py::array_t<int32> starts,
+    py::array_t<int32> widths,
+    py::array_t<int32> shift,
     py::object width,
     py::array_t<double> weight,
     py::object circle_len,
@@ -197,22 +197,22 @@ py::array_t<double> coverage(
 }
 
 static py::array_t<double> coverage_sort(
-    const py::array_t<int>& starts,
-    const py::array_t<int>& widths,
+    const py::array_t<int32>& starts,
+    const py::array_t<int32>& widths,
     const py::array_t<double>& weight,
-    int cvg_len
+    int32 cvg_len
 ) {
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
     auto weight_r = weight.unchecked<1>();
     int x_len = starts_r.shape(0);
 
-    std::vector<std::tuple<int, int, double>> events;
+    std::vector<std::tuple<int32, int32, double>> events;
     events.reserve(2 * x_len);
 
     for (int i = 0; i < x_len; i++) {
-        int start = starts_r(i);
-        int width = widths_r(i);
+        int32 start = starts_r(i);
+        int32 width = widths_r(i);
         double w = weight_r(i % weight_r.shape(0));
         events.emplace_back(start, 1, w);
         events.emplace_back(start + width, -1, w);
@@ -249,10 +249,10 @@ static py::array_t<double> coverage_sort(
 }
 
 static py::array_t<double> coverage_hash(
-    const py::array_t<int>& starts,
-    const py::array_t<int>& widths,
+    const py::array_t<int32>& starts,
+    const py::array_t<int32>& widths,
     const py::array_t<double>& weight,
-    int cvg_len
+    int32 cvg_len
 ) {
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
@@ -262,8 +262,8 @@ static py::array_t<double> coverage_hash(
     std::vector<double> cvg_buf(cvg_len + 1, 0.0);
 
     for (int i = 0; i < x_len; i++) {
-        int start = starts_r(i);
-        int width = widths_r(i);
+        int32 start = starts_r(i);
+        int32 width = widths_r(i);
         double w = weight_r(i % weight_r.shape(0));
 
         if (width > 0) {
@@ -287,10 +287,10 @@ static py::array_t<double> coverage_hash(
 }
 
 static py::array_t<double> coverage_naive(
-    const py::array_t<int>& starts,
-    const py::array_t<int>& widths,
+    const py::array_t<int32>& starts,
+    const py::array_t<int32>& widths,
     const py::array_t<double>& weight,
-    int cvg_len
+    int32 cvg_len
 ) {
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
@@ -302,8 +302,8 @@ static py::array_t<double> coverage_naive(
     std::fill_n(coverage_ptr.mutable_data(0), cvg_len, 0.0);
 
     for (int i = 0; i < x_len; i++) {
-        int start = starts_r(i);
-        int width = widths_r(i);
+        int32 start = starts_r(i);
+        int32 width = widths_r(i);
         double w = weight_r(i % weight_r.shape(0));
 
         for (int j = start - 1; j < start + width - 1 && j < cvg_len; j++) {
@@ -316,9 +316,7 @@ static py::array_t<double> coverage_naive(
     return coverage;
 }
 
-PYBIND11_MODULE(lib_iranges, m) {
-    m.doc() = "Iranges C++ implementations";
-
+void init_coverage(pybind11::module& m) {
     m.def("shift_and_clip_ranges", &shift_and_clip_ranges,
           py::arg("starts"),
           py::arg("widths"),

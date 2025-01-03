@@ -713,7 +713,6 @@ class IRanges:
     #### inter-range methods ####
     #############################
 
-    # based on https://github.com/Bioconductor/IRanges/blob/devel/src/coverage_methods.c
     def shift_and_clip_ranges(
         self, shift: np.ndarray, width: Union[int, None] = None, circle_length: Union[int, None] = None
     ) -> Tuple[np.ndarray, np.ndarray, int, bool]:
@@ -822,7 +821,7 @@ class IRanges:
         min_start = self.start.min()
         max_end = self.end.max()
 
-        return IRanges([min_start], [max_end - min_start])
+        return IRanges([min_start], [max_end - min_start + 1])
 
     def reduce(
         self,

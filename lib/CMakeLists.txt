@@ -5,21 +5,20 @@ project(iranges
     DESCRIPTION "Building the rds shared library"
     LANGUAGES CXX)
 
-# Defining the targets.
-set(TARGET iranges)
-
 find_package(pybind11 CONFIG)
 
 # pybind11 method:
-pybind11_add_module(${TARGET}
-    src/iranges.cpp
+pybind11_add_module(iranges
+    src/coverage.cpp
+    src/interranges.cpp
+    src/init.cpp
 )
 
-set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 17)
+set_property(TARGET iranges PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(${TARGET} PRIVATE pybind11::pybind11)
+target_link_libraries(iranges PRIVATE pybind11::pybind11)
 
-set_target_properties(${TARGET} PROPERTIES
+set_target_properties(iranges PROPERTIES
     OUTPUT_NAME lib_iranges
     PREFIX ""
 )

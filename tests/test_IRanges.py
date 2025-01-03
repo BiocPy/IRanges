@@ -201,3 +201,10 @@ def test_empty():
     subset = r[1:10]
     assert subset is not None
     assert isinstance(subset, IRanges)
+
+
+def test_IRanges_ends():
+    starts = [1, 8, 14, 15, 19, 34, 40]
+    widths = [12, 6, 6, 15, 6, 2, 7]
+    x = IRanges(starts, widths)
+    assert np.allclose(x.get_end(), [12, 13, 19, 29, 24, 35, 46])
