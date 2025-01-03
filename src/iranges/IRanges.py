@@ -7,6 +7,7 @@ import biocutils as ut
 import numpy as np
 from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
+from superintervals import IntervalSet
 
 from .interval import (
     calc_gap_and_overlap,
@@ -111,19 +112,26 @@ class IRanges:
             self._validate_metadata()
 
     def _sanitize_start(self, start):
-        return np.asarray(start, dtype=np.int32)
+        arr = np.array(start, dtype=np.int32)
+        if arr.ndim != 1:
+            raise ValueError("'start' must be a 1-dimensional array")
+        return arr
 
     def _sanitize_width(self, width):
-        return np.asarray(width, dtype=np.int32)
+        arr = np.array(width, dtype=np.int32)
+        if arr.ndim != 1:
+            raise ValueError("'width' must be a 1-dimensional array")
+        return arr
 
     def _validate_width(self):
         if len(self._start) != len(self._width):
-            raise ValueError("'start' and 'width' should have the same length")
+            raise ValueError("'widths' must have the same lengths as 'start'")
 
-        if (self._width < 0).any():
-            raise ValueError("'width' must be non-negative")
+        if np.any(self._width < 0):
+            raise ValueError("'width' values must be non-negative")
 
-        if (self._start + self._width < self._start).any():
+        end = self._start + self._width
+        if (end < self._start).any() or np.any(end > np.iinfo(np.int32).max) or np.any(end < np.iinfo(np.int32).min):
             raise ValueError("end position should fit in a 32-bit signed integer")
 
     def _sanitize_names(self, names):
@@ -142,7 +150,7 @@ class IRanges:
             raise ValueError("'names' should be a list of strings")
 
         if len(self._names) != len(self._start):
-            raise ValueError("'names' and 'start' should have the same length")
+            raise ValueError("'names' must have the same length as 'start'")
 
     def _sanitize_mcols(self, mcols):
         if mcols is None:
@@ -152,10 +160,10 @@ class IRanges:
 
     def _validate_mcols(self):
         if not isinstance(self._mcols, BiocFrame):
-            raise TypeError("'mcols' should be a BiocFrame")
+            raise TypeError("'mcols' must be a BiocFrame")
 
         if self._mcols.shape[0] != len(self._start):
-            raise ValueError("Number of rows in 'mcols' should be equal to length of 'start'")
+            raise ValueError("'mcols' must have the same number of rows as the length of 'start'")
 
     def _sanitize_metadata(self, metadata):
         if metadata is None:
@@ -167,14 +175,14 @@ class IRanges:
 
     def _validate_metadata(self):
         if not isinstance(self._metadata, dict):
-            raise TypeError("'metadata' should be a dictionary")
+            raise TypeError("'metadata' must be a dictionary")
 
     ########################
     #### Getter/setters ####
     ########################
 
     def get_start(self) -> np.ndarray:
-        """Get all start positions.
+        """Get start positions.
 
         Returns:
             NumPy array of 32-bit signed integers containing the start
@@ -206,7 +214,7 @@ class IRanges:
 
     @property
     def start(self) -> np.ndarray:
-        """Get all start positions.
+        """Get start positions.
 
         Returns:
             NumPy array of 32-bit signed integers containing the start
@@ -230,7 +238,7 @@ class IRanges:
         self.set_start(start, in_place=True)
 
     def get_width(self) -> np.ndarray:
-        """Get width of each interval.
+        """Get widths.
 
         Returns:
             NumPy array of 32-bit signed integers containing the widths for all
@@ -253,13 +261,16 @@ class IRanges:
             and a reference to it is returned.
         """
         output = self._define_output(in_place)
+        if len(width) != len(output._width):
+            raise ValueError("length of 'width' should be equal to 'length(<IRanges>)'")
+
         output._width = output._sanitize_width(width)
         output._validate_width()
         return output
 
     @property
     def width(self) -> np.ndarray:
-        """Get width of each interval.
+        """Get widths.
 
         Returns:
             NumPy array of 32-bit signed integers containing the widths for all
@@ -282,13 +293,13 @@ class IRanges:
         return self.set_width(width, in_place=True)
 
     def get_end(self) -> np.ndarray:
-        """Get all end positions.
+        """Get end positions (inclusive).
 
         Returns:
             NumPy array of 32-bit signed integers containing the end position
-            (not inclusive) for all ranges.
+            for all ranges.
         """
-        return self._start + self._width
+        return self._start + self._width - 1
 
     @property
     def end(self) -> np.ndarray:
@@ -296,12 +307,12 @@ class IRanges:
 
         Returns:
             NumPy array of 32-bit signed integers containing the end position
-            (not inclusive) for all ranges.
+            for all ranges.
         """
         return self.get_end()
 
     def get_names(self) -> Optional[Names]:
-        """Get all names.
+        """Get range names.
 
         Returns:
             List containing the names for all ranges, or None if no names are
@@ -330,7 +341,7 @@ class IRanges:
 
     @property
     def names(self) -> Optional[Names]:
-        """Get all names.
+        """Get names.
 
         Returns:
             List containing the names for all ranges, or None if no names are
@@ -388,7 +399,7 @@ class IRanges:
 
     @property
     def mcols(self) -> BiocFrame:
-        """Get metadata about ranges.
+        """Get metadata.
 
         Returns:
             Data frame containing additional metadata columns for all ranges.
@@ -461,12 +472,6 @@ class IRanges:
         )
         self.set_metadata(metadata, in_place=True)
 
-    def _define_output(self, in_place):
-        if in_place:
-            return self
-        else:
-            return self.__copy__()
-
     #########################
     #### Getitem/setitem ####
     #########################
@@ -528,6 +533,37 @@ class IRanges:
         elif self._names is not None:
             for i, j in enumerate(idx):
                 self._names[j] = ""
+
+    def get_row(self, index_or_name: Union[str, int]) -> "IRanges":
+        """Access a row by index or row name.
+
+        Args:
+            index_or_name:
+                Integer index of the row to access.
+
+                Alternatively, you may provide a string specifying the row name to access,
+                only if :py:attr:`~iranges.IRanges.IRanges.names` are available.
+
+        Raises:
+            ValueError:
+                If ``index_or_name`` is not in row names.
+                If the integer index is greater than the number of rows.
+
+            TypeError:
+                If ``index_or_name`` is neither a string nor an integer.
+
+        Returns:
+            IRanges: A sliced IRanges object.
+        """
+
+        if not isinstance(index_or_name, (int, str)):
+            raise TypeError("`index_or_name` must be either an integer index or name.")
+
+        return self[index_or_name]
+
+    def __iter__(self) -> IRangesIter:
+        """Iterator over ranges."""
+        return IRangesIter(self)
 
     ##################
     #### Printing ####
@@ -635,6 +671,12 @@ class IRanges:
     #### Copying ####
     #################
 
+    def _define_output(self, in_place):
+        if in_place:
+            return self
+        else:
+            return self.__copy__()
+
     def __copy__(self) -> "IRanges":
         """Shallow copy of the object.
 
@@ -668,40 +710,227 @@ class IRanges:
             validate=False,
         )
 
-    def get_row(self, index_or_name: Union[str, int]) -> "IRanges":
-        """Access a row by index or row name.
+    #############################
+    #### inter-range methods ####
+    #############################
+
+    def shift_and_clip_ranges(
+        self, shift: np.ndarray, width: Union[int, None] = None, circle_length: Union[int, None] = None
+    ) -> Tuple[np.ndarray, np.ndarray, int, bool]:
+        """Shift and clip interval ranges.
 
         Args:
-            index_or_name:
-                Integer index of the row to access.
+            shift:
+                Array of shift values (will be recycled if necessary).
 
-                Alternatively, you may provide a string specifying the row name to access,
-                only if :py:attr:`~iranges.IRanges.IRanges.names` are available.
+            width:
+                Maximum width to clip to.
+                Defaults to None for no clipping.
 
-        Raises:
-            ValueError:
-                If ``index_or_name`` is not in row names.
-                If the integer index is greater than the number of rows.
-
-            TypeError:
-                If ``index_or_name`` is neither a string nor an integer.
+            circle_length:
+                Length of circular sequence.
+                Defaults to None for linear sequence.
 
         Returns:
-            IRanges: A sliced IRanges object.
+            Tuple of:
+            - Array of shifted/clipped start positions
+            - Array of shifted/clipped widths
+            - Coverage length
+            - Boolean indicating if ranges are in tiling configuration
+        """
+        x_len = len(self._start)
+        print(shift)
+        shift_len = len(shift)
+
+        if x_len == 0:
+            return (np.array([], dtype=np.int_), np.array([], dtype=np.int_), 0 if width is None else width, True)
+
+        if shift_len == 0:
+            raise ValueError("shift length must be > 0")
+
+        # Calculate coverage length
+        auto_cvg_len = width is None or (circle_length is not None and circle_length > 0)
+        cvg_len = 0 if auto_cvg_len else width
+
+        # Recycle shift values if needed
+        recycled_shift = np.tile(shift, (x_len + shift_len - 1) // shift_len)[:x_len]
+
+        # Shift starts and calculate ends
+        shifted_starts = self._start + recycled_shift
+        ends = shifted_starts + self._width - 1  # -1 because width includes start position
+
+        # Handle circular sequence
+        if circle_length is not None:
+            if circle_length <= 0:
+                raise ValueError("circle_len must be > 0")
+            if width is not None and width > circle_length:
+                raise ValueError("width cannot be greater than circle_len")
+
+            # Adjust positions for circular sequence
+            tmp = shifted_starts % circle_length
+            mask = tmp <= 0
+            tmp[mask] += circle_length
+            ends += tmp - shifted_starts
+            shifted_starts = tmp
+
+        # Clip ends
+        if auto_cvg_len:
+            cvg_len = int(np.max(ends)) if x_len > 0 else 0
+        else:
+            np.clip(ends, None, cvg_len, out=ends)
+
+        # Clip starts
+        np.clip(shifted_starts, 1, cvg_len + 1, out=shifted_starts)
+
+        # Calculate new widths after clipping
+        new_widths = ends - shifted_starts + 1
+        np.maximum(new_widths, 0, out=new_widths)
+
+        # Check for tiling configuration
+        out_ranges_are_tiles = True
+        if x_len > 0:
+            # Sort by start position
+            sort_idx = np.argsort(shifted_starts)
+            sorted_starts = shifted_starts[sort_idx]
+            sorted_ends = ends[sort_idx]
+
+            # Ranges are tiling if:
+            # 1. Each range starts where previous ended + 1
+            # 2. First range starts at 1
+            # 3. Last range ends at cvg_len
+            print(sorted_starts[0])
+            print(sorted_ends[-1])
+            print(cvg_len)
+            if sorted_starts[0] != 1 or sorted_ends[-1] != cvg_len:
+                out_ranges_are_tiles = False
+            else:
+                # Check for continuity between ranges
+                gaps = sorted_starts[1:] - sorted_ends[:-1] - 1
+                if np.any(gaps != 0):
+                    out_ranges_are_tiles = False
+
+        return shifted_starts, new_widths, cvg_len, out_ranges_are_tiles
+
+    def coverage(
+        self,
+        shift: Optional[np.ndarray] = None,
+        width: Union[int, None] = None,
+        weight: Optional[np.ndarray] = None,
+        circle_length: Union[int, None] = None,
+        method: Literal["auto", "sort", "hash", "naive"] = "auto",
+    ) -> np.ndarray:
+        """Compute weighted coverage of ranges.
+
+        Args:
+            shift:
+                Array of shift values.
+                Defaults to None for no shift.
+
+            width:
+                Maximum width to clip to.
+                Defaults to None for no clipping.
+
+            weight:
+                Array of weights.
+                Defaults to None for equal weights
+                for all ranges `(weight = 1)`.
+
+            circle_length:
+                Length of circular sequence.
+                Defaults to None for linear sequence.
+
+            method:
+                Coverage computation method.
+                Defaults to "auto".
+
+        Returns:
+            Array containing coverage values
         """
 
-        if not isinstance(index_or_name, (int, str)):
-            raise TypeError("`index_or_name` must be either an integer index or name.")
+        if shift is None:
+            shift = np.zeros(len(self), dtype=np.int32)
+        else:
+            shift = self._sanitize_vec_argument(shift, allow_none=False)
 
-        return self[index_or_name]
+        if weight is None:
+            weight = np.ones(len(self), dtype=np.int32)
+        else:
+            weight = self._sanitize_vec_argument(weight, allow_none=True)
 
-    def __iter__(self) -> IRangesIter:
-        """Iterator over intervals."""
-        return IRangesIter(self)
+        # Process ranges
+        shifted_starts, new_widths, cvg_len, out_ranges_are_tiles = self.shift_and_clip_ranges(
+            shift, width, circle_length
+        )
 
-    #############################
-    #### inter range methods ####
-    #############################
+        if len(shifted_starts) == 0 or cvg_len == 0:
+            return np.zeros(cvg_len, dtype=weight.dtype)
+
+        # Handle tiling case optimization
+        if out_ranges_are_tiles:
+            if len(weight) == 1:
+                return np.full(cvg_len, weight[0], dtype=weight.dtype)
+            elif len(weight) == len(self._start):
+                return np.repeat(weight, new_widths)
+
+        # Choose method
+        if method == "auto":
+            method = "sort" if len(self._start) <= 0.25 * cvg_len else "hash"
+
+        if method == "sort":
+            # Create event pairs (start/end positions with weights)
+            starts_events = np.column_stack(
+                (shifted_starts, np.ones_like(shifted_starts), weight[: len(shifted_starts)])
+            )
+            ends_events = np.column_stack(
+                (shifted_starts + new_widths, -np.ones_like(shifted_starts), weight[: len(shifted_starts)])
+            )
+            events = np.vstack((starts_events, ends_events))
+
+            # Sort events by position, using sign as tiebreaker
+            sort_idx = np.lexsort((events[:, 1], events[:, 0]))
+            events = events[sort_idx]
+
+            # Compute coverage
+            coverage = np.zeros(cvg_len, dtype=weight.dtype)
+            current_sum = 0
+            prev_pos = 1
+
+            for pos, event_type, w in events:
+                pos = int(pos)
+                if pos > cvg_len:
+                    break
+
+                if pos > prev_pos:
+                    coverage[prev_pos - 1 : pos - 1] = current_sum
+
+                current_sum += event_type * w
+                prev_pos = pos
+
+            if prev_pos <= cvg_len:
+                coverage[prev_pos - 1 :] = current_sum
+
+        elif method == "hash":
+            # Use cumsum method for coverage
+            coverage = np.zeros(cvg_len + 1, dtype=weight.dtype)
+
+            for i, (start, width, w) in enumerate(zip(shifted_starts, new_widths, weight[: len(shifted_starts)])):
+                if width > 0:
+                    coverage[start - 1] += w
+                    if start + width - 1 <= cvg_len:
+                        coverage[start + width - 1] -= w
+
+            # Compute cumulative sum
+            coverage = np.cumsum(coverage[:-1])
+
+        else:  # naive method
+            coverage = np.zeros(cvg_len, dtype=weight.dtype)
+            positions = np.arange(cvg_len)
+
+            for i, (start, width, w) in enumerate(zip(shifted_starts, new_widths, weight[: len(shifted_starts)])):
+                mask = (positions >= start - 1) & (positions < start + width - 1)
+                coverage[mask] += w
+
+        return coverage
 
     def _sanitize_vec_argument(
         self,
@@ -713,7 +942,7 @@ class IRanges:
             return None
 
         if isinstance(vec, int):
-            return vec
+            return np.array([vec] * _size)
         elif ut.is_list_of_type(vec, int, ignore_none=allow_none):
             vec = np.asarray(vec)
 
@@ -724,112 +953,6 @@ class IRanges:
             vec = vec[:_size]
 
         return vec
-
-    def clip_intervals(
-        self,
-        shift: Union[int, List[int], np.ndarray] = 0,
-        width: Optional[Union[int, List[int], np.ndarray]] = None,
-        adjust_width_by_shift: bool = False,
-    ) -> "IRanges":
-        """Clip intervals. Starts are always clipped to positive interval ranges (1, Inf).
-
-        If ``width`` is specified, the intervals are clipped to (1, width).
-
-        Args:
-            shift:
-                Shift all starts before clipping. Defaults to 0.
-
-            width:
-                Clip width of each interval. Defaults to None.
-
-            adjust_width_by_shift:
-                Whether to adjust the width based on `shift`.
-                Defaults to False.
-
-        Returns:
-            A ``IRanges`` object, with the clipped intervals.
-        """
-
-        _clipped_starts = []
-        _clipped_widths = []
-        _clipped_names = []
-
-        _ashift = self._sanitize_vec_argument(shift, False)
-        _awidth = self._sanitize_vec_argument(width, True)
-
-        counter = 0
-        for name, val in self:
-            _start = val.start[0]
-            _width = val.width[0]
-
-            _pshift = shift if isinstance(shift, int) else _ashift[counter]
-            _pwidth = width if width is None or isinstance(width, int) else _awidth[counter]
-
-            if _pshift > 0:
-                _start += _pshift
-                if adjust_width_by_shift is True:
-                    _width -= _pshift
-
-            if _pwidth is not None:
-                if _start + _width > _pwidth:
-                    _width = _pwidth - _start
-
-            counter += 1
-
-            if _start < 1:
-                _start = 1
-                _width = val.end[0] - _start
-
-            _end = _start + _width
-            if _end < 1:
-                continue
-
-            _clipped_starts.append(_start)
-            _clipped_widths.append(_width)
-            _clipped_names.append(name if name is not None else str(counter - 1))
-
-        if all(x is None for x in _clipped_names):
-            _clipped_names = None
-
-        return IRanges(_clipped_starts, _clipped_widths, names=_clipped_names)
-
-    def coverage(
-        self,
-        shift: Union[int, List[int], np.ndarray] = 0,
-        width: Optional[Union[int, List[int], np.ndarray]] = None,
-        weight: Union[int, float] = 1,
-    ) -> np.ndarray:
-        """Calculate coverage, for each position, counts the number of intervals that cover it.
-
-        Args:
-            shift:
-                Shift all intervals. Defaults to 0.
-
-            width:
-                Restrict the width of all intervals. Defaults to None.
-
-            weight:
-                Weight to use. Defaults to 1.
-
-        Raises:
-            TypeError:
-                If 'weight' is not a number.
-                If 'width' is not an expected type.
-
-        Returns:
-            A numpy array with the coverage vector.
-        """
-
-        new_ranges = self.clip_intervals(shift=shift, width=width)
-
-        if weight is not None and not isinstance(weight, (int, float)):
-            raise TypeError("'width' must be an integer or float.")
-
-        if isinstance(width, (np.ndarray, list)):
-            width = width.max()
-
-        cov, _ = create_np_interval_vector(new_ranges, force_size=width, value=weight)
-        return cov
 
     def range(self) -> "IRanges":
         """Concatenate all intervals.
