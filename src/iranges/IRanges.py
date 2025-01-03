@@ -7,11 +7,9 @@ import biocutils as ut
 import numpy as np
 from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
-from superintervals import IntervalSet
 
 from .interval import (
     calc_gap_and_overlap,
-    create_np_interval_vector,
 )
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
