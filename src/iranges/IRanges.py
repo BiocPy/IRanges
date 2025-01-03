@@ -1001,13 +1001,13 @@ class IRanges:
             return True
 
         ends = self.get_end()
-        
+
         oo = self.order()
         sorted_start = self._start[oo]
         sorted_end = ends[oo]
-        
+
         return bool(np.all(sorted_start[1:] > sorted_end[:-1]))
-    
+
     def disjoint_bins(self) -> np.ndarray:
         """Split ranges into a set of bins so that the ranges in each bin are disjoint..
 

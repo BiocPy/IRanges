@@ -7,7 +7,7 @@
 
 namespace py = pybind11;
 
-// Similar implementations to 
+// Similar implementations to
 // https://github.com/Bioconductor/IRanges/blob/devel/src/inter_range_methods.c
 
 static std::vector<int32_t> get_order(
@@ -254,30 +254,30 @@ py::array_t<int32_t> disjoint_bins(
     auto starts_r = starts.unchecked<1>();
     auto widths_r = widths.unchecked<1>();
     int n = starts_r.shape(0);
-    
+
     auto result = py::array_t<int32_t>(n);
     auto result_ptr = result.mutable_unchecked<1>();
-    
+
     std::vector<int32_t> bin_ends;
     bin_ends.reserve(128);
-    
+
     for (int i = 0; i < n; i++) {
         int32_t start = starts_r(i);
         int32_t end = start + widths_r(i) - 1;
-        
+
         // Find appropriate bin
         int j = 0;
         for (; j < static_cast<int>(bin_ends.size()) && bin_ends[j] >= start; j++);
-        
+
         if (j == static_cast<int>(bin_ends.size())) {
             bin_ends.push_back(end);
         } else {
             bin_ends[j] = end;
         }
-        
+
         result_ptr(i) = j;
     }
-    
+
     return result;
 }
 

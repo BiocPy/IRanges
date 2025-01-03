@@ -8,7 +8,7 @@
 
 namespace py = pybind11;
 
-// Similar implementations to 
+// Similar implementations to
 // based on https://github.com/Bioconductor/IRanges/blob/devel/src/coverage_methods.c
 
 std::tuple<py::array_t<int32_t>, py::array_t<int32_t>, int32_t, bool>
