@@ -714,6 +714,7 @@ class IRanges:
     #### inter-range methods ####
     #############################
 
+    # based on https://github.com/Bioconductor/IRanges/blob/devel/src/coverage_methods.c
     def shift_and_clip_ranges(
         self, shift: np.ndarray, width: Union[int, None] = None, circle_length: Union[int, None] = None
     ) -> Tuple[np.ndarray, np.ndarray, int, bool]:
@@ -739,7 +740,6 @@ class IRanges:
             - Boolean indicating if ranges are in tiling configuration
         """
         x_len = len(self._start)
-        print(shift)
         shift_len = len(shift)
 
         if x_len == 0:
@@ -762,9 +762,9 @@ class IRanges:
         # Handle circular sequence
         if circle_length is not None:
             if circle_length <= 0:
-                raise ValueError("circle_len must be > 0")
+                raise ValueError("'circle_length' must be > 0")
             if width is not None and width > circle_length:
-                raise ValueError("width cannot be greater than circle_len")
+                raise ValueError("'width' cannot be greater than 'circle_length'")
 
             # Adjust positions for circular sequence
             tmp = shifted_starts % circle_length
@@ -798,9 +798,6 @@ class IRanges:
             # 1. Each range starts where previous ended + 1
             # 2. First range starts at 1
             # 3. Last range ends at cvg_len
-            print(sorted_starts[0])
-            print(sorted_ends[-1])
-            print(cvg_len)
             if sorted_starts[0] != 1 or sorted_ends[-1] != cvg_len:
                 out_ranges_are_tiles = False
             else:
