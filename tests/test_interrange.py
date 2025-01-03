@@ -18,54 +18,63 @@ def test_range():
     assert all(np.equal(range.end, [14]))
 
 
-# def test_reduce():
-#     starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
-#     widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
-#     x = IRanges(starts, widths)
+def test_reduce():
+    starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
+    widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
+    x = IRanges(starts, widths)
 
-#     reduced = x.reduce(with_reverse_map=True)
+    reduced = x.reduce()
 
-#     assert all(np.equal(reduced.start, [-6, -2, 6, 9]))
-#     assert all(np.equal(reduced.width, [3, 7, 0, 6]))
-#     assert reduced.mcols.colnames.as_list() == ["revmap"]
+    assert all(np.equal(reduced.start, [-6, -2, 6, 9]))
+    assert all(np.equal(reduced.width, [3, 7, 0, 6]))
+    assert reduced.mcols.colnames.as_list() == []
 
+    reduced_withrevmap = x.reduce(with_reverse_map=True)
 
-# def test_reduce_drop_ranges():
-#     starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
-#     widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
-#     x = IRanges(starts, widths)
-
-#     reduced = x.reduce(drop_empty_ranges=True)
-#     assert all(np.equal(reduced.start, [-6, -2, 9]))
-#     assert all(np.equal(reduced.width, [3, 7, 6]))
-#     assert reduced.mcols.colnames.as_list() == []
+    assert all(np.equal(reduced_withrevmap.start, [-6, -2, 6, 9]))
+    assert all(np.equal(reduced_withrevmap.width, [3, 7, 0, 6]))
+    assert reduced_withrevmap.mcols.colnames.as_list() == ["revmap"]
 
 
-# def test_reduce_drop_ranges_and_revmap():
-#     starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
-#     widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
-#     x = IRanges(starts, widths)
+def test_reduce_drop_ranges():
+    starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
+    widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
+    x = IRanges(starts, widths)
 
-#     reduced = x.reduce(drop_empty_ranges=True, with_reverse_map=True)
-#     assert all(np.equal(reduced.start, [-6, -2, 9]))
-#     assert all(np.equal(reduced.width, [3, 7, 6]))
-#     assert reduced.mcols.colnames.as_list() == ["revmap"]
+    reduced = x.reduce(drop_empty_ranges=True)
+    assert all(np.equal(reduced.start, [-6, -2, 9]))
+    assert all(np.equal(reduced.width, [3, 7, 6]))
+    assert reduced.mcols.colnames.as_list() == []
+
+    reduced_withrevmap = x.reduce(drop_empty_ranges=True, with_reverse_map=True)
+    assert all(np.equal(reduced_withrevmap.start, [-6, -2, 9]))
+    assert all(np.equal(reduced_withrevmap.width, [3, 7, 6]))
+    assert reduced_withrevmap.mcols.colnames.as_list() == ["revmap"]
+
+def test_reduce_gapwidth():
+    starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
+    widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
+    x = IRanges(starts, widths)
+
+    reduced = x.reduce(min_gap_width=2)
+    assert all(np.equal(reduced.start, [-6,  9]))
+    assert all(np.equal(reduced.width, [12,  6]))
+    assert reduced.mcols.colnames.as_list() == []
+
+def test_gap():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+
+    gaps = x.gaps()
+    assert all(np.equal(gaps.start, [-3, 5]))
+    assert all(np.equal(gaps.width, [1, 4]))
 
 
-# def test_gap():
-#     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
+def test_gap_with_restrictions():
+    x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
 
-#     gaps = x.gaps()
-#     assert all(np.equal(gaps.start, [-3, 5]))
-#     assert all(np.equal(gaps.width, [1, 4]))
-
-
-# def test_gap_with_restrictions():
-#     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
-
-#     gaps = x.gaps(start=-6, end=20)
-#     assert all(np.equal(gaps.start, [-3, 5, 15]))
-#     assert all(np.equal(gaps.width, [1, 4, 6]))
+    gaps = x.gaps(start=-6, end=20)
+    assert all(np.equal(gaps.start, [-3, 5, 15]))
+    assert all(np.equal(gaps.width, [1, 4, 6]))
 
 
 # def test_disjoin():

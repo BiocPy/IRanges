@@ -849,44 +849,18 @@ class IRanges:
         if min_gap_width < 0:
             raise ValueError("'min_gap_width' cannot be negative.")
 
-        order = self.order()
-        starts = self._start[order]
-        widths = self._width[order]
-        ends = starts + widths - 1
+        reduced = result = libir.reduce_ranges(
+            starts=self._start,
+            widths=self._width,
+            drop_empty_ranges=drop_empty_ranges,
+            min_gapwidth=min_gap_width,
+            with_revmap=with_reverse_map,
+            with_inframe_start=False,
+        )
 
-        if drop_empty_ranges:
-            valid_mask = widths > 0
-            starts = starts[valid_mask]
-            ends = ends[valid_mask]
-            widths = widths[valid_mask]
-            order = np.array(order)[valid_mask]
-
-        gaps = np.r_[starts[1:] - ends[:-1], np.inf]
-        merge_mask = np.r_[True, gaps <= min_gap_width][:-1]
-        merge_groups = np.cumsum(~merge_mask)
-        unique_groups = np.unique(merge_groups)
-
-        result_starts = []
-        result_widths = []
-        result_revmaps = []
-
-        for group in unique_groups:
-            group_mask = merge_groups == group
-            group_starts = starts[group_mask]
-            group_ends = ends[group_mask]
-            group_indices = order[group_mask]
-
-            start = group_starts.min()
-            end = group_ends.max()
-            width = end - start + 1
-
-            result_starts.append(start)
-            result_widths.append(width)
-            result_revmaps.append(group_indices.tolist())
-
-        result = IRanges(result_starts, result_widths)
+        result = IRanges(reduced["start"], reduced["width"])
         if with_reverse_map:
-            result._mcols.set_column("revmap", result_revmaps, in_place=True)
+            result._mcols.set_column("revmap", reduced["revmap"], in_place=True)
 
         return result
 
@@ -912,7 +886,7 @@ class IRanges:
         Returns:
             NumPy vector containing index positions in the sorted order.
         """
-        order_buf = sorted(range(len(self)), key=lambda i: (self._start[i], self._width[i]))
+        order_buf = libir.get_order(self._start, self._width)
 
         if decreasing:
             return np.asarray(order_buf[::-1])
@@ -924,10 +898,12 @@ class IRanges:
 
         Args:
             decreasing:
-                Whether to sort in descending order. Defaults to False.
+                Whether to sort in descending order.
+                Defaults to False.
 
             in_place:
-                Whether to modify the object in place. Defaults to False.
+                Whether to modify the object in place.
+                Defaults to False.
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
@@ -950,119 +926,11 @@ class IRanges:
                 Restrict end position. Defaults to None.
 
         Returns:
-            A new ``IRanges`` is with the gap regions.
+            A new ``IRanges``'s with the gap regions.
         """
-        out_ranges = []
-        order_buf = self.order()
+        gap_starts, gap_widths = libir.gaps_ranges(self._start, self._width, restrict_start=start, restrict_end=end)
 
-        if start is not None:
-            max_end = start - 1
-        else:
-            max_end = float("inf")
-
-        for i in order_buf:
-            width_j = self._width[i]
-            if width_j == 0:
-                continue
-            start_j = self._start[i]
-            end_j = start_j + width_j - 1
-
-            if max_end == float("inf"):
-                max_end = end_j
-            else:
-                gapstart = max_end + 1
-                if end is not None and start_j > end + 1:
-                    start_j = end + 1
-                gapwidth = start_j - gapstart
-                if gapwidth >= 1:
-                    out_ranges.append((gapstart, gapwidth))
-                    max_end = end_j
-                elif end_j > max_end:
-                    max_end = end_j
-
-            if end is not None and max_end >= end:
-                break
-
-        if end is not None and max_end is not None and max_end < end:
-            gapstart = max_end + 1
-            gapwidth = end - max_end
-            out_ranges.append((gapstart, gapwidth))
-
-        _gapstarts = []
-        _gapends = []
-        if len(out_ranges):
-            _gapstarts, _gapends = zip(*out_ranges)
-
-        return IRanges(_gapstarts, _gapends)
-
-    def gaps_numpy(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
-        """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
-        removed specified by the start and end arguments.
-
-        This function uses a vectorized approach using numpy vectors.
-        The normal :py:meth:`~.gaps` method performs better in most cases.
-
-        Args:
-            start:
-                Restrict start position. Defaults to 1.
-
-            end:
-                Restrict end position. Defaults to None.
-
-        Returns:
-            A new ``IRanges`` is with the gap regions.
-        """
-        mask = self._width > 0
-        starts = self._start[mask]
-        widths = self._width[mask]
-
-        order = np.argsort(starts)
-        starts = starts[order]
-        widths = widths[order]
-        ends = starts + widths
-
-        gaps = np.r_[starts[1:] - ends[:-1], np.inf]
-        merge_mask = np.r_[True, gaps <= 0][:-1]
-        merge_groups = np.cumsum(~merge_mask)
-        unique_groups = np.unique(merge_groups)
-
-        result_starts = []
-        result_ends = []
-
-        first = merge_groups == unique_groups[0]
-        current_start = starts[first].min()
-        current_end = ends[first].max()
-
-        if start is not None and start < current_start:
-            result_starts.append(start)
-            result_ends.append(current_start)
-
-        for group in unique_groups[1:]:
-            group_mask = merge_groups == group
-            group_starts = starts[group_mask]
-            group_ends = ends[group_mask]
-
-            _start = group_starts.min()
-            _end = group_ends.max()
-
-            if _start - current_end > 0:
-                result_starts.append(current_end)
-                result_ends.append(_start)
-
-                current_start = _start
-                current_end = _end
-            else:
-                current_end = _end
-
-        if end is not None and end > current_end:
-            result_starts.append(current_end)
-            result_ends.append(end + 1)
-
-        result_starts = np.array(result_starts)
-        result_ends = np.array(result_ends)
-
-        result_widths = result_ends - result_starts
-        return IRanges(result_starts, result_widths)
+        return IRanges(gap_starts, gap_widths)
 
     # folows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
     # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/5acb46b3f2805f7f74fe4cb746780e75f8257a83/R/inter-range-methods.R#L389
