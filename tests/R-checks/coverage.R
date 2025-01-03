@@ -14,3 +14,6 @@ paste(as.vector(res3), collapse=",")
 
 res4 <- coverage(ir, shift=7, width=27)
 paste(as.vector(res4), collapse=",")
+
+res5 <- coverage(ir, weight=10)
+paste(as.vector(res5), collapse=",")

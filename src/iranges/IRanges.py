@@ -8,6 +8,7 @@ import numpy as np
 from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
+from . import lib_iranges as libir
 from .interval import (
     calc_gap_and_overlap,
 )
@@ -737,74 +738,8 @@ class IRanges:
             - Coverage length
             - Boolean indicating if ranges are in tiling configuration
         """
-        x_len = len(self._start)
-        shift_len = len(shift)
 
-        if x_len == 0:
-            return (np.array([], dtype=np.int_), np.array([], dtype=np.int_), 0 if width is None else width, True)
-
-        if shift_len == 0:
-            raise ValueError("shift length must be > 0")
-
-        # Calculate coverage length
-        auto_cvg_len = width is None or (circle_length is not None and circle_length > 0)
-        cvg_len = 0 if auto_cvg_len else width
-
-        # Recycle shift values if needed
-        recycled_shift = np.tile(shift, (x_len + shift_len - 1) // shift_len)[:x_len]
-
-        # Shift starts and calculate ends
-        shifted_starts = self._start + recycled_shift
-        ends = shifted_starts + self._width - 1  # -1 because width includes start position
-
-        # Handle circular sequence
-        if circle_length is not None:
-            if circle_length <= 0:
-                raise ValueError("'circle_length' must be > 0")
-            if width is not None and width > circle_length:
-                raise ValueError("'width' cannot be greater than 'circle_length'")
-
-            # Adjust positions for circular sequence
-            tmp = shifted_starts % circle_length
-            mask = tmp <= 0
-            tmp[mask] += circle_length
-            ends += tmp - shifted_starts
-            shifted_starts = tmp
-
-        # Clip ends
-        if auto_cvg_len:
-            cvg_len = int(np.max(ends)) if x_len > 0 else 0
-        else:
-            np.clip(ends, None, cvg_len, out=ends)
-
-        # Clip starts
-        np.clip(shifted_starts, 1, cvg_len + 1, out=shifted_starts)
-
-        # Calculate new widths after clipping
-        new_widths = ends - shifted_starts + 1
-        np.maximum(new_widths, 0, out=new_widths)
-
-        # Check for tiling configuration
-        out_ranges_are_tiles = True
-        if x_len > 0:
-            # Sort by start position
-            sort_idx = np.argsort(shifted_starts)
-            sorted_starts = shifted_starts[sort_idx]
-            sorted_ends = ends[sort_idx]
-
-            # Ranges are tiling if:
-            # 1. Each range starts where previous ended + 1
-            # 2. First range starts at 1
-            # 3. Last range ends at cvg_len
-            if sorted_starts[0] != 1 or sorted_ends[-1] != cvg_len:
-                out_ranges_are_tiles = False
-            else:
-                # Check for continuity between ranges
-                gaps = sorted_starts[1:] - sorted_ends[:-1] - 1
-                if np.any(gaps != 0):
-                    out_ranges_are_tiles = False
-
-        return shifted_starts, new_widths, cvg_len, out_ranges_are_tiles
+        return libir.shift_and_clip_ranges(self._start, self._width, shift, width, circle_length)
 
     def coverage(
         self,
@@ -852,80 +787,7 @@ class IRanges:
         else:
             weight = self._sanitize_vec_argument(weight, allow_none=True)
 
-        # Process ranges
-        shifted_starts, new_widths, cvg_len, out_ranges_are_tiles = self.shift_and_clip_ranges(
-            shift, width, circle_length
-        )
-
-        if len(shifted_starts) == 0 or cvg_len == 0:
-            return np.zeros(cvg_len, dtype=weight.dtype)
-
-        # Handle tiling case optimization
-        if out_ranges_are_tiles:
-            if len(weight) == 1:
-                return np.full(cvg_len, weight[0], dtype=weight.dtype)
-            elif len(weight) == len(self._start):
-                return np.repeat(weight, new_widths)
-
-        # Choose method
-        if method == "auto":
-            method = "sort" if len(self._start) <= 0.25 * cvg_len else "hash"
-
-        if method == "sort":
-            # Create event pairs (start/end positions with weights)
-            starts_events = np.column_stack(
-                (shifted_starts, np.ones_like(shifted_starts), weight[: len(shifted_starts)])
-            )
-            ends_events = np.column_stack(
-                (shifted_starts + new_widths, -np.ones_like(shifted_starts), weight[: len(shifted_starts)])
-            )
-            events = np.vstack((starts_events, ends_events))
-
-            # Sort events by position, using sign as tiebreaker
-            sort_idx = np.lexsort((events[:, 1], events[:, 0]))
-            events = events[sort_idx]
-
-            # Compute coverage
-            coverage = np.zeros(cvg_len, dtype=weight.dtype)
-            current_sum = 0
-            prev_pos = 1
-
-            for pos, event_type, w in events:
-                pos = int(pos)
-                if pos > cvg_len:
-                    break
-
-                if pos > prev_pos:
-                    coverage[prev_pos - 1 : pos - 1] = current_sum
-
-                current_sum += event_type * w
-                prev_pos = pos
-
-            if prev_pos <= cvg_len:
-                coverage[prev_pos - 1 :] = current_sum
-
-        elif method == "hash":
-            # Use cumsum method for coverage
-            coverage = np.zeros(cvg_len + 1, dtype=weight.dtype)
-
-            for i, (start, width, w) in enumerate(zip(shifted_starts, new_widths, weight[: len(shifted_starts)])):
-                if width > 0:
-                    coverage[start - 1] += w
-                    if start + width - 1 <= cvg_len:
-                        coverage[start + width - 1] -= w
-
-            # Compute cumulative sum
-            coverage = np.cumsum(coverage[:-1])
-
-        else:  # naive method
-            coverage = np.zeros(cvg_len, dtype=weight.dtype)
-            positions = np.arange(cvg_len)
-
-            for i, (start, width, w) in enumerate(zip(shifted_starts, new_widths, weight[: len(shifted_starts)])):
-                mask = (positions >= start - 1) & (positions < start + width - 1)
-                coverage[mask] += w
-
-        return coverage
+        return libir.coverage(self._start, self._width, shift, width, weight, circle_length, method)
 
     def _sanitize_vec_argument(
         self,
