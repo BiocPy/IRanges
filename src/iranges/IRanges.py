@@ -14,7 +14,6 @@ from .interval import (
 )
 from .sew_handler import SEWWrangler
 from .utils import (
-    broadcast_to_ranges,
     compute_up_down,
     normalize_array,
 )
