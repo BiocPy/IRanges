@@ -153,6 +153,7 @@ def compute_up_down(
 
     return new_starts, new_widths
 
+
 def calc_gap_and_overlap(first: Tuple[int, int], second: Tuple[int, int]) -> Tuple[Optional[int], Optional[int]]:
     """Calculate gap and/or overlap between two intervals.
 
