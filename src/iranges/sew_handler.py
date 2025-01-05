@@ -4,6 +4,12 @@ import numpy as np
 
 from .utils import handle_negative_coords, normalize_array
 
+__author__ = "Jayaram Kancherla"
+__copyright__ = "jkanche"
+__license__ = "MIT"
+
+# reference: https://github.com/Bioconductor/IRanges/blob/devel/R/IRanges-constructor.R#L201
+
 
 class SEWWrangler:
     """Handler to resolve start/end/width parameters."""

@@ -9,14 +9,8 @@ from biocframe import BiocFrame
 from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
 from . import lib_iranges as libir
-from .interval import (
-    calc_gap_and_overlap,
-)
 from .sew_handler import SEWWrangler
-from .utils import (
-    compute_up_down,
-    normalize_array,
-)
+from .utils import calc_gap_and_overlap, compute_up_down, normalize_array
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
 __copyright__ = "LTLA, jkanche"

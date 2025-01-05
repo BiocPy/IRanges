@@ -2,6 +2,10 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 
+__author__ = "Jayaram Kancherla"
+__copyright__ = "jkanche"
+__license__ = "MIT"
+
 
 def normalize_array(
     x: Optional[Union[int, float, np.number, np.ndarray]], length: int, dtype: np.dtype = np.int32
@@ -148,3 +152,27 @@ def compute_up_down(
     new_widths = new_ends - new_starts + 1
 
     return new_starts, new_widths
+
+def calc_gap_and_overlap(first: Tuple[int, int], second: Tuple[int, int]) -> Tuple[Optional[int], Optional[int]]:
+    """Calculate gap and/or overlap between two intervals.
+
+    Args:
+        first:
+            Interval containing start and end positions.
+            `end` is non-inclusive.
+
+        second:
+            Interval containing start and end positions.
+            `end` is non-inclusive.
+    """
+    if min(first[1], second[1]) > max(first[0], second[0]):
+        _overlap = min(first[1], second[1]) - max(first[0], second[0])
+        return (None, _overlap)
+
+    _gap = None
+    if second[0] >= first[1]:
+        _gap = second[0] - first[1]
+    elif first[0] >= second[1]:
+        _gap = first[0] - second[1]
+
+    return (_gap, None)
