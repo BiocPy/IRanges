@@ -53,6 +53,9 @@ x = IRanges(starts, width=widths)
 
 bounds = IRanges(c(0,5,3), width=c(11,2,7))
 reflect(x, bounds)
+bounds = IRanges(c(0), width=c(11))
+reflect(x, bounds)
+
 
 starts = c(1, 20, 25, 25, 33)
 widths = c(19, 5, 0, 8, 5)

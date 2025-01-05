@@ -1363,11 +1363,14 @@ class IRanges:
 
         output = self._define_output(in_place)
 
-        if len(output) > 1 and len(bounds) == 0:
+        bounds_start = normalize_array(bounds._start, len(output))
+        bounds_width = normalize_array(bounds._width, len(output))
+
+        if len(output) > 1 and len(bounds_start) == 0:
             raise ValueError("'bounds' is an empty array")
 
         ends = output.get_end()
-        new_starts = (2 * bounds._start + bounds._width - 1) - ends
+        new_starts = (2 * bounds_start + bounds_width - 1) - ends
 
         output._start = new_starts
         return output
