@@ -1,6 +1,6 @@
 from copy import deepcopy
 from itertools import chain
-from typing import List, Literal, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import biocutils as ut
@@ -11,6 +11,12 @@ from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 from . import lib_iranges as libir
 from .interval import (
     calc_gap_and_overlap,
+)
+from .sew_handler import SEWWrangler
+from .utils import (
+    broadcast_to_ranges,
+    compute_up_down,
+    normalize_array,
 )
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
@@ -128,6 +134,10 @@ class IRanges:
 
         if np.any(self._width < 0):
             raise ValueError("'width' values must be non-negative")
+
+        # make this optional ??
+        # if not allow_empty and np.any(widths <= 0):
+        #     raise Exception("widths must be positive")
 
         end = self._start + self._width
         if (end < self._start).any() or np.any(end > np.iinfo(np.int32).max) or np.any(end < np.iinfo(np.int32).min):
@@ -803,9 +813,9 @@ class IRanges:
             vec = np.asarray(vec)
 
         if len(vec) < _size:
-            raise ValueError("Provided argument must match the number of intervals.")
+            raise ValueError("Provided argument must match the number of ranges.")
         elif len(vec) > _size:
-            warn("Truncating argument to the number of intervals.")
+            warn("Truncating argument to the number of ranges.")
             vec = vec[:_size]
 
         return vec
@@ -844,7 +854,7 @@ class IRanges:
                 positions are not merged. Defaults to 1.
 
         Returns:
-            A new ``IRanges`` object with reduced intervals.
+            A new ``IRanges`` object with reduced ranges.
         """
         if min_gap_width < 0:
             raise ValueError("'min_gap_width' cannot be negative.")
@@ -865,7 +875,7 @@ class IRanges:
         return result
 
     def _get_intervals_as_list(self) -> List[Tuple[int, int, int]]:
-        """Internal method to get intervals as a list of tuples.
+        """Internal method to get ranges as a list of tuples.
 
         Returns:
             List of tuples containing the start, end and the index.
@@ -894,7 +904,7 @@ class IRanges:
         return np.asarray(order_buf)
 
     def sort(self, decreasing: bool = False, in_place: bool = False) -> "IRanges":
-        """Sort the intervals.
+        """Sort the ranges.
 
         Args:
             decreasing:
@@ -907,7 +917,7 @@ class IRanges:
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            sorted intervals. Otherwise, the current object is directly
+            sorted ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
         order = self.order(decreasing=decreasing)
@@ -935,7 +945,7 @@ class IRanges:
     # follows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
     # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/devel/R/inter-range-methods.R#L389
     def disjoin(self, with_reverse_map: bool = False) -> "IRanges":
-        """Calculate disjoint intervals.
+        """Calculate disjoint ranges.
 
         Args:
             with_reverse_map:
@@ -943,7 +953,7 @@ class IRanges:
                 Defaults to False.
 
         Returns:
-           A new `IRanges` containing disjoint intervals.
+           A new `IRanges` containing disjoint ranges.
         """
 
         ends = self.get_end()
@@ -958,7 +968,6 @@ class IRanges:
 
         adj_widths = adj_ends - adj_starts + 1
 
-        adj_ranges = IRanges(adj_starts, adj_widths)
         # Find overlaps with original ranges
         adj_indices = []
         original_indices = []
@@ -1009,7 +1018,7 @@ class IRanges:
         return bool(np.all(sorted_start[1:] > sorted_end[:-1]))
 
     def disjoint_bins(self) -> np.ndarray:
-        """Split ranges into a set of bins so that the ranges in each bin are disjoint..
+        """Split ranges into a set of bins so that the ranges in each bin are disjoint.
 
         Returns:
             An ndarray indicating the bin index for each range.
@@ -1024,7 +1033,7 @@ class IRanges:
     #############################
 
     def shift(self, shift: Union[int, List[int], np.ndarray], in_place: bool = False) -> "IRanges":
-        """Shifts all the intervals by the amount specified by the ``shift`` argument.
+        """Shift ranges by specified amount.
 
         Args:
             shift:
@@ -1035,13 +1044,22 @@ class IRanges:
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            shifted intervals. Otherwise, the current object is directly
+            shifted ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
-        shift = self._sanitize_vec_argument(shift, allow_none=False)
-
         output = self._define_output(in_place)
-        output._start = output._start + shift
+
+        shift_arr = normalize_array(shift, len(output))
+        if shift_arr.mask.any():
+            raise Exception("'shift' cannot contain NAs")
+
+        new_starts = output._start.copy()
+        if len(shift_arr) == 1:
+            new_starts = output._start + shift_arr[0]
+        else:
+            new_starts = output._start + shift_arr.data
+
+        output._start = new_starts
         return output
 
     def narrow(
@@ -1051,22 +1069,26 @@ class IRanges:
         end: Optional[Union[int, List[int], np.ndarray]] = None,
         in_place: bool = False,
     ) -> "IRanges":
-        """Narrow genomic positions by provided ``start``, ``width`` and ``end`` parameters.
+        """Narrow ranges.
 
         Important: These arguments are relative shift in positions for each range.
 
         Args:
             start:
-                Relative start position. Defaults to None.
+                Relative start position.
+                Defaults to None.
 
             width:
-                Width of each interval position. Defaults to None.
+                Width of each interval position.
+                Defaults to None.
 
             end:
-                Relative end position. Defaults to None.
+                Relative end position.
+                Defaults to None.
 
             in_place:
-                Whether to modify the object in place. Defaults to False.
+                Whether to modify the object in place.
+                Defaults to False.
 
         Raises:
             ValueError:
@@ -1076,77 +1098,19 @@ class IRanges:
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            narrow intervals. Otherwise, the current object is directly
+            narrowed ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
-        start = self._sanitize_vec_argument(start, allow_none=True)
-        end = self._sanitize_vec_argument(end, allow_none=True)
-        width = self._sanitize_vec_argument(width, allow_none=True)
-
-        if (all(x is not None for x in (start, end, width))) or (all(x is None for x in (start, end, width))):
-            raise ValueError("Two out of three ('start', 'end' or 'width') arguments must be provided.")
-
-        if width is not None:
-            if (isinstance(width, int) and width < 0) or (isinstance(width, np.ndarray) and any(x < 0 for x in width)):
-                raise ValueError("'width' cannot be negative.")
-
-            if start is None and end is None:
-                raise ValueError("If 'width' is provided, either 'start' or 'end' must be provided.")
-
         output = self._define_output(in_place)
 
-        counter = 0
-        new_starts = []
-        new_widths = []
-        for _, value in output:
-            _start = value.start[0]
-            _width = value.width[0]
-            _oend = value.end[0]
+        if len(output) == 0:
+            return output
 
-            _pstart = start if start is None or isinstance(start, int) else start[counter]
-            _pwidth = width if width is None or isinstance(width, int) else width[counter]
-            _pend = end if end is None or isinstance(end, int) else end[counter]
+        sew = SEWWrangler(output._width, start, end, width, translate_negative=True, allow_nonnarrowing=False)
+        window_starts, window_widths = sew.solve()
 
-            if _pend is not None and _pend > 0 and _pend > _width:
-                raise ValueError(f"Provided 'end' is greater than width of the interval for: {counter}")
-
-            if _pstart is not None:
-                if _pstart > 0:
-                    _start += _pstart - 1
-                    _width -= _pstart - 1
-                else:
-                    _start = _oend + _pstart
-
-                if _pwidth is not None:
-                    _width = _pwidth
-                elif _pend is not None:
-                    if _pend < 0:
-                        _width = _width + _pend + 1
-                    else:
-                        _width = _pend - _pstart + 1
-            elif _pwidth is not None:
-                _width = _pwidth
-                if _pend is not None:
-                    if _pend > 0:
-                        _start = _start - (_pend - _pwidth) + 2
-                    else:
-                        _start = _oend + _pend - 1
-            elif _pend is not None:
-                if _pend > 0:
-                    _width = _pend
-                else:
-                    _width = _width + _pend + 1
-
-            if _width < 0:
-                raise ValueError(f"Provided 'start' or 'end' arguments lead to negative width for interval: {counter}.")
-
-            new_starts.append(_start)
-            new_widths.append(_width)
-
-            counter += 1
-
-        output._start = np.asarray(new_starts)
-        output._width = np.asarray(new_widths)
+        output._start = output._start + window_starts - 1
+        output._width = window_widths
         return output
 
     def resize(
@@ -1172,7 +1136,8 @@ class IRanges:
                 Defaults to "start".
 
             in_place:
-                Whether to modify the object in place. Defaults to False.
+                Whether to modify the object in place.
+                Defaults to False.
 
         Raises:
             ValueError:
@@ -1181,46 +1146,38 @@ class IRanges:
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            resized intervals. Otherwise, the current object is directly
+            resized ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
-        _FIX_VALS = ["start", "end", "center"]
-        _awidth = self._sanitize_vec_argument(width, allow_none=False)
-
-        if width is None:
-            raise ValueError("`width` cannot be None!")
-
-        if isinstance(_awidth, int) and _awidth < 0:
-            raise ValueError("`width` cannot be negative!")
-        elif isinstance(_awidth, np.ndarray) and any(x < 0 for x in _awidth):
-            raise ValueError("`width` cannot contain negative values!")
-
-        if isinstance(fix, str) and fix not in _FIX_VALS:
-            raise ValueError("`fix` must be either 'start', 'end' or 'center'.")
-        elif ut.is_list_of_type(fix, str) and not all(x in _FIX_VALS for x in fix):
-            raise ValueError("`fix` must be either 'start', 'end' or 'center'.")
-
-        new_starts = []
-
-        counter = 0
-        for name, val in self:
-            _start = val.start[0]
-            _width = val.width[0]
-            _fix = fix if isinstance(fix, str) else fix[counter]
-            _twidth = _awidth if isinstance(_awidth, int) else _awidth[counter]
-
-            if _fix != "start":
-                if _fix == "end":
-                    _start += _width - _twidth
-                elif _fix == "center":
-                    _start += int(_width) / 2 - int(_twidth) / 2
-
-            new_starts.append(int(_start))
-            counter += 1
-
         output = self._define_output(in_place)
-        output._start = np.asarray(new_starts)
-        output._width = np.repeat(_awidth, len(self)) if isinstance(_awidth, int) else _awidth
+
+        width_arr = normalize_array(width, len(output))
+        if width_arr.mask.any() or np.any(width_arr < 0):
+            raise Exception("'width' must be non-negative without NAs")
+
+        if isinstance(fix, str):
+            if fix not in {"start", "end", "center"}:
+                raise ValueError("'fix' must be 'start', 'end', or 'center'")
+            fix_arr = np.array([fix] * len(output))
+        else:
+            fix_arr = np.asarray(fix)
+            if not all(f in {"start", "end", "center"} for f in fix_arr):
+                raise ValueError("'fix' must contain only 'start', 'end', or 'center'")
+
+        # calculate new starts based on fix point
+        new_starts = output._start.copy()
+        width_diff = output._width - width_arr.data
+
+        # end fixed
+        end_mask = fix_arr == "end"
+        new_starts[end_mask] += width_diff[end_mask]
+
+        # center fixed
+        center_mask = fix_arr == "center"
+        new_starts[center_mask] += width_diff[center_mask] // 2
+
+        output._start = new_starts
+        output._width = width_arr.data
         return output
 
     def flank(self, width: int, start: bool = True, both: bool = False, in_place: bool = False) -> "IRanges":
@@ -1255,49 +1212,71 @@ class IRanges:
                 Width to flank by. May be negative.
 
             start:
-                Whether to only flank starts. Defaults to True.
+                Whether to only flank starts.
+                Defaults to True.
 
             both:
-                Whether to flank both starts and ends. Defaults to False.
+                Whether to flank both starts and ends.
+                Defaults to False.
 
             in_place:
-                Whether to modify the object in place. Defaults to False.
+                Whether to modify the object in place.
+                Defaults to False.
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            flanked intervals. Otherwise, the current object is directly
+            flanked ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
-
-        if width is None:
-            raise ValueError("`width` cannot be None!")
-
         output = self._define_output(in_place)
 
-        if both is True:
-            width = abs(width)
-            if start is True:
-                output._start = output.start - width
-            else:
-                output._start = output.end - width
+        width_arr = normalize_array(width, len(output))
 
-            output._width = np.zeros(len(output)) + (2 * width)
+        if isinstance(start, bool):
+            start_arr = np.full(len(output), start, dtype=bool)
         else:
-            if start is True:
-                if width >= 0:
-                    output._start = output.start - width
-            else:
-                if width >= 0:
-                    output._start = output.end
-                else:
-                    output._start = output.end + width
+            start_arr = np.asarray(start, dtype=bool)
+            if len(start_arr) != len(output):
+                start_arr = np.resize(start_arr, len(output))  # may be throw an error?
 
-            output._width = np.zeros(len(output)) + abs(width)
+        if not isinstance(both, bool):
+            raise ValueError("'both' must be TRUE or FALSE")
 
+        ends = output.get_end()
+
+        # Handle both-sided flanking
+        if both:
+            width_abs = np.abs(width_arr)
+            new_widths = 2 * width_abs.data
+            new_starts = np.where(start_arr, output._start - width_abs.data, ends - width_abs.data + 1)
+        else:
+            new_widths = np.abs(width_arr.data)
+
+            new_starts = np.zeros(len(output), dtype=np.int32)
+            pos_width = width_arr >= 0
+
+            # start=True, width>=0: start - width
+            mask1 = start_arr & pos_width
+            new_starts[mask1] = output._start[mask1] - width_arr[mask1]
+
+            # start=True, width<0: start
+            mask2 = start_arr & ~pos_width
+            new_starts[mask2] = output._start[mask2]
+
+            # start=False, width>=0: end + 1
+            mask3 = ~start_arr & pos_width
+            new_starts[mask3] = ends[mask3] + 1
+
+            # start=False, width<0: end + width + 1
+            mask4 = ~start_arr & ~pos_width
+            new_starts[mask4] = ends[mask4] + width_arr[mask4] + 1
+
+        output._start = new_starts
+        output._width = new_widths
         return output
 
     def promoters(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> "IRanges":
-        """Extend intervals to promoter regions.
+        """Get promoter regions (upstream and downstream of TSS sites).
 
         Generates promoter ranges relative to the transcription start site (TSS),
         where TSS is start(x). The promoter range is expanded around the TSS
@@ -1320,20 +1299,45 @@ class IRanges:
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            promoter intervals. Otherwise, the current object is directly
+            promoter ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
 
         output = self._define_output(in_place)
 
-        if upstream < 0 or downstream < 0:
-            raise ValueError("'upstream' and 'downstream; must be integers >=0.")
-
-        new_starts = output.start - upstream
-        new_ends = output.start + downstream
+        new_starts, new_widths = compute_up_down(output._start, output._width, upstream, downstream, "TSS")
 
         output._start = new_starts
-        output._width = new_ends - new_starts
+        output._width = new_widths
+        return output
+
+    def terminators(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> "IRanges":
+        """Get terminator regions (upstream and downstream of TES).
+
+        Args:
+            upstream:
+                Number of positions to extend in the 5' direction.
+                Defaults to 2000.
+
+            downstream:
+                Number of positions to extend in the 3' direction.
+                Defaults to 200.
+
+            in_place:
+                Whether to modify the object in place. Defaults to False.
+
+        Returns:
+            If ``in_place = False``, a new ``IRanges`` is returned with the
+            terminator ranges. Otherwise, the current object is directly
+            modified and a reference to it is returned.
+        """
+
+        output = self._define_output(in_place)
+
+        new_starts, new_widths = compute_up_down(output._start, output._width, upstream, downstream, "TES")
+
+        output._start = new_starts
+        output._width = new_widths
         return output
 
     def reflect(self, bounds: "IRanges", in_place: bool = False) -> "IRanges":
@@ -1357,18 +1361,22 @@ class IRanges:
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
-            reflected intervals. Otherwise, the current object is directly
+            reflected ranges. Otherwise, the current object is directly
             modified and a reference to it is returned.
         """
 
         if not isinstance(bounds, IRanges):
             raise TypeError("'bounds' must be an IRanges object.")
 
-        if len(bounds) != len(self):
-            raise ValueError("'bounds' does not contain the same number of intervals.")
-
         output = self._define_output(in_place)
-        output._start = ((2 * bounds.start) + bounds.width) - output.end
+
+        if len(output) > 1 and len(bounds) == 0:
+            raise ValueError("'bounds' is an empty array")
+
+        ends = output.get_end()
+        new_starts = (2 * bounds._start + bounds._width - 1) - ends
+
+        output._start = new_starts
         return output
 
     def restrict(
@@ -1387,37 +1395,104 @@ class IRanges:
                 End position. Defaults to None.
 
             keep_all_ranges:
-                Whether to keep intervals that do not overlap with start and end.
+                Whether to keep ranges that do not overlap with start and end.
                 Defaults to False.
 
         Returns:
-            A new ``IRanges`` with the restricted intervals.
+            A new ``IRanges`` with the restricted ranges.
         """
-        if start is None and end is None:
-            warn("Both 'start' and 'end' are 'None'.")
-            return self._define_output(False)
+        start_arr = normalize_array(start, len(self))
+        end_arr = normalize_array(end, len(self))
 
-        if start is not None:
-            _start = self._sanitize_vec_argument(start)
-            new_starts = np.clip(self.start, _start, None)
-        else:
-            new_starts = self.start
+        range_ends = self.get_end()
 
-        if end is not None:
-            _end = self._sanitize_vec_argument(end)
-            new_ends = np.clip(self.end, None, _end + 1)
-        else:
-            new_ends = self.end
+        new_starts = self._start.copy()
+        new_ends = range_ends.copy()
+        keep_mask = np.ones(len(self), dtype=bool)
 
-        new_starts = new_starts
-        new_widths = new_ends - new_starts
+        drop_mode = 2 if keep_all_ranges else 1
 
-        if keep_all_ranges is False:
-            _flt_idx = np.where(new_widths > -1)
-            new_starts = new_starts[_flt_idx]
-            new_widths = new_widths[_flt_idx]
+        # left/start restrictions
+        if not start_arr.mask.all():
+            if drop_mode == 2:
+                # Keep but clip ranges
+                too_left = (~start_arr.mask) & (new_starts < start_arr)
+                new_starts[too_left] = start_arr[too_left]
+            else:
+                # Drop ranges too far left
+                far_left = (~start_arr.mask) & (range_ends < start_arr - (drop_mode == 1))
+                keep_mask &= ~far_left
+                too_left = (~start_arr.mask) & (new_starts < start_arr)
+                new_starts[too_left] = start_arr[too_left]
 
-        return IRanges(new_starts, new_widths, validate=False)
+        # right/end restriction
+        if not end_arr.mask.all():
+            if drop_mode == 2:
+                # Keep but clip ranges
+                too_right = (~end_arr.mask) & (new_ends > end_arr)
+                new_ends[too_right] = end_arr[too_right]
+            else:
+                # Drop ranges too far right
+                far_right = (~end_arr.mask) & (new_starts > end_arr + (drop_mode == 1))
+                keep_mask &= ~far_right
+                too_right = (~end_arr.mask) & (new_ends > end_arr)
+                new_ends[too_right] = end_arr[too_right]
+
+        if drop_mode != 2:
+            new_starts = new_starts[keep_mask]
+            new_ends = new_ends[keep_mask]
+
+        new_widths = new_ends - new_starts + 1
+        return IRanges(new_starts, new_widths)
+
+    def threebands(
+        self,
+        start: Optional[Union[int, np.ndarray]] = None,
+        end: Optional[Union[int, np.ndarray]] = None,
+        width: Optional[Union[int, np.ndarray]] = None,
+    ) -> Dict[str, Tuple[np.ndarray, np.ndarray]]:
+        """Split ranges into three parts: left, middle, and right.
+
+        Args:
+            starts:
+                Array of start positions.
+
+            widths:
+                Array of widths.
+
+            start:
+                Start positions for middle band.
+
+            end:
+                End positions for middle band.
+
+            width:
+                Width for middle band.
+
+        Returns:
+            Dictionary with:
+                'left': (starts, widths) for left bands
+                'middle': (starts, widths) for middle bands
+                'right': (starts, widths) for right bands
+        """
+        # calculate middle band using narrow
+        middle_ranges = self.narrow(start, end, width)
+        middle_ends = middle_ranges.get_end()
+
+        # calculate left band
+        left_starts = self._start.copy()
+        left_widths = middle_ranges._start - self._start
+
+        # calculate right band
+        right_starts = middle_ends + 1
+        range_ends = self.get_end()
+        right_widths = range_ends - middle_ends
+
+        return {
+            "left": IRanges(left_starts, left_widths),
+            "middle": middle_ranges,
+            "right": IRanges(right_starts, right_widths),
+        }
 
     def overlap_indices(self, start: Optional[int] = None, end: Optional[int] = None) -> np.ndarray:
         """Find overlaps with the start and end positions.
@@ -1460,7 +1535,7 @@ class IRanges:
 
     # set operations
     def union(self, other: "IRanges") -> "IRanges":
-        """Find union of intervals with `other`.
+        """Find union of ranges with `other`.
 
         Args:
             other:
