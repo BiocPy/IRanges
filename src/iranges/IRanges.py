@@ -1691,48 +1691,53 @@ class IRanges:
             if select != "all" and len(all_overlaps[_q_idx]) > 0:
                 continue
 
-            print("all so continue", select)
+            print("select is ", select)
 
             qstart = query._start[_q_idx]
             qend = query._start[_q_idx] + query._width[_q_idx] - 1
-            if max_gap > 0:
-                if query_type == "start":
-                    qstart -= max_gap
-                    qend -= max_gap
-                elif query_type == "end":
-                    qstart += max_gap
-                    qend += max_gap
+            print("old q positions", qstart, qend)
 
-            _gap, _overlap, _position = calc_gap_and_overlap_position(
-                (qstart, qend),
+            # if max_gap > 0:
+            #     if query_type == "start":
+            #         qstart -= max_gap
+            #     elif query_type == "end":
+            #         qend += max_gap
+
+            print("new q positions", qstart, qend)
+            _gap, _overlap = calc_gap_and_overlap_position(
                 (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx] - 1),
+                (qstart, qend),
             )
 
-            print("calc_gap_and_overlap_position", _gap, _overlap, _position, query_type)
+            print(
+                "final s and q positions",
+                (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx] - 1),
+                (qstart, qend),
+            )
 
-            if query_type != "any" and query_type != _position:
+            print("calc_gap_and_overlap_position", _gap, _overlap)
+
+            if query_type != "any" and _overlap is not None and _overlap[1] != "any" and query_type != _overlap[1]:
+                print("query ! = position")
                 continue
 
-            _append = True
-
-            if _gap is not None and (max_gap == -1 or _gap > max_gap):
+            if _gap is not None and (max_gap == -1 or _gap[0] > max_gap):
                 print("gap is false")
-                _append = False
+                continue
 
-            if _overlap is not None and _overlap < min_overlap:
+            if _overlap is not None and _overlap[0] < min_overlap:
                 print("overlap is false")
-                _append = False
+                continue
 
-            print("what is append???", _append)
-            if _append is True:
-                if select == "first" or select == "arbitrary":
-                    all_overlaps[_q_idx].append(_s_idx)
-                elif select == "last":
-                    all_overlaps[_q_idx].append(_s_idx)
-                elif select == "all":
-                    all_overlaps[_q_idx].append(_s_idx)
+            print("appendding...")
+            if select == "first" or select == "arbitrary":
+                all_overlaps[_q_idx].append(_s_idx)
+            elif select == "last":
+                all_overlaps[_q_idx].append(_s_idx)
+            elif select == "all":
+                all_overlaps[_q_idx].append(_s_idx)
 
-                index_counter.append(_q_idx)
+            index_counter.append(_q_idx)
 
         if delete_index is True:
             self._delete_ncls_index()
@@ -1791,7 +1796,7 @@ class IRanges:
             indices in ``self`` that overlap with the query range.
         """
         print("########")
-        print(query_type, select, max_gap, min_overlap)
+        print("query_type, select, max_gap, min_overlap", query_type, select, max_gap, min_overlap)
         if not isinstance(query, IRanges):
             raise TypeError("'query' is not a `IRanges` object.")
 

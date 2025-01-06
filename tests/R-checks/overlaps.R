@@ -1,5 +1,5 @@
-subject = IRanges(c(1, 4, 9), width=c(5, 4, 2))
 query = IRanges(c(2, 2, 10), width=c(1, 2, 3))
+subject = IRanges(c(1, 4, 9), width=c(5, 4, 2))
 
 findOverlaps(query, subject)
 findOverlaps(query, subject, maxgap = 0)

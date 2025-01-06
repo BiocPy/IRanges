@@ -49,30 +49,6 @@ def normalize_array(
     return np.ma.masked_array(x, dtype=dtype, mask=False)
 
 
-def broadcast_to_ranges(*arrays: Tuple[np.ndarray, str]) -> Tuple[np.ndarray, ...]:
-    """Broadcast multiple arrays to match range length.
-
-    Args:
-        arrays:
-            Tuple of (array, name) pairs.
-
-    Returns:
-        Tuple of broadcasted arrays
-    """
-    max_len = max(len(arr) for arr, _ in arrays)
-    result = []
-
-    for arr, name in arrays:
-        if len(arr) == 1:
-            result.append(np.full(max_len, arr[0], dtype=arr.dtype))
-        elif len(arr) == max_len:
-            result.append(arr)
-        else:
-            raise Exception(f"{name} length {len(arr)} cannot be broadcast to length {max_len}")
-
-    return tuple(result)
-
-
 def handle_negative_coords(coords: np.ma.MaskedArray, ref_len: np.ndarray) -> np.ma.MaskedArray:
     """Convert negative coordinates to positive using reference length.
 
@@ -155,47 +131,57 @@ def compute_up_down(
 
 
 def calc_gap_and_overlap_position(
-    first: Tuple[int, int], second: Tuple[int, int]
+    subject: Tuple[int, int], query: Tuple[int, int]
 ) -> Tuple[Optional[int], Optional[int], Optional[str]]:
-    """Calculate gap and/or overlap between two intervals, including overlap position.
+    """Calculate gap and/or overlap between intervals relative to query.
 
     Args:
-        first:
+        subject:
             Interval containing start and end positions.
-            `end` is non-inclusive.
 
-        second:
+        query:
             Interval containing start and end positions.
-            `end` is non-inclusive.
 
     Returns:
-        A tuple of (gap, overlap, overlap_position):
+        A tuple of ((gap_position, gap), (overlap, overlap_position)):
         - gap: The gap between the intervals if non-overlapping, else None.
+        - gap_position: Position of the subject relative to the query.
         - overlap: The overlap size if overlapping, else None.
         - overlap_position: Where the overlap occurs relative to the first interval.
           Options are: 'start', 'end', 'within', or 'any' (if there's overlap but no specific case).
     """
-    start_first, end_first = first
-    start_second, end_second = second
+    subject_start, subject_end = subject
+    query_start, query_end = query
 
-    print("calc gap and overlap:::: ", first, second)
+    # non-overlapping scenarios (includes adjacents)
+    if subject_end < query_start and subject_start < query_start:
+        # ___S___|___Q___
+        return (max(query_start - subject_end - 1, 0), "gap_start"), None
+    elif query_end < subject_start and query_start < subject_start:
+        # ___Q___|___S___
+        return (max(subject_start - query_end - 1, 0), "gap_end"), None
 
-    if end_first >= start_second and end_second >= start_first:
-        # Overlapping case
-        overlap = min(end_first, end_second) - max(start_first, start_second) + 1
+    # overlap scenarios
+    #     ___Q___
+    #     ___S___       # overlap equal
+    #          __S___   # overlap right
+    # ___S__            # overlap left
+    #       _S_         # overlap within
+    if query_end >= subject_start and query_start <= subject_end:
+        overlap = min(subject_end, query_end) - max(subject_start, query_start) + 1
 
         # Determine the overlap position
-        if start_second <= start_first and end_second >= end_first:
+        if query_start == subject_start and query_end == subject_end:
+            overlap_position = "equal"
+        if query_start < subject_start and query_end > subject_end:
             overlap_position = "within"
-        elif start_second <= start_first:
+        elif subject_start < query_start and subject_end < query_end and subject_end > query_start:
             overlap_position = "start"
-        elif end_second >= end_first:
+        elif subject_end > query_end and subject_start > query_start and subject_start < query_end:
             overlap_position = "end"
         else:
             overlap_position = "any"
 
-        return None, overlap, overlap_position
+        return None, (overlap, overlap_position)
 
-    # Non-overlapping, calculate the gap
-    gap = max(start_first - end_second, start_second - end_first) - 1
-    return gap, None, None
+    return None, None
