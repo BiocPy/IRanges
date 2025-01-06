@@ -1703,7 +1703,6 @@ class IRanges:
                     qstart += max_gap
                     qend += max_gap
 
-
             _gap, _overlap, _position = calc_gap_and_overlap_position(
                 (qstart, qend),
                 (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx] - 1),
