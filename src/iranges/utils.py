@@ -154,8 +154,10 @@ def compute_up_down(
     return new_starts, new_widths
 
 
-def calc_gap_and_overlap(first: Tuple[int, int], second: Tuple[int, int]) -> Tuple[Optional[int], Optional[int]]:
-    """Calculate gap and/or overlap between two intervals.
+def calc_gap_and_overlap_position(
+    first: Tuple[int, int], second: Tuple[int, int]
+) -> Tuple[Optional[int], Optional[int], Optional[str]]:
+    """Calculate gap and/or overlap between two intervals, including overlap position.
 
     Args:
         first:
@@ -165,15 +167,35 @@ def calc_gap_and_overlap(first: Tuple[int, int], second: Tuple[int, int]) -> Tup
         second:
             Interval containing start and end positions.
             `end` is non-inclusive.
+
+    Returns:
+        A tuple of (gap, overlap, overlap_position):
+        - gap: The gap between the intervals if non-overlapping, else None.
+        - overlap: The overlap size if overlapping, else None.
+        - overlap_position: Where the overlap occurs relative to the first interval.
+          Options are: 'start', 'end', 'within', or 'any' (if there's overlap but no specific case).
     """
-    if min(first[1], second[1]) > max(first[0], second[0]):
-        _overlap = min(first[1], second[1]) - max(first[0], second[0])
-        return (None, _overlap)
+    start_first, end_first = first
+    start_second, end_second = second
 
-    _gap = None
-    if second[0] >= first[1]:
-        _gap = second[0] - first[1]
-    elif first[0] >= second[1]:
-        _gap = first[0] - second[1]
+    print("calc gap and overlap:::: ", first, second)
 
-    return (_gap, None)
+    if end_first >= start_second and end_second >= start_first:
+        # Overlapping case
+        overlap = min(end_first, end_second) - max(start_first, start_second) + 1
+
+        # Determine the overlap position
+        if start_second <= start_first and end_second >= end_first:
+            overlap_position = "within"
+        elif start_second <= start_first:
+            overlap_position = "start"
+        elif end_second >= end_first:
+            overlap_position = "end"
+        else:
+            overlap_position = "any"
+
+        return None, overlap, overlap_position
+
+    # Non-overlapping, calculate the gap
+    gap = max(start_first - end_second, start_second - end_first) - 1
+    return gap, None, None

@@ -53,7 +53,7 @@ x = IRanges(starts, width=widths)
 
 bounds = IRanges(c(0,5,3), width=c(11,2,7))
 reflect(x, bounds)
-bounds = IRanges(c(0), width=c(11))
+bounds = IRanges(c(5), width=c(2))
 reflect(x, bounds)
 
 

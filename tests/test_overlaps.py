@@ -1,21 +1,50 @@
-# from iranges import IRanges
-# import numpy as np
+from iranges import IRanges
+import numpy as np
 
-# __author__ = "jkanche"
-# __copyright__ = "jkanche"
-# __license__ = "MIT"
+__author__ = "jkanche"
+__copyright__ = "jkanche"
+__license__ = "MIT"
 
 
-# def test_find_overlaps():
-#     query = IRanges([1, 4, 9], [5, 4, 2])
-#     subject = IRanges([2, 2, 10], [1, 2, 3])
+def test_find_overlaps():
+    query = IRanges([1, 4, 9], [5, 4, 2])
+    subject = IRanges([2, 2, 10], [1, 2, 3])
 
-#     res = query.find_overlaps(subject)
-#     assert res == [[0], [0], [2]]
+    res = query.find_overlaps(subject)
+    assert res.get_column("self_indices") == [0, 0, 2]
+    assert res.get_column("query_indices") == [0, 1, 2]
 
-#     res = query.find_overlaps(subject, max_gap=0)
-#     assert res == [[0], [0, 1], [2]]
+    res = query.find_overlaps(subject, max_gap=0)
+    assert res.get_column("self_indices") == [0, 0, 1, 2]
+    assert res.get_column("query_indices") == [0, 1, 1, 2]
 
+    res = query.find_overlaps(subject, select="first")
+    assert res.get_column("self_indices") == [0, 0, 2]
+    assert res.get_column("query_indices") == [0, 1, 2]
+
+    res = query.find_overlaps(subject, select="last")
+    assert res.get_column("self_indices") == [0, 0, 2]
+    assert res.get_column("query_indices") == [0, 1, 2]
+
+    res = query.find_overlaps(subject, select="arbitrary")
+    assert res.get_column("self_indices") == [0, 0, 2]
+    assert res.get_column("query_indices") == [0, 1, 2]
+
+    res = query.find_overlaps(subject, query_type="start")
+    assert res.get_column("self_indices") == []
+    assert res.get_column("query_indices") == []
+
+    res = query.find_overlaps(subject, query_type="start", max_gap=1)
+    assert res.get_column("self_indices") == [0, 0, 2]
+    assert res.get_column("query_indices") == [0, 1, 2]
+
+    res = query.find_overlaps(subject, query_type="end", select="first")
+    assert res.get_column("self_indices") == []
+    assert res.get_column("query_indices") == []
+
+    res = query.find_overlaps(subject, query_type="within", max_gap=1)
+    assert res.get_column("self_indices") == []
+    assert res.get_column("query_indices") == []
 
 # def test_subset_overlaps():
 #     query = IRanges([1, 4], [5, 4])
