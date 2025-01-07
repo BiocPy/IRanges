@@ -790,7 +790,7 @@ class IRanges:
         return libir.coverage(self._start, self._width, shift, width, weight, circle_length, method)
 
     def range(self) -> "IRanges":
-        """Concatenate all intervals.
+        """Concatenate all ranges.
 
         Returns:
             An new ``IRanges`` instance with a single range,
@@ -882,7 +882,7 @@ class IRanges:
         return output[order]
 
     def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
-        """Gaps returns an ``IRanges`` object representing the set of integers that remain after the intervals are
+        """Gaps returns an ``IRanges`` object representing the set of intervals that remain after the ranges are
         removed specified by the start and end arguments.
 
         Args:
@@ -1546,7 +1546,7 @@ class IRanges:
         return diff
 
     def intersect(self, other: "IRanges") -> "IRanges":
-        """Find intersecting intervals with `other`.
+        """Find intersecting ranges with `other`.
 
         Args:
             other:
@@ -1557,7 +1557,7 @@ class IRanges:
                 If ``other`` is not `IRanges`.
 
         Returns:
-            A new ``IRanges`` object with all intersecting intervals.
+            A new ``IRanges`` object with all intersecting ranges.
         """
 
         if not isinstance(other, IRanges):
@@ -1574,7 +1574,7 @@ class IRanges:
     # Inspired by pyranges intersection using NCLS
     # https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py
     def intersect_ncls(self, other: "IRanges", delete_index: bool = True) -> "IRanges":
-        """Find intersecting intervals with `other`. Uses the NCLS index.
+        """Find intersecting ranges with `other`. Uses the NCLS index.
 
         Args:
             other:
@@ -1585,7 +1585,7 @@ class IRanges:
                 If ``other`` is not `IRanges`.
 
         Returns:
-            A new ``IRanges`` object with all intersecting intervals.
+            A new ``IRanges`` object with all intersecting ranges.
         """
 
         other._build_ncls_index()
@@ -1644,8 +1644,8 @@ class IRanges:
                 Overlap query type, must be one of
 
                 - "any": Any overlap is good
-                - "start": Overlap at the beginning of the intervals
-                - "end": Must overlap at the end of the intervals
+                - "start": Overlap at the beginning of the range
+                - "end": Must overlap at the end of the range
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
@@ -1795,8 +1795,8 @@ class IRanges:
                 Overlap query type, must be one of
 
                 - "any": Any overlap is good
-                - "start": Overlap at the beginning of the intervals
-                - "end": Must overlap at the end of the intervals
+                - "start": Overlap at the beginning of the range
+                - "end": Must overlap at the end of the range
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
@@ -1849,8 +1849,8 @@ class IRanges:
                 Overlap query type, must be one of
 
                 - "any": Any overlap is good
-                - "start": Overlap at the beginning of the intervals
-                - "end": Must overlap at the end of the intervals
+                - "start": Overlap at the beginning of the range
+                - "end": Must overlap at the end of the range
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
@@ -1997,13 +1997,13 @@ class IRanges:
                 Query `IRanges`.
 
         Returns:
-            Numpy vector containing distances for each interval in query.
+            Numpy vector containing distances for each range in query.
         """
         if not isinstance(query, IRanges):
             raise TypeError("`query` is not a `IRanges` object.")
 
         if len(self) != len(query):
-            raise ValueError("'query' does not contain the same number of intervals.")
+            raise ValueError("'query' does not contain the same number of range.")
 
         max_starts = np.maximum(self._start, query._start)
         min_ends = np.minimum(self.get_end(), query.get_end())
@@ -2031,9 +2031,8 @@ class IRanges:
                 Internal use only.
 
         Returns:
-            A List with the same lenth as the number of intervals in query.
-            Each element may contain indices nearest to the interval or
-            None if there are no nearest intervals.
+            if `select="first"`, returns a numpy array of length same as query.
+            if `select="all", returns a BiocFrame with hit indices.
         """
 
         if not isinstance(query, IRanges):
@@ -2277,7 +2276,7 @@ class IRanges:
         Wrapper around :py:func:`~biocutils.combine_sequences`.
 
         Returns:
-            An IRange contianing all the combined ranges.
+            An `IRanges` containing all the combined ranges.
         """
         return _combine_IRanges(self, *other)
 
