@@ -2053,7 +2053,6 @@ class IRanges:
             result = np.full(len(query), -1, dtype=np.int32)
 
             for i in range(len(query._start)):
-
                 overlap_mask = oqhits == i
 
                 if np.any(overlap_mask):
@@ -2095,7 +2094,6 @@ class IRanges:
 
             for i in range(len(query._start)):
                 if not has_overlap[i]:
-
                     # calculate distances to all hits
                     dists = np.zeros(len(self._start))
                     for j in range(len(self._start)):
