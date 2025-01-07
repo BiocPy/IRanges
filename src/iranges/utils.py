@@ -130,58 +130,27 @@ def compute_up_down(
     return new_starts, new_widths
 
 
-def calc_gap_and_overlap_position(
-    subject: Tuple[int, int], query: Tuple[int, int]
-) -> Tuple[Optional[int], Optional[int], Optional[str]]:
-    """Calculate gap and/or overlap between intervals relative to query.
+def calc_gap_and_overlap(start1: int, width1: int, start2: int, width2: int):
+    """Calculate gap, overlap and relative position between two intervals."""
 
-    Args:
-        subject:
-            Interval containing start and end positions.
+    end1 = start1 + width1 - 1
+    end2 = start2 + width2 - 1
 
-        query:
-            Interval containing start and end positions.
+    overlap_start = max(start1, start2)
+    overlap_end = min(end1, end2)
+    overlap = max(0, overlap_end - overlap_start + 1)
 
-    Returns:
-        A tuple of ((gap_position, gap), (overlap, overlap_position)):
-        - gap: The gap between the intervals if non-overlapping, else None.
-        - gap_position: Position of the subject relative to the query.
-        - overlap: The overlap size if overlapping, else None.
-        - overlap_position: Where the overlap occurs relative to the first interval.
-          Options are: 'start', 'end', 'within', or 'any' (if there's overlap but no specific case).
-    """
-    subject_start, subject_end = subject
-    query_start, query_end = query
+    if end1 < start2:
+        # First interval precedes second
+        gap = start2 - end1 - 1
+        position = "start"
+    elif end2 < start1:
+        # First interval follows second
+        gap = start1 - end2 - 1
+        position = "end"
+    else:
+        # Intervals overlap
+        gap = -overlap
+        position = "overlap"
 
-    # non-overlapping scenarios (includes adjacents)
-    if subject_end < query_start and subject_start < query_start:
-        # ___S___|___Q___
-        return (max(query_start - subject_end - 1, 0), "gap_start"), None
-    elif query_end < subject_start and query_start < subject_start:
-        # ___Q___|___S___
-        return (max(subject_start - query_end - 1, 0), "gap_end"), None
-
-    # overlap scenarios
-    #     ___Q___
-    #     ___S___       # overlap equal
-    #          __S___   # overlap right
-    # ___S__            # overlap left
-    #       _S_         # overlap within
-    if query_end >= subject_start and query_start <= subject_end:
-        overlap = min(subject_end, query_end) - max(subject_start, query_start) + 1
-
-        # Determine the overlap position
-        if query_start == subject_start and query_end == subject_end:
-            overlap_position = "equal"
-        if query_start < subject_start and query_end > subject_end:
-            overlap_position = "within"
-        elif subject_start < query_start and subject_end < query_end and subject_end > query_start:
-            overlap_position = "start"
-        elif subject_end > query_end and subject_start > query_start and subject_start < query_end:
-            overlap_position = "end"
-        else:
-            overlap_position = "any"
-
-        return None, (overlap, overlap_position)
-
-    return None, None
+    return gap, overlap, position

@@ -10,7 +10,7 @@ from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
 from . import lib_iranges as libir
 from .sew_handler import SEWWrangler
-from .utils import calc_gap_and_overlap_position, compute_up_down, normalize_array
+from .utils import compute_up_down, normalize_array
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
 __copyright__ = "LTLA, jkanche"
@@ -1655,95 +1655,12 @@ class IRanges:
         from ncls import NCLS
 
         if not hasattr(self, "_ncls"):
-            self._ncls = NCLS(self.start, self.end + 1, np.arange(len(self)))
+            # NCLS needs non-inclusive ends
+            self._ncls = NCLS(self.start, self.get_end() + 1, np.arange(len(self)))
 
     def _delete_ncls_index(self):
         if hasattr(self, "_ncls"):
             del self._ncls
-
-    def _generic_find_hits(
-        self,
-        query,
-        gap_start,
-        gap_end,
-        max_gap,
-        min_overlap,
-        select,
-        query_type="any",
-        delete_index=False,
-    ):
-        self._build_ncls_index()
-
-        new_starts = query._start - gap_start - 1
-        new_ends = query.end + gap_end + 2
-        _res = self._ncls.all_overlaps_both(new_starts, new_ends, np.arange(len(query)))
-        all_overlaps = [[] for _ in range(len(query))]
-        index_counter = []
-
-        print("ncls results:: ", _res)
-
-        for i in range(len(_res[0])):
-            _q_idx = int(_res[0][i])
-            _s_idx = int(_res[1][i])
-
-            print(_q_idx, _s_idx)
-
-            if select != "all" and len(all_overlaps[_q_idx]) > 0:
-                continue
-
-            print("select is ", select)
-
-            qstart = query._start[_q_idx]
-            qend = query._start[_q_idx] + query._width[_q_idx] - 1
-            print("old q positions", qstart, qend)
-
-            # if max_gap > 0:
-            #     if query_type == "start":
-            #         qstart -= max_gap
-            #     elif query_type == "end":
-            #         qend += max_gap
-
-            print("new q positions", qstart, qend)
-            _gap, _overlap = calc_gap_and_overlap_position(
-                (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx] - 1),
-                (qstart, qend),
-            )
-
-            print(
-                "final s and q positions",
-                (self._start[_s_idx], self._start[_s_idx] + self._width[_s_idx] - 1),
-                (qstart, qend),
-            )
-
-            print("calc_gap_and_overlap_position", _gap, _overlap)
-
-            if query_type != "any" and _overlap is not None and _overlap[1] != "any" and query_type != _overlap[1]:
-                print("query ! = position")
-                continue
-
-            if _gap is not None and (max_gap == -1 or _gap[0] > max_gap):
-                print("gap is false")
-                continue
-
-            if _overlap is not None and _overlap[0] < min_overlap:
-                print("overlap is false")
-                continue
-
-            print("appendding...")
-            if select == "first" or select == "arbitrary":
-                all_overlaps[_q_idx].append(_s_idx)
-            elif select == "last":
-                all_overlaps[_q_idx].append(_s_idx)
-            elif select == "all":
-                all_overlaps[_q_idx].append(_s_idx)
-
-            index_counter.append(_q_idx)
-
-        if delete_index is True:
-            self._delete_ncls_index()
-
-        print("in _gen", all_overlaps, index_counter)
-        return list(chain(*all_overlaps)), index_counter
 
     def find_overlaps(
         self,
@@ -1751,7 +1668,7 @@ class IRanges:
         query_type: Literal["any", "start", "end", "within"] = "any",
         select: Literal["all", "first", "last", "arbitrary"] = "all",
         max_gap: int = -1,
-        min_overlap: int = 1,
+        min_overlap: int = 0,
         delete_index: bool = True,
     ) -> BiocFrame:
         """Find overlaps with ``query``.
@@ -1797,8 +1714,15 @@ class IRanges:
         """
         print("########")
         print("query_type, select, max_gap, min_overlap", query_type, select, max_gap, min_overlap)
+
+        if max_gap < -1:
+            raise ValueError("'max_gap' must be >= -1")
+
         if not isinstance(query, IRanges):
             raise TypeError("'query' is not a `IRanges` object.")
+
+        if min_overlap < 0:
+            raise ValueError("'min_overlap' cannot be negative.")
 
         if query_type not in ["any", "start", "end", "within"]:
             raise ValueError(f"'query_type' must be one of {', '.join(['any', 'start', 'end', 'within'])}.")
@@ -1806,19 +1730,99 @@ class IRanges:
         if select not in ["all", "first", "last", "arbitrary"]:
             raise ValueError(f"'select' must be one of {', '.join(['all', 'first', 'last', 'arbitrary'])}.")
 
-        _tgap = 0 if max_gap == -1 else max_gap
+        # R rule: when type="any", at least one of maxgap and minoverlap must be at default
+        if query_type == "any" and max_gap != -1 and min_overlap != 0:
+            raise ValueError(
+                "when query_type='any', at least one of max_gap and min_overlap must be set to its default value"
+            )
 
-        all_overlaps, qindices = self._generic_find_hits(
-            query, _tgap, _tgap, max_gap, min_overlap, select, query_type=query_type, delete_index=delete_index
-        )
-        return BiocFrame(data={"self_indices": all_overlaps, "query_indices": qindices})
+        max_gap += 1
+
+        self._build_ncls_index()
+
+        if max_gap >= 0 and query_type == "any":
+            search_starts = query._start - max_gap
+            search_ends = query.get_end() + 1 + max_gap
+        else:
+            search_starts = query._start
+            search_ends = query.get_end() + 1
+
+        query_hits, self_hits = self._ncls.all_overlaps_both(search_starts, search_ends, np.arange(len(query)))
+
+        print("hits:: ", query_hits, self_hits)
+        if len(query_hits) == 0:
+            return BiocFrame(data={"self_indices": [], "query_indices": []})
+
+        # Filter based on overlap type and minoverlap
+        mask = np.ones(len(query_hits), dtype=bool)
+
+        if query_type != "any" or min_overlap > 0:
+            q_starts = query._start[query_hits]
+            q_ends = query.get_end()[query_hits]
+            s_starts = self._start[self_hits]
+            s_ends = self.get_end()[self_hits]
+
+            if query_type == "start":
+                mask &= np.abs(q_starts - s_starts) <= max_gap
+            elif query_type == "end":
+                mask &= np.abs(q_ends - s_ends) <= max_gap
+            elif query_type == "within":
+                mask &= (q_starts >= s_starts) & (q_ends <= s_ends)
+                if max_gap > 0:
+                    gaps = (q_starts - s_starts) + (s_ends - q_ends)
+                    mask &= gaps <= max_gap
+            elif query_type == "equal":
+                mask &= (np.abs(q_starts - s_starts) <= max_gap) & (np.abs(q_ends - s_ends) <= max_gap)
+
+            # Apply minoverlap filter
+            if min_overlap > 0:
+                overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
+                mask &= overlap_lengths >= min_overlap
+
+        # Apply mask
+        query_hits = query_hits[mask]
+        self_hits = self_hits[mask]
+
+        print("before selection mode:::", query_hits, self_hits)
+
+        # Handle selection modes
+        if select != "all":
+            if len(query_hits) == 0:
+                return BiocFrame(data={"self_indices": [], "query_indices": []})
+
+            unique_queries = np.unique(query_hits)
+            mask = np.zeros_like(query_hits, dtype=bool)
+
+            for q in unique_queries:
+                q_indices = np.where(query_hits == q)[0]
+                if select == "first":
+                    mask[q_indices[0]] = True
+                elif select == "last":
+                    mask[q_indices[-1]] = True
+                elif select == "arbitrary":
+                    mask[q_indices[0]] = True
+
+            query_hits = query_hits[mask]
+            self_hits = self_hits[mask]
+        else:
+            # Sort by query hits if selection mode is "all" (as per R implementation)
+            sort_idx = np.argsort(query_hits)
+            query_hits = query_hits[sort_idx]
+            self_hits = self_hits[sort_idx]
+
+        print("final hits:::", query_hits, self_hits)
+
+        if delete_index:
+            self._delete_ncls_index()
+
+        return BiocFrame(data={"self_indices": self_hits, "query_indices": query_hits})
 
     def count_overlaps(
         self,
         query: "IRanges",
         query_type: Literal["any", "start", "end", "within"] = "any",
         max_gap: int = -1,
-        min_overlap: int = 1,
+        min_overlap: int = 0,
         delete_index: bool = True,
     ) -> np.ndarray:
         """Count number of overlaps for each range in ``query``.
@@ -1860,14 +1864,19 @@ class IRanges:
             min_overlap=min_overlap,
             delete_index=delete_index,
         )
-        return np.asarray([len(x) for x in _overlaps.get_column("self_indices")])
+        result = np.zeros(len(query))
+        _ucounts = np.unique_counts(_overlaps.get_column("query_indices"))
+        result[_ucounts.values] = _ucounts.counts
+
+        return result
 
     def subset_by_overlaps(
         self,
         query: "IRanges",
         query_type: Literal["any", "start", "end", "within"] = "any",
+        select: Literal["all", "first", "last", "arbitrary"] = "all",
         max_gap: int = -1,
-        min_overlap: int = 1,
+        min_overlap: int = 0,
         delete_index: bool = True,
     ) -> "IRanges":
         """Subset to overlapping ranges with ``query``.
@@ -1885,6 +1894,14 @@ class IRanges:
                 - "within": Fully contain the query interval
 
                 Defaults to "any".
+
+            select:
+                Determine what hit to choose when
+                there are multiple hits for a query range.
+
+                Must be one of "all", "first", "last", "arbitrary".
+
+                Defaults to "all".
 
             max_gap:
                 Maximum gap allowed in the overlap.
@@ -1904,11 +1921,12 @@ class IRanges:
         _overlaps = self.find_overlaps(
             query=query,
             query_type=query_type,
+            select=select,
             max_gap=max_gap,
             min_overlap=min_overlap,
             delete_index=delete_index,
         )
-        _all_indices = list(set(chain(*_overlaps.get_column("self_indices"))))
+        _all_indices = np.unique(_overlaps.get_column("self_indices"))
         return self[_all_indices]
 
     ###########################
