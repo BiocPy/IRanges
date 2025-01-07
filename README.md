@@ -29,7 +29,7 @@ pip install iranges[optional]
 
 ## IRanges
 
-An `IRanges` holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a 1-based position, but other use cases may allow zero or even negative values.
+An `IRanges` holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a 1-based position, but other use cases may allow zero or even negative values. Ends are inclusive.
 
 ```python
 from iranges import IRanges
@@ -44,12 +44,11 @@ print(x)
      ## output
      IRanges object with 4 ranges and 0 metadata columns
                     start              end            width
-     <ndarray[int32]> <ndarray[int32]> <ndarray[int32]>
-     [0]                1                5                4
-     [1]                2                7                5
+          <ndarray[int32]> <ndarray[int32]> <ndarray[int32]>
+     [0]                1                4                4
+     [1]                2                6                5
      [2]                3                9                6
-     [3]                4               11                7
-
+     [3]                4               10                7
 
 ## Interval Operations
 
@@ -64,12 +63,11 @@ print(gaps)
 ```
 
      ## output
-
      IRanges object with 2 ranges and 0 metadata columns
                     start              end            width
-     <ndarray[int32]> <ndarray[int32]> <ndarray[int32]>
-     [0]               -3               -2                1
-     [1]                5                9                4
+          <ndarray[int32]> <ndarray[int32]> <ndarray[int32]>
+     [0]               -3               -3                1
+     [1]                5                8                4
 
 Or Perform interval set operations
 
@@ -84,14 +82,14 @@ print(intersection)
      ## output
      IRanges object with 3 ranges and 0 metadata columns
                     start              end            width
-     <ndarray[int32]> <ndarray[int32]> <ndarray[int32]>
-     [0]               -2                3                5
+          <ndarray[int32]> <ndarray[int32]> <ndarray[int32]>
+     [0]               -2                2                5
      [1]                6                9                3
-     [2]               14               18                4
+     [2]               14               17                4
 
 ### Overlap operations
 
-IRanges uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search based operations. These methods typically return a list of indices that map to each interval in query.
+IRanges uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search based operations. These methods typically return a hits-like BiocFrame.
 
 ```python
 subject = IRanges([2, 2, 10], [1, 2, 3])
@@ -102,7 +100,12 @@ print(overlap)
 ```
 
      ## output
-     [[1, 0], [], [2]]
+     BiocFrame with 3 rows and 2 columns
+               self_hits       query_hits
+          <ndarray[int64]> <ndarray[int64]>
+     [0]                1                0
+     [1]                0                0
+     [2]                2                2
 
 Similarly one can perform search operations like follow, precede or nearest.
 
@@ -115,7 +118,13 @@ print(nearest)
 ```
 
      ## output
-     [[0], [0, 1], [2]]
+     BiocFrame with 4 rows and 2 columns
+               query_hits        self_hits
+          <ndarray[int64]> <ndarray[int64]>
+     [0]                0                0
+     [1]                0                1
+     [2]                1                1
+     [3]                2                2
 
 ## Further Information
 
