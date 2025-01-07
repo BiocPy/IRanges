@@ -191,6 +191,9 @@ def test_IRanges_combine():
     comb = combine_sequences(x, y)
     assert comb.get_names() == ["", "", "", "", "A", "B", "C", "D"]
 
+    z = x.combine(y)
+    assert z.get_names() == ["", "", "", "", "A", "B", "C", "D"]
+
 
 def test_empty():
     r = IRanges.empty()

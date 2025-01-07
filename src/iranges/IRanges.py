@@ -2053,7 +2053,6 @@ class IRanges:
             result = np.full(len(query), -1, dtype=np.int32)
 
             for i in range(len(query._start)):
-
                 overlap_mask = oqhits == i
 
                 if np.any(overlap_mask):
@@ -2095,7 +2094,6 @@ class IRanges:
 
             for i in range(len(query._start)):
                 if not has_overlap[i]:
-
                     # calculate distances to all hits
                     dists = np.zeros(len(self._start))
                     for j in range(len(self._start)):
@@ -2134,7 +2132,7 @@ class IRanges:
     #### pandas interop ####
     ########################
 
-    def to_pandas(self) -> "pandas.DataFrame":
+    def to_pandas(self):
         """Convert this ``IRanges`` object into a :py:class:`~pandas.DataFrame`.
 
         Returns:
@@ -2157,7 +2155,7 @@ class IRanges:
         return output
 
     @classmethod
-    def from_pandas(cls, input: "pandas.DataFrame") -> "IRanges":
+    def from_pandas(cls, input) -> "IRanges":
         """Create a ``IRanges`` from a :py:class:`~pandas.DataFrame` object.
 
         Args:
@@ -2198,7 +2196,7 @@ class IRanges:
     #### polars interop ####
     ########################
 
-    def to_polars(self) -> "polars.DataFrame":
+    def to_polars(self):
         """Convert this ``IRanges`` object into a :py:class:`~polars.DataFrame`.
 
         Returns:
@@ -2221,7 +2219,7 @@ class IRanges:
         return output
 
     @classmethod
-    def from_polars(cls, input: "polars.DataFrame") -> "IRanges":
+    def from_polars(cls, input) -> "IRanges":
         """Create a ``IRanges`` from a :py:class:`~polars.DataFrame` object.
 
         Args:
@@ -2268,6 +2266,20 @@ class IRanges:
             same type as caller, in this case a ``IRanges``.
         """
         return cls([], [])
+
+    #############################
+    #### combine ops wrapper ####
+    #############################
+
+    def combine(self, *other: "IRanges") -> "IRanges":
+        """Combine multiple range objects into one.
+
+        Wrapper around :py:func:`~biocutils.combine_sequences`.
+
+        Returns:
+            An IRange contianing all the combined ranges.
+        """
+        return _combine_IRanges(self, *other)
 
 
 @combine_sequences.register
