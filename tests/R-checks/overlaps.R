@@ -10,3 +10,5 @@ findOverlaps(query, subject, type="start")
 findOverlaps(query, subject, type="start", maxgap=1L)
 findOverlaps(query, subject, type="end", select="first")
 findOverlaps(query, subject, type="within", maxgap=1L)
+
+
