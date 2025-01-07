@@ -12,10 +12,26 @@ iranges.IRanges module
    :undoc-members:
    :show-inheritance:
 
-iranges.interval module
------------------------
+iranges.lib\_iranges module
+---------------------------
 
-.. automodule:: iranges.interval
+.. automodule:: iranges.lib_iranges
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+iranges.sew\_handler module
+---------------------------
+
+.. automodule:: iranges.sew_handler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+iranges.utils module
+--------------------
+
+.. automodule:: iranges.utils
    :members:
    :undoc-members:
    :show-inheritance:
