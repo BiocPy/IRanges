@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 0.4.0
+## Version 0.4.0 - 0.4.1
 
 This is a major rewrite of the package partly driven by performance and for better consistency with the IRanges R/Bioconductor package.
 

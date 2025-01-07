@@ -620,7 +620,7 @@ class IRanges:
 
             sub_start = self._start[indices]
             sub_width = self._width[indices]
-            sub_end = sub_start + sub_width
+            sub_end = sub_start + sub_width - 1
             for prop, val in [
                 ("start", sub_start),
                 ("end", sub_end),
