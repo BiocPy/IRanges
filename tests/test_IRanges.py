@@ -31,7 +31,7 @@ def test_IRanges_basic():
     # Throws an error appropriately.
     with pytest.raises(ValueError) as ex:
         IRanges([], [1])
-    assert str(ex.value).find("should have the same length") >= 0
+    assert str(ex.value).find("must have the same lengths") >= 0
 
     with pytest.raises(ValueError) as ex:
         x.set_start([1])
@@ -43,7 +43,7 @@ def test_IRanges_basic():
 
     with pytest.raises(ValueError) as ex:
         IRanges([1], [2**31 - 1])
-    assert str(ex.value).find("should fit in a 32-bit") >= 0
+    assert str(ex.value).find("32-bit") >= 0
 
     # Adding names.
     x = IRanges(starts, widths, names=["A", "B", "C", "D"])
@@ -67,11 +67,11 @@ def test_IRanges_metadata():
 
     with pytest.raises(TypeError) as ex:
         IRanges(starts, widths, mcols={})
-    assert str(ex.value).find("should be a BiocFrame") >= 0
+    assert str(ex.value).find("must be a BiocFrame") >= 0
 
     with pytest.raises(ValueError) as ex:
         IRanges(starts, widths, mcols=BiocFrame({}, number_of_rows=3))
-    assert str(ex.value).find("Number of rows") >= 0
+    assert str(ex.value).find("number of rows") >= 0
 
     assert x.get_metadata() == {}
     y = x.set_metadata({"A": 2})
@@ -191,6 +191,9 @@ def test_IRanges_combine():
     comb = combine_sequences(x, y)
     assert comb.get_names() == ["", "", "", "", "A", "B", "C", "D"]
 
+    z = x.combine(y)
+    assert z.get_names() == ["", "", "", "", "A", "B", "C", "D"]
+
 
 def test_empty():
     r = IRanges.empty()
@@ -201,3 +204,10 @@ def test_empty():
     subset = r[1:10]
     assert subset is not None
     assert isinstance(subset, IRanges)
+
+
+def test_IRanges_ends():
+    starts = [1, 8, 14, 15, 19, 34, 40]
+    widths = [12, 6, 6, 15, 6, 2, 7]
+    x = IRanges(starts, widths)
+    assert np.allclose(x.get_end(), [12, 13, 19, 29, 24, 35, 46])

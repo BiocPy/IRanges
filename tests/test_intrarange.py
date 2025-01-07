@@ -16,6 +16,14 @@ def test_shift():
     assert all(np.equal(sorted.start, [-2, 17, 22, 22, 30]))
     assert all(np.equal(sorted.width, widths))
 
+    sorted = x.shift(shift=[-3] * len(x))
+    assert all(np.equal(sorted.start, [-2, 17, 22, 22, 30]))
+    assert all(np.equal(sorted.width, widths))
+
+    sorted = x.shift(shift=3)
+    assert all(np.equal(sorted.start, [4,23,28,28,36]))
+    assert all(np.equal(sorted.width, widths))
+
 
 def test_narrow():
     starts = [1, 20, 25, 33]
@@ -29,6 +37,10 @@ def test_narrow():
     res = x.narrow(start=4, width=2)
     assert all(np.equal(res.start, [4, 23, 28, 36]))
     assert all(np.equal(res.width, [2, 2, 2, 2]))
+
+    res = x.narrow(start=-4)
+    assert all(np.equal(res.start, [16, 21, 29, 34]))
+    assert all(np.equal(res.width, [4,4,4,4]))
 
     res = x.narrow(start=-4, width=2)
     assert all(np.equal(res.start, [16, 21, 29, 34]))
@@ -121,7 +133,6 @@ def test_promoters():
     assert all(np.equal(res.width, [0] * 4))
 
     res = x.promoters(upstream=0, downstream=1)
-    print(res)
     assert all(np.equal(res.start, starts))
     assert all(np.equal(res.width, [1] * 4))
 
@@ -141,6 +152,12 @@ def test_reflect():
     assert all(np.equal(res.start, [7, 4, 9]))
     assert all(np.equal(res.width, [2, 3, 3]))
 
+    bounds = IRanges([5], [2])
+
+    res = x.reflect(bounds=bounds)
+    assert all(np.equal(res.start, [8, 4, 8]))
+    assert all(np.equal(res.width, [2, 3, 3]))
+
 
 def test_restrict():
     starts = [1, 20, 25, 25, 33]
@@ -158,3 +175,22 @@ def test_restrict():
     res = x.restrict(start=21)
     assert all(np.equal(res.start, [21, 25, 25, 33]))
     assert all(np.equal(res.width, [4, 0, 8, 5]))
+
+def test_threebands():
+    starts = [1, 20, 25, 25, 33]
+    widths = [19, 5, 0, 8, 5]
+    x = IRanges(starts, widths)
+
+    res = x.threebands()
+
+    # left
+    assert all(np.equal(res["left"].start, [1, 20, 25, 25, 33]))
+    assert all(np.equal(res["left"].width, [0] * 5))
+
+    # middle
+    assert all(np.equal(res["middle"].start, [1, 20, 25, 25, 33]))
+    assert all(np.equal(res["middle"].width, [19, 5 ,0 ,8, 5]))
+
+    # right
+    assert all(np.equal(res["right"].start, [20, 25, 25, 33, 38]))
+    assert all(np.equal(res["right"].width, [0] * 5))

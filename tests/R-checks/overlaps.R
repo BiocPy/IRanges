@@ -1,0 +1,12 @@
+query = IRanges(c(2, 2, 10), width=c(1, 2, 3))
+subject = IRanges(c(1, 4, 9), width=c(5, 4, 2))
+
+findOverlaps(query, subject)
+findOverlaps(query, subject, maxgap = 0)
+findOverlaps(query, subject, select="first")
+findOverlaps(query, subject, select="last")
+findOverlaps(query, subject, select="arbitrary")
+findOverlaps(query, subject, type="start")
+findOverlaps(query, subject, type="start", maxgap=1L)
+findOverlaps(query, subject, type="end", select="first")
+findOverlaps(query, subject, type="within", maxgap=1L)
