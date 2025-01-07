@@ -2,10 +2,10 @@
 
 ## Version 0.4.0
 
-This is a major rewrite of the package partly driven by performance and for better consistency with the IRanges R/Bioconductor package. 
+This is a major rewrite of the package partly driven by performance and for better consistency with the IRanges R/Bioconductor package.
 
-- Using pybind11, reimplement inter-range methods to a cpp implementation using code derived from the R package. 
-- Better Start/End/Width resolver that is similar to the R implementation. 
+- Using pybind11, reimplement inter-range methods to a cpp implementation using code derived from the R package.
+- Better Start/End/Width resolver that is similar to the R implementation.
 - Overhaul of many of the find overlaps and search methods to better align with R's expectations of how these methods work.
 - Update docstrings, more tests.
 
