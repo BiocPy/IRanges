@@ -1675,8 +1675,6 @@ class IRanges:
             ``query_hits`` for each range in query and ``self_hits`` for
             indices in ``self`` that overlap with the query range.
         """
-        print("########")
-        print("query_type, select, max_gap, min_overlap", query_type, select, max_gap, min_overlap)
 
         if max_gap < -1:
             raise ValueError("'max_gap' must be >= -1")
@@ -1712,7 +1710,6 @@ class IRanges:
 
         query_hits, self_hits = self._ncls.all_overlaps_both(search_starts, search_ends, np.arange(len(query)))
 
-        print("hits:: ", query_hits, self_hits)
         if len(query_hits) == 0:
             return BiocFrame(data={"self_hits": [], "query_hits": []})
 
@@ -1744,8 +1741,6 @@ class IRanges:
         query_hits = query_hits[mask]
         self_hits = self_hits[mask]
 
-        print("before selection mode:::", query_hits, self_hits)
-
         if select != "all":
             if len(query_hits) == 0:
                 return BiocFrame(data={"self_hits": [], "query_hits": []})
@@ -1769,8 +1764,6 @@ class IRanges:
             sort_idx = np.argsort(query_hits, stable=True)
             query_hits = query_hits[sort_idx]
             self_hits = self_hits[sort_idx]
-
-        print("final hits:::", query_hits, self_hits)
 
         if delete_index:
             self._delete_ncls_index()

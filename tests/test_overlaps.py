@@ -11,7 +11,6 @@ def test_find_overlaps():
     subject = IRanges([2, 2, 10], [1, 2, 3])
 
     res = query.find_overlaps(subject)
-    print(res)
     assert np.all(res.get_column("self_hits") == [0, 0, 2])
     assert np.all(res.get_column("query_hits") == [0, 1, 2])
 
@@ -81,15 +80,12 @@ def test_precede():
     subject = IRanges([3, 2, 10], [1, 12, 3])
 
     res = subject.precede(query)
-    print(res)
     assert np.all(res == [2, 2, None])
 
     res = query.precede(subject)
-    print(res)
     assert np.all(res == [2, None, None])
 
     res = query.precede(subject, select="all")
-    print(res)
     assert np.all(res.get_column("self_hits") == [2])
     assert np.all(res.get_column("query_hits") == [0])
 
@@ -105,7 +101,6 @@ def test_follow():
     assert np.all(res == [None, None, 1])
 
     res = query.precede(subject, select="all")
-    print(res)
     assert np.all(res.get_column("self_hits") == [2])
     assert np.all(res.get_column("query_hits") == [0])
 
@@ -134,11 +129,9 @@ def test_nearest():
     assert np.all(res == [0,0,2])
 
     res = subject.nearest(query, select="all")
-    print(res)
     assert np.all(res.get_column("self_hits") == [0, 1, 1, 2])
     assert np.all(res.get_column("query_hits") == [0, 0, 1,2])
 
     res = query.nearest(subject, select="all")
-    print(res)
     assert np.all(res.get_column("query_hits") == [0, 1, 1, 2])
     assert np.all(res.get_column("self_hits") == [0, 0, 1,2])

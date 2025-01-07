@@ -12,12 +12,10 @@ def test_shift():
     widths = [19, 5, 0, 8, 5]
     x = IRanges(starts, widths)
 
-    print("x", x)
     sorted = x.shift(shift=-3)
     assert all(np.equal(sorted.start, [-2, 17, 22, 22, 30]))
     assert all(np.equal(sorted.width, widths))
 
-    print("x", x, len(x))
     sorted = x.shift(shift=[-3] * len(x))
     assert all(np.equal(sorted.start, [-2, 17, 22, 22, 30]))
     assert all(np.equal(sorted.width, widths))
@@ -135,7 +133,6 @@ def test_promoters():
     assert all(np.equal(res.width, [0] * 4))
 
     res = x.promoters(upstream=0, downstream=1)
-    print(res)
     assert all(np.equal(res.start, starts))
     assert all(np.equal(res.width, [1] * 4))
 
