@@ -1,5 +1,4 @@
 from copy import deepcopy
-from itertools import chain
 from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
 
