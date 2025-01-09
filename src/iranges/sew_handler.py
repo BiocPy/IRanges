@@ -131,7 +131,7 @@ class SEWWrangler:
         # Handle only end
         elif not self.end.mask.all():
             out_widths = self.end
-            
+
         # Validate after computing
         self._validate_narrowing(out_starts, out_widths)
         return out_starts, out_widths
