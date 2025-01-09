@@ -1412,7 +1412,9 @@ class IRanges:
             validate = True
 
         new_widths = new_ends - new_starts + 1
-        return IRanges(new_starts, new_widths, validate=validate)
+        return IRanges(
+            new_starts, new_widths, mcols=BiocFrame({"revmap": np.where(keep_mask == 1)[0]}), validate=validate
+        )
 
     def threebands(
         self,
