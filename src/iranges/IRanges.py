@@ -1379,31 +1379,40 @@ class IRanges:
                 too_left = (~start_arr.mask) & (new_starts < start_arr)
                 new_starts[too_left] = start_arr[too_left]
             else:
-                # drop ranges too far left
-                far_left = (~start_arr.mask) & (range_ends < start_arr - (drop_mode == 1))
+                # In drop_mode 1, keep ranges that end at start-1 or later
+                far_left = (~start_arr.mask) & (range_ends < start_arr - 1)
                 keep_mask &= ~far_left
+                # Then adjust remaining starts if needed
                 too_left = (~start_arr.mask) & (new_starts < start_arr)
                 new_starts[too_left] = start_arr[too_left]
 
         # right/end restriction
         if not end_arr.mask.all():
             if drop_mode == 2:
-                # keep but clip ranges
+                # First handle ranges that are too far right by setting their starts to end+1
+                far_right = (~end_arr.mask) & (new_starts > end_arr + 1)
+                new_starts[far_right] = end_arr[far_right] + 1
+                # Then clip any remaining ends that exceed the boundary
                 too_right = (~end_arr.mask) & (new_ends > end_arr)
                 new_ends[too_right] = end_arr[too_right]
             else:
-                # drop ranges too far right
-                far_right = (~end_arr.mask) & (new_starts > end_arr + (drop_mode == 1))
+                # In drop_mode 1, keep ranges that start at end+1 or earlier
+                far_right = (~end_arr.mask) & (new_starts > end_arr + 1)
                 keep_mask &= ~far_right
+                # Then adjust remaining ends if needed
                 too_right = (~end_arr.mask) & (new_ends > end_arr)
                 new_ends[too_right] = end_arr[too_right]
 
+        # if keep_all_ranges is True, some ranges may not
+        # satisfy the validation requirements
+        validate = False
         if drop_mode != 2:
             new_starts = new_starts[keep_mask]
             new_ends = new_ends[keep_mask]
+            validate = True
 
         new_widths = new_ends - new_starts + 1
-        return IRanges(new_starts, new_widths)
+        return IRanges(new_starts, new_widths, validate=validate)
 
     def threebands(
         self,
