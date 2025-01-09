@@ -57,6 +57,7 @@ class SEWWrangler:
             self.end = handle_negative_coords(self.end, self.ref_widths)
 
         if not allow_nonnarrowing:
+            # validate supplied ends
             if not self.end.mask.all():
                 too_wide = (~self.end.mask) & (self.end > self.ref_widths)
                 if np.any(too_wide):
@@ -93,7 +94,7 @@ class SEWWrangler:
 
             if not self.end.mask.all():
                 # Width and end specified
-                mask = (~self.width.mask) & (~self.end.mask)
+                # mask = (~self.width.mask) & (~self.end.mask)
                 out_starts = self.end - self.width + 1
                 out_widths = self.width
                 # Validate after computing
@@ -101,7 +102,7 @@ class SEWWrangler:
 
             elif not self.start.mask.all():
                 # Width and start specified
-                mask = (~self.width.mask) & (~self.start.mask)
+                # mask = (~self.width.mask) & (~self.start.mask)
                 out_starts = self.start
                 out_widths = self.width
                 # Validate after computing
@@ -130,6 +131,7 @@ class SEWWrangler:
         # Handle only end
         elif not self.end.mask.all():
             out_widths = self.end
-
+            
+        # Validate after computing
         self._validate_narrowing(out_starts, out_widths)
         return out_starts, out_widths
