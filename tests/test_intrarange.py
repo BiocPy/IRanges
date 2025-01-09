@@ -78,6 +78,11 @@ def test_narrow():
     assert all(np.equal(res.start, [1, 20, 25, 33]))
     assert all(np.equal(res.width, [3] * 4))
 
+    ir = IRanges([x for x in range(1, 11)], [10, 9, 8,7,6,5,4,3,2,1])
+
+    with pytest.raises(Exception):
+        res = ir.narrow(start=2, width=3)
+
 
 def test_resize():
     starts = [1, 20, 25, 33]
