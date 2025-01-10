@@ -137,7 +137,7 @@ py::dict reduce_ranges(
             auto map_arr = py::array_t<int32_t>(mapping.size());
             auto map_ptr = map_arr.mutable_unchecked<1>();
             for (size_t i = 0; i < mapping.size(); i++) {
-                map_ptr(i) = mapping[i] + 1;
+                map_ptr(i) = mapping[i];
             }
             revmap_list.append(map_arr);
         }

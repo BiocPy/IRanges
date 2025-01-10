@@ -828,7 +828,7 @@ class IRanges:
         if min_gap_width < 0:
             raise ValueError("'min_gap_width' cannot be negative.")
 
-        reduced = result = libir.reduce_ranges(
+        reduced = libir.reduce_ranges(
             starts=self._start,
             widths=self._width,
             drop_empty_ranges=drop_empty_ranges,
