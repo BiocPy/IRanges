@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from iranges import IRanges
 
 __author__ = "jkanche"
@@ -51,15 +50,17 @@ def test_reduce_drop_ranges():
     assert all(np.equal(reduced_withrevmap.width, [3, 7, 6]))
     assert reduced_withrevmap.mcols.colnames.as_list() == ["revmap"]
 
+
 def test_reduce_gapwidth():
     starts = [-2, 6, 9, -4, 1, 0, -6, 3, 10]
     widths = [5, 0, 6, 1, 4, 3, 2, 0, 3]
     x = IRanges(starts, widths)
 
     reduced = x.reduce(min_gap_width=2)
-    assert all(np.equal(reduced.start, [-6,  9]))
-    assert all(np.equal(reduced.width, [12,  6]))
+    assert all(np.equal(reduced.start, [-6, 9]))
+    assert all(np.equal(reduced.width, [12, 6]))
     assert reduced.mcols.colnames.as_list() == []
+
 
 def test_gap():
     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
@@ -101,6 +102,7 @@ def test_is_disjoint():
 
     assert x.is_disjoint() is False
 
+
 def test_disjoint_bins():
     x = IRanges([-2, 6, 9, -4, 1, 0, -6, 10], [5, 0, 6, 1, 4, 3, 2, 3])
-    assert np.allclose(x.disjoint_bins(), [0,0,0,0,2,1,0,1])
+    assert np.allclose(x.disjoint_bins(), [0, 0, 0, 0, 2, 1, 0, 1])

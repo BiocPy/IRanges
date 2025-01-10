@@ -21,7 +21,7 @@ def test_shift():
     assert all(np.equal(sorted.width, widths))
 
     sorted = x.shift(shift=3)
-    assert all(np.equal(sorted.start, [4,23,28,28,36]))
+    assert all(np.equal(sorted.start, [4, 23, 28, 28, 36]))
     assert all(np.equal(sorted.width, widths))
 
 
@@ -40,7 +40,7 @@ def test_narrow():
 
     res = x.narrow(start=-4)
     assert all(np.equal(res.start, [16, 21, 29, 34]))
-    assert all(np.equal(res.width, [4,4,4,4]))
+    assert all(np.equal(res.width, [4, 4, 4, 4]))
 
     res = x.narrow(start=-4, width=2)
     assert all(np.equal(res.start, [16, 21, 29, 34]))
@@ -78,7 +78,7 @@ def test_narrow():
     assert all(np.equal(res.start, [1, 20, 25, 33]))
     assert all(np.equal(res.width, [3] * 4))
 
-    ir = IRanges([x for x in range(1, 11)], [10, 9, 8,7,6,5,4,3,2,1])
+    ir = IRanges([x for x in range(1, 11)], [10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
 
     with pytest.raises(Exception):
         res = ir.narrow(start=2, width=3)
@@ -181,6 +181,7 @@ def test_restrict():
     assert all(np.equal(res.start, [21, 25, 25, 33]))
     assert all(np.equal(res.width, [4, 0, 8, 5]))
 
+
 def test_threebands():
     starts = [1, 20, 25, 25, 33]
     widths = [19, 5, 0, 8, 5]
@@ -194,7 +195,7 @@ def test_threebands():
 
     # middle
     assert all(np.equal(res["middle"].start, [1, 20, 25, 25, 33]))
-    assert all(np.equal(res["middle"].width, [19, 5 ,0 ,8, 5]))
+    assert all(np.equal(res["middle"].width, [19, 5, 0, 8, 5]))
 
     # right
     assert all(np.equal(res["right"].start, [20, 25, 25, 33, 38]))
