@@ -2018,7 +2018,7 @@ class IRanges:
         query: "IRanges",
         select: Literal["all", "arbitrary"] = "arbitrary",
         delete_index: bool = True,
-    ) -> List[List[int]]:
+    ) -> Union[BiocFrame, np.ndarray]:
         """Search nearest positions both upstream and downstream
         that overlap with each range in ``query``.
 
@@ -2045,7 +2045,9 @@ class IRanges:
         if select not in ["all", "arbitrary"]:
             raise ValueError(f"'select' must be one of {', '.join(['all', 'arbitrary'])}.")
 
-        overlaps = query.find_overlaps(self, select="all", max_gap=0, delete_index=delete_index)
+        overlaps = self.find_overlaps(query, select="all", max_gap=0, delete_index=delete_index)
+
+        print("result of overlaps", overlaps)
         oqhits = overlaps.get_column("query_hits")
         oshits = overlaps.get_column("self_hits")
 

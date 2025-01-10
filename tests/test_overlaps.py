@@ -1,5 +1,6 @@
-from iranges import IRanges
 import numpy as np
+
+from iranges import IRanges
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -46,6 +47,7 @@ def test_find_overlaps():
     assert np.all(res.get_column("self_hits") == [])
     assert np.all(res.get_column("query_hits") == [])
 
+
 def test_count_overlaps():
     query = IRanges([1, 4, 9], [5, 4, 2])
     subject = IRanges([2, 2, 10], [1, 2, 3])
@@ -55,6 +57,7 @@ def test_count_overlaps():
 
     res = query.count_overlaps(subject, max_gap=0)
     assert np.all(res == [1, 2, 1])
+
 
 def test_subset_overlaps():
     subject = IRanges([1, 4, 9], [5, 4, 2])
@@ -74,6 +77,7 @@ def test_subset_overlaps():
     res = query.subset_by_overlaps(subject)
     assert all(np.equal(res.start, [1]))
     assert all(np.equal(res.width, [5]))
+
 
 def test_precede():
     query = IRanges([1, 3, 9], [3, 5, 2])
@@ -118,20 +122,21 @@ def test_distance():
     res = x.distance(y)
     assert res == [0]
 
+
 def test_nearest():
     query = IRanges([1, 3, 9], [2, 5, 2])
     subject = IRanges([3, 5, 12], [1, 2, 1])
 
     res = subject.nearest(query)
-    assert np.all(res == [0,1,2])
+    assert np.all(res == [0, 0, 2])
 
     res = query.nearest(subject)
-    assert np.all(res == [0,0,2])
+    assert np.all(res == [0, 1, 2])
 
     res = subject.nearest(query, select="all")
-    assert np.all(res.get_column("self_hits") == [0, 1, 1, 2])
-    assert np.all(res.get_column("query_hits") == [0, 0, 1,2])
+    assert np.all(res.get_column("self_hits") == [0, 0, 1, 2])
+    assert np.all(res.get_column("query_hits") == [0, 1, 1, 2])
 
     res = query.nearest(subject, select="all")
-    assert np.all(res.get_column("query_hits") == [0, 1, 1, 2])
-    assert np.all(res.get_column("self_hits") == [0, 0, 1,2])
+    assert np.all(res.get_column("query_hits") == [0, 0, 1, 2])
+    assert np.all(res.get_column("self_hits") == [0, 1, 1, 2])
