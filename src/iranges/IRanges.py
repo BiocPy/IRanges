@@ -2044,8 +2044,6 @@ class IRanges:
         if select == "arbitrary":
             result = np.full(len(query), None)
 
-            print("after init", result)
-
             # Handle overlaps
             ol_query = ol.get_column("query_hits")
             ol_subject = ol.get_column("self_hits")
@@ -2081,8 +2079,6 @@ class IRanges:
                 missing_ranges = query[missing]
                 before = self.precede(missing_ranges, select="first")
                 after = self.follow(missing_ranges, select="last")
-
-                print(before, after)
 
                 before_dist = np.full(len(missing_ranges), np.inf)
                 after_dist = np.full(len(missing_ranges), np.inf)
