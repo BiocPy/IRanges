@@ -154,3 +154,23 @@ def calc_gap_and_overlap(start1: int, width1: int, start2: int, width2: int):
         position = "overlap"
 
     return gap, overlap, position
+
+
+def find_interval(x: np.ndarray, vec: np.ndarray) -> np.ndarray:
+    """Python implementation of R's findInterval function.
+
+    Args:
+        x:
+            Values to find intervals for.
+
+        vec:
+            Sorted vector to find intervals in.
+
+    Returns:
+        Array of indices indicating which interval each x value falls into.
+    """
+    if len(vec) == 0:
+        return np.zeros(len(x), dtype=np.int32)
+
+    indices = np.searchsorted(vec, x, side="right") - 1
+    return indices

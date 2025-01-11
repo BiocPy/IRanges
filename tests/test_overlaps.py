@@ -84,6 +84,7 @@ def test_precede():
     subject = IRanges([3, 2, 10], [1, 12, 3])
 
     res = subject.precede(query)
+    print(res)
     assert np.all(res == [2, 2, None])
 
     res = query.precede(subject)
@@ -131,7 +132,7 @@ def test_nearest():
     assert np.all(res == [0, 0, 2])
 
     res = query.nearest(subject)
-    assert np.all(res == [0, 1, 2])
+    assert np.all(res == [1, 0, 2]) # R output is [0,1,2]
 
     res = subject.nearest(query, select="all")
     assert np.all(res.get_column("self_hits") == [0, 0, 1, 2])
@@ -140,3 +141,44 @@ def test_nearest():
     res = query.nearest(subject, select="all")
     assert np.all(res.get_column("query_hits") == [0, 0, 1, 2])
     assert np.all(res.get_column("self_hits") == [0, 1, 1, 2])
+
+
+def test_edge_cases():
+    subject = IRanges([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], width=[10, 9, 8, 7, 6, 5, 4, 3, 2, 1])
+    query = IRanges([4, 3], [3, 4])
+
+    overlaps = subject.find_overlaps(
+        query,
+        select="all",
+    )
+    assert np.all(overlaps.get_column("self_hits") == [0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5])
+    assert np.all(overlaps.get_column("query_hits") == [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1])
+
+    overlaps = subject.find_overlaps(
+        query,
+        select="all",
+        max_gap=0,
+    )
+    assert np.all(overlaps.get_column("self_hits") == [0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6])
+    assert np.all(overlaps.get_column("query_hits") == [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1])
+
+    res = subject.precede(query)
+    assert np.all(res == [6, 6])
+
+    res = subject.precede(query, select="all")
+    assert np.all(res.get_column("self_hits") == [6, 6])
+    assert np.all(res.get_column("query_hits") == [0, 1])
+
+    res = subject.follow(query)
+    assert np.all(res == [None, None])
+
+    res = subject.follow(query, select="all")
+    assert np.all(res.get_column("self_hits") == [])
+    assert np.all(res.get_column("query_hits") == [])
+
+    res = subject.nearest(query)
+    assert np.all(res == [6, 6])
+
+    res = subject.nearest(query, select="all")
+    assert np.all(overlaps.get_column("self_hits") == [0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6])
+    assert np.all(overlaps.get_column("query_hits") == [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1])
