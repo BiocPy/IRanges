@@ -42,4 +42,3 @@ follow(query, subject, select="all")
 
 nearest(query, subject)
 nearest(query, subject, select="all")
-

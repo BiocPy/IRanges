@@ -132,7 +132,7 @@ def test_nearest():
     assert np.all(res == [0, 0, 2])
 
     res = query.nearest(subject)
-    assert np.all(res == [1, 0, 2]) # R output is [0,1,2]
+    assert np.all(res == [1, 0, 2])  # R output is [0,1,2]
 
     res = subject.nearest(query, select="all")
     assert np.all(res.get_column("self_hits") == [0, 0, 1, 2])
