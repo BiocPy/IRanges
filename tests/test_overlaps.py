@@ -84,7 +84,6 @@ def test_precede():
     subject = IRanges([3, 2, 10], [1, 12, 3])
 
     res = subject.precede(query)
-    print(res)
     assert np.all(res == [2, 2, None])
 
     res = query.precede(subject)

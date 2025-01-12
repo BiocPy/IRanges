@@ -167,7 +167,7 @@ def find_interval(x: np.ndarray, vec: np.ndarray) -> np.ndarray:
             Sorted vector to find intervals in.
 
     Returns:
-        Array of indices indicating which interval each x value falls into.
+        NumPy array of indices indicating which interval each x value falls into.
     """
     if len(vec) == 0:
         return np.zeros(len(x), dtype=np.int32)
