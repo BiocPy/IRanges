@@ -2374,13 +2374,13 @@ class IRanges:
 
             n = np.ceil(self._width / width).astype(np.int32)
             # tile_widths = np.repeat(width, len(self))
-        
+
         widths_per_tile = self._width / n
         positions = np.arange(1, np.max(n) + 1, dtype=np.int32)
-        
+
         result = []
         for i in range(len(self)):
-            rel_ends = np.floor(positions[:n[i]] * widths_per_tile[i]).astype(np.int32)
+            rel_ends = np.floor(positions[: n[i]] * widths_per_tile[i]).astype(np.int32)
             abs_ends = rel_ends + self._start[i] - 1
             prev_ends = np.concatenate([[self._start[i] - 1], abs_ends[:-1]])
             widths = abs_ends - prev_ends
