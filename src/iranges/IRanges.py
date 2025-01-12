@@ -1924,7 +1924,7 @@ class IRanges:
                 Defaults to "first".
 
         Returns:
-            if `select="first"`, returns a numpy array who length is same as query.
+            if `select="first"`, returns a numpy array of length same as query.
             if `select="all", returns a BiocFrame with hit indices.
         """
 
@@ -1971,7 +1971,7 @@ class IRanges:
                 Defaults to "last".
 
         Returns:
-            if `select="first"`, returns a numpy array of length same as query.
+            if `select="last"`, returns a numpy array of length same as query.
             if `select="all", returns a BiocFrame with hit indices.
         """
 
@@ -2031,7 +2031,8 @@ class IRanges:
                 Internal use only.
 
         Returns:
-            Array of indices or BiocFrame of hits.
+            if `select="arbitrary"`, returns a numpy array of length same as query.
+            if `select="all", returns a BiocFrame with hit indices.
         """
         if not isinstance(query, IRanges):
             raise TypeError("`query` is not a `IRanges` object.")
@@ -2326,6 +2327,108 @@ class IRanges:
             An `IRanges` containing all the combined ranges.
         """
         return _combine_IRanges(self, *other)
+
+    ################################
+    ######>> window methods <<######
+    ################################
+
+    def tile(
+        self, n: Optional[Union[int, np.ndarray]] = None, width: Optional[Union[int, np.ndarray]] = None
+    ) -> List["IRanges"]:
+        """Split ranges into either n equal parts or parts of fixed width.
+
+        Args:
+            n:
+                Number of tiles per range (mutually exclusive with width).
+
+            width:
+                Width of each tile (mutually exclusive with n).
+
+        Returns:
+            List of IRanges objects, one per input range containing the tiles.
+        """
+        if n is not None and width is not None:
+            raise ValueError("only one of 'n' and 'width' can be specified")
+
+        if n is not None:
+            if isinstance(n, int):
+                n = np.repeat(n, len(self))
+            else:
+                n = np.asarray(n, dtype=np.int32)
+
+            if np.any(self._width < n):
+                raise ValueError("some width(x) are less than 'n'")
+            if np.any(n < 0):
+                raise ValueError("some 'n' are negative")
+
+            # tile_widths = self._width / n
+
+        if width is not None:
+            if isinstance(n, int):
+                width = np.repeat(width, len(self))
+            else:
+                width = np.asarray(width, dtype=np.int32)
+
+            if np.any(width < 0):
+                raise ValueError("some 'width' are negative")
+
+            n = np.ceil(self._width / width).astype(np.int32)
+            # tile_widths = np.repeat(width, len(self))
+        
+        widths_per_tile = self._width / n
+        positions = np.arange(1, np.max(n) + 1, dtype=np.int32)
+        
+        result = []
+        for i in range(len(self)):
+            rel_ends = np.floor(positions[:n[i]] * widths_per_tile[i]).astype(np.int32)
+            abs_ends = rel_ends + self._start[i] - 1
+            prev_ends = np.concatenate([[self._start[i] - 1], abs_ends[:-1]])
+            widths = abs_ends - prev_ends
+            result.append(IRanges(start=abs_ends - widths + 1, width=widths))
+
+        return result
+
+    def sliding_windows(self, width: int, step: int = 1) -> List["IRanges"]:
+        """Create sliding windows of fixed width and step size.
+
+        Args:
+            width:
+                Width of each window.
+
+            step:
+                Step size between window starts.
+
+        Returns:
+            List of IRanges objects, one per input range containing the windows.
+        """
+        if not isinstance(width, (int, np.integer)):
+            raise ValueError("'width' must be a single, non-NA number")
+
+        if not isinstance(step, (int, np.integer)):
+            raise ValueError("'step' must be a single, non-NA number")
+
+        if width < 0:
+            raise ValueError("'width' cannot be negative")
+
+        if step < 0:
+            raise ValueError("'step' cannot be negative")
+
+        n = np.ceil(np.maximum(self._width - width, 0) / step).astype(np.int32) + 1
+
+        result = []
+        for i in range(len(self)):
+            window_starts = np.arange(n[i]) * step + 1
+
+            valid_windows = window_starts + width - 1 <= self._width[i]
+            if not np.all(valid_windows):
+                window_starts = window_starts[valid_windows]
+
+            abs_starts = window_starts + self._start[i] - 1
+            window_widths = np.repeat(width, len(window_starts))
+
+            result.append(IRanges(start=abs_starts, width=window_widths))
+
+        return result
 
 
 @combine_sequences.register
