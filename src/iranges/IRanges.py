@@ -1921,7 +1921,7 @@ class IRanges:
         Returns:
             If select="first":
                 A numpy array of integers with length matching query, containing indices
-                into self for the closest upstream position of each query range. Value may be 
+                into self for the closest upstream position of each query range. Value may be
                 None if there are no matches.
             If select="all":
                 A BiocFrame with two columns:
@@ -1975,7 +1975,7 @@ class IRanges:
         Returns:
             If select="last":
                 A numpy array of integers with length matching query, containing indices
-                into self for the closest downstream position of each query range. Value may be 
+                into self for the closest downstream position of each query range. Value may be
                 None if there are no matches.
             If select="all":
                 A BiocFrame with two columns:

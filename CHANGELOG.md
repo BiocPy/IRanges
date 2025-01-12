@@ -2,9 +2,9 @@
 
 ## Version 0.4.2
 
-- Fixes edge cases for overlap and search methods. 
+- Fixes edge cases for overlap and search methods.
 - Add tile and sliding window operations.
-- Updates tests to capture most scenarios. 
+- Updates tests to capture most scenarios.
 - Update docstrings and edit tutorials.
 
 ## Version 0.4.0 - 0.4.1
