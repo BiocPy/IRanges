@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.4.2
+
+- Fixes edge cases for overlap and search methods.
+- Add tile and sliding window operations.
+- Updates tests to capture most scenarios.
+- Update docstrings and edit tutorials.
+
 ## Version 0.4.0 - 0.4.1
 
 This is a major rewrite of the package partly driven by performance and for better consistency with the IRanges R/Bioconductor package.

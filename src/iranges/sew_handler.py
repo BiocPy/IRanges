@@ -46,6 +46,7 @@ class SEWWrangler:
         """
         self.ref_widths = np.asarray(ref_widths, dtype=np.int32)
         self.length = len(ref_widths)
+        self.allow_nonnarrowing = allow_nonnarrowing
 
         self.start = normalize_array(start, self.length)
         self.end = normalize_array(end, self.length)
@@ -56,17 +57,26 @@ class SEWWrangler:
             self.end = handle_negative_coords(self.end, self.ref_widths)
 
         if not allow_nonnarrowing:
-            self._validate_narrowing()
+            # validate supplied ends
+            if not self.end.mask.all():
+                too_wide = (~self.end.mask) & (self.end > self.ref_widths)
+                if np.any(too_wide):
+                    idx = np.where(too_wide)[0][0]
+                    raise Exception(
+                        f"solving row {idx + 1}: 'allow.nonnarrowing' is FALSE and "
+                        f"the supplied end ({int(self.end[idx])}) is > refwidth"
+                    )
 
-    def _validate_narrowing(self) -> None:
+    def _validate_narrowing(self, starts: np.ndarray, widths: np.ndarray) -> None:
         """Validate that ranges don't exceed reference width."""
-        if not self.end.mask.all():
-            too_wide = (~self.end.mask) & (self.end > self.ref_widths)
+        if not self.allow_nonnarrowing:
+            ends = starts + widths - 1
+            too_wide = ends > self.ref_widths
             if np.any(too_wide):
                 idx = np.where(too_wide)[0][0]
                 raise Exception(
                     f"solving row {idx + 1}: 'allow.nonnarrowing' is FALSE and "
-                    f"the supplied end ({int(self.end[idx])}) is > refwidth"
+                    f"the solved end ({int(ends[idx])}) is > refwidth"
                 )
 
     def solve(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -84,12 +94,20 @@ class SEWWrangler:
 
             if not self.end.mask.all():
                 # Width and end specified
+                # mask = (~self.width.mask) & (~self.end.mask)
                 out_starts = self.end - self.width + 1
                 out_widths = self.width
+                # Validate after computing
+                self._validate_narrowing(out_starts, out_widths)
+
             elif not self.start.mask.all():
                 # Width and start specified
+                # mask = (~self.width.mask) & (~self.start.mask)
                 out_starts = self.start
                 out_widths = self.width
+                # Validate after computing
+                self._validate_narrowing(out_starts, out_widths)
+
             else:
                 # Only width specified
                 out_widths = self.width
@@ -100,14 +118,20 @@ class SEWWrangler:
             out_widths = self.end - self.start + 1
             if np.any(out_widths < 0):
                 raise Exception("ranges contain negative width")
+            # Validate after computing
+            self._validate_narrowing(out_starts, out_widths)
 
         # Handle only start
         elif not self.start.mask.all():
             out_starts = self.start
             out_widths = self.ref_widths - (self.start - 1)
+            # Validate after computing
+            self._validate_narrowing(out_starts, out_widths)
 
         # Handle only end
         elif not self.end.mask.all():
             out_widths = self.end
 
+        # Validate after computing
+        self._validate_narrowing(out_starts, out_widths)
         return out_starts, out_widths

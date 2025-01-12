@@ -16,3 +16,4 @@ finally:
     del version, PackageNotFoundError
 
 from .IRanges import IRanges
+from .utils import normalize_array

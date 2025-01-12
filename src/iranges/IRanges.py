@@ -9,7 +9,7 @@ from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
 from . import lib_iranges as libir
 from .sew_handler import SEWWrangler
-from .utils import compute_up_down, normalize_array
+from .utils import compute_up_down, find_interval, normalize_array
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
 __copyright__ = "LTLA, jkanche"
@@ -20,7 +20,8 @@ class IRangesIter:
     """An iterator to :py:class:`~iranges.IRanges.IRanges`.
 
     Args:
-        obj (IRanges): Object to iterate.
+        obj:
+            Object to iterate.
     """
 
     def __init__(self, obj: "IRanges") -> None:
@@ -50,10 +51,12 @@ class IRangesIter:
 class IRanges:
     """A collection of integer ranges, equivalent to the ``IRanges`` class from the
     `Bioconductor package <https://bioconductor.org/packages/IRanges>`_ of the same name.
+    It enables efficient storage and manipulation of genomic intervals defined by start
+    positions and widths.
 
-    This holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic
-    sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a
-    1-based position, but other use cases may allow zero or even negative values.
+    Each range consists of a start position and width. For genomic sequences, the start is
+    typically 1-based, though other applications may use zero or negative values. The width
+    represents the length of the interval. Ends are inclusive.
     """
 
     def __init__(
@@ -498,8 +501,8 @@ class IRanges:
         """
         idx, _ = ut.normalize_subscript(subset, len(self), self._names)
         return type(self)(
-            start=self._start[idx] if len(self._start) > 0 else [],
-            width=self._width[idx] if len(self._width) > 0 else [],
+            start=ut.subset_sequence(self._start, idx),
+            width=ut.subset_sequence(self._width, idx),
             names=ut.subset(self._names, idx) if self._names is not None else None,
             mcols=self._mcols[list(idx), :],
             metadata=self._metadata,
@@ -775,7 +778,7 @@ class IRanges:
                 Defaults to "auto".
 
         Returns:
-            Array containing coverage values
+            NumPy array containing coverage values.
         """
         if shift is None:
             shift = np.zeros(len(self))
@@ -790,7 +793,7 @@ class IRanges:
         return libir.coverage(self._start, self._width, shift, width, weight, circle_length, method)
 
     def range(self) -> "IRanges":
-        """Concatenate all ranges.
+        """Concatenate and compute the mix and max across all ranges.
 
         Returns:
             An new ``IRanges`` instance with a single range,
@@ -828,7 +831,7 @@ class IRanges:
         if min_gap_width < 0:
             raise ValueError("'min_gap_width' cannot be negative.")
 
-        reduced = result = libir.reduce_ranges(
+        reduced = libir.reduce_ranges(
             starts=self._start,
             widths=self._width,
             drop_empty_ranges=drop_empty_ranges,
@@ -961,7 +964,7 @@ class IRanges:
         """Check if the ranges are disjoint.
 
         Returns:
-            True if all ranges are non-overlapping.
+            True if all ranges are non-overlapping, otherwise False.
         """
         if len(self) < 2:
             return True
@@ -978,7 +981,7 @@ class IRanges:
         """Split ranges into a set of bins so that the ranges in each bin are disjoint.
 
         Returns:
-            An ndarray indicating the bin index for each range.
+            An NumPy vector indicating the bin index for each range.
         """
         order = self.order()
         result = libir.disjoint_bins(self._start[order], self._width[order])
@@ -1047,12 +1050,6 @@ class IRanges:
                 Whether to modify the object in place.
                 Defaults to False.
 
-        Raises:
-            ValueError:
-                If `width` is provided, either `start` or `end` must be provided.
-                Provide two of the three parameters - `start`, `end` and `width`
-                but not all.
-
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
             narrowed ranges. Otherwise, the current object is directly
@@ -1095,11 +1092,6 @@ class IRanges:
             in_place:
                 Whether to modify the object in place.
                 Defaults to False.
-
-        Raises:
-            ValueError:
-                If parameter ``fix`` is neither `start`, `end`, nor `center`.
-                If ``width`` is negative.
 
         Returns:
             If ``in_place = False``, a new ``IRanges`` is returned with the
@@ -1147,7 +1139,7 @@ class IRanges:
         ``width`` can be negative, in which case the flanking region is
         reversed so that it represents a prefix or suffix of the range.
 
-        Usage:
+        Notes:
 
             `ir.flank(3, True)`, where "x" indicates a range in ``ir`` and "-" indicates the
             resulting flanking region:
@@ -1163,6 +1155,8 @@ class IRanges:
 
             This is illustrated below for `ir.flank(3, both=TRUE)`:
                 ---***xxxx
+
+            Checkout the documentation on the Bioc package for more details.
 
         Args:
             width:
@@ -1379,31 +1373,42 @@ class IRanges:
                 too_left = (~start_arr.mask) & (new_starts < start_arr)
                 new_starts[too_left] = start_arr[too_left]
             else:
-                # drop ranges too far left
-                far_left = (~start_arr.mask) & (range_ends < start_arr - (drop_mode == 1))
+                # In drop_mode 1, keep ranges that end at start-1 or later
+                far_left = (~start_arr.mask) & (range_ends < start_arr - 1)
                 keep_mask &= ~far_left
+                # Then adjust remaining starts if needed
                 too_left = (~start_arr.mask) & (new_starts < start_arr)
                 new_starts[too_left] = start_arr[too_left]
 
         # right/end restriction
         if not end_arr.mask.all():
             if drop_mode == 2:
-                # keep but clip ranges
+                # First handle ranges that are too far right by setting their starts to end+1
+                far_right = (~end_arr.mask) & (new_starts > end_arr + 1)
+                new_starts[far_right] = end_arr[far_right] + 1
+                # Then clip any remaining ends that exceed the boundary
                 too_right = (~end_arr.mask) & (new_ends > end_arr)
                 new_ends[too_right] = end_arr[too_right]
             else:
-                # drop ranges too far right
-                far_right = (~end_arr.mask) & (new_starts > end_arr + (drop_mode == 1))
+                # In drop_mode 1, keep ranges that start at end+1 or earlier
+                far_right = (~end_arr.mask) & (new_starts > end_arr + 1)
                 keep_mask &= ~far_right
+                # Then adjust remaining ends if needed
                 too_right = (~end_arr.mask) & (new_ends > end_arr)
                 new_ends[too_right] = end_arr[too_right]
 
+        # if keep_all_ranges is True, some ranges may not
+        # satisfy the validation requirements
+        validate = False
         if drop_mode != 2:
             new_starts = new_starts[keep_mask]
             new_ends = new_ends[keep_mask]
+            validate = True
 
         new_widths = new_ends - new_starts + 1
-        return IRanges(new_starts, new_widths)
+        return IRanges(
+            new_starts, new_widths, mcols=BiocFrame({"revmap": np.where(keep_mask == 1)[0]}), validate=validate
+        )
 
     def threebands(
         self,
@@ -1431,9 +1436,9 @@ class IRanges:
 
         Returns:
             Dictionary with:
-                'left': (starts, widths) for left bands
-                'middle': (starts, widths) for middle bands
-                'right': (starts, widths) for right bands
+                'left': IRanges for left bands
+                'middle': IRanges for middle bands
+                'right': IRanges for right bands
         """
         # calculate middle band using narrow
         middle_ranges = self.narrow(start, end, width)
@@ -1465,7 +1470,7 @@ class IRanges:
                 End position. Defaults to None.
 
         Returns:
-            Numpy vector containing indices that overlap with
+            NumPy vector containing indices that overlap with
             the given range.
         """
         counter = 0
@@ -1671,9 +1676,10 @@ class IRanges:
                 Internal use only.
 
         Returns:
-            A `BiocFrame` with two columns,
-            ``query_hits`` for each range in query and ``self_hits`` for
-            indices in ``self`` that overlap with the query range.
+            A BiocFrame with two columns:
+            - query_hits: Indices into query ranges
+            - self_hits: Corresponding indices into self ranges that are upstream
+            Each row represents a query-subject pair where subject precedes query.
         """
 
         if max_gap < -1:
@@ -1697,13 +1703,21 @@ class IRanges:
                 "when query_type='any', at least one of max_gap and min_overlap must be set to its default value"
             )
 
-        max_gap += 1
+        if len(query) == 0 or len(self) == 0:
+            return BiocFrame(
+                data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+            )
 
         self._build_ncls_index()
 
-        if max_gap >= 0 and query_type == "any":
-            search_starts = query._start - max_gap
-            search_ends = query.get_end() + 1 + max_gap
+        if query_type == "any":
+            if min_overlap == 0:
+                offset = max_gap + 1
+            else:
+                offset = 1 - min_overlap
+
+            search_starts = query._start - offset
+            search_ends = query.get_end() + 1 + offset
         else:
             search_starts = query._start
             search_ends = query.get_end() + 1
@@ -1711,17 +1725,23 @@ class IRanges:
         query_hits, self_hits = self._ncls.all_overlaps_both(search_starts, search_ends, np.arange(len(query)))
 
         if len(query_hits) == 0:
-            return BiocFrame(data={"self_hits": [], "query_hits": []})
+            return BiocFrame(
+                data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+            )
+
+        q_starts = query._start[query_hits]
+        q_ends = query.get_end()[query_hits]
+        s_starts = self._start[self_hits]
+        s_ends = self.get_end()[self_hits]
 
         # filter based on overlap type and minoverlap
         mask = np.ones(len(query_hits), dtype=bool)
 
-        if query_type != "any" or min_overlap > 0:
-            q_starts = query._start[query_hits]
-            q_ends = query.get_end()[query_hits]
-            s_starts = self._start[self_hits]
-            s_ends = self.get_end()[self_hits]
-
+        if query_type == "any":
+            if min_overlap > 0:
+                overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
+                mask &= overlap_lengths >= min_overlap - max_gap - 2
+        else:
             if query_type == "start":
                 mask &= np.abs(q_starts - s_starts) <= max_gap
             elif query_type == "end":
@@ -1736,39 +1756,36 @@ class IRanges:
 
             if min_overlap > 0:
                 overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
-                mask &= overlap_lengths >= min_overlap
+                mask &= overlap_lengths >= min_overlap - 1
 
         query_hits = query_hits[mask]
         self_hits = self_hits[mask]
 
-        if select != "all":
-            if len(query_hits) == 0:
-                return BiocFrame(data={"self_hits": [], "query_hits": []})
-
-            unique_queries = np.unique(query_hits)
-            mask = np.zeros_like(query_hits, dtype=bool)
-
-            for q in unique_queries:
-                q_indices = np.where(query_hits == q)[0]
-                if select == "first":
-                    mask[q_indices[0]] = True
-                elif select == "last":
-                    mask[q_indices[-1]] = True
-                elif select == "arbitrary":
-                    mask[q_indices[0]] = True
-
-            query_hits = query_hits[mask]
-            self_hits = self_hits[mask]
-        else:
-            # sort by query hits as per R implementation
-            sort_idx = np.argsort(query_hits, stable=True)
-            query_hits = query_hits[sort_idx]
-            self_hits = self_hits[sort_idx]
-
         if delete_index:
             self._delete_ncls_index()
 
-        return BiocFrame(data={"self_hits": self_hits, "query_hits": query_hits})
+        if select == "all":
+            # sort by query hits for consistency with R
+            sort_idx = np.argsort(query_hits, stable=True)
+            return BiocFrame(data={"self_hits": self_hits[sort_idx], "query_hits": query_hits[sort_idx]})
+        else:
+            if len(query_hits) == 0:
+                return BiocFrame(
+                    data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+                )
+
+            _, unique_indices = np.unique(query_hits, return_index=True)
+
+            if select == "last":
+                # Find the last occurrence of each unique query
+                _, unique_indices = np.unique(query_hits[::-1], return_index=True)
+                unique_indices = len(query_hits) - 1 - unique_indices
+
+            # Create mask for selected hits
+            mask = np.zeros_like(query_hits, dtype=bool)
+            mask[unique_indices] = True
+
+            return BiocFrame(data={"self_hits": self_hits[mask], "query_hits": query_hits[mask]})
 
     def count_overlaps(
         self,
@@ -1807,8 +1824,8 @@ class IRanges:
                 Internal use only.
 
         Returns:
-            Numpy vector with lenght same as number of query ranges,
-            specifying the number of overlaps for each query.
+            NumPy vector with length same as number of query ranges,
+            value represents the number of overlaps in `self` for each query.
         """
         _overlaps = self.find_overlaps(
             query,
@@ -1891,21 +1908,26 @@ class IRanges:
         query: "IRanges",
         select: Literal["all", "first"] = "first",
     ) -> Union[np.ndarray, BiocFrame]:
-        """Search nearest positions only downstream that overlap with each range in ``query``.
+        """Find nearest positions that are upstream/precede each query range.
 
         Args:
             query:
-                Query `IRanges` to find nearest positions.
+                Query `IRanges`.
 
             select:
-                Determine what hit to choose when there are
-                multiple hits for an interval in ``query``.
-
+                Whether to return "all" hits or just "first".
                 Defaults to "first".
 
         Returns:
-            if `select="first"`, returns a numpy array who length is same as query.
-            if `select="all", returns a BiocFrame with hit indices.
+            If select="first":
+                A numpy array of integers with length matching query, containing indices
+                into self for the closest upstream position of each query range. Value may be
+                None if there are no matches.
+            If select="all":
+                A BiocFrame with two columns:
+                - query_hits: Indices into query ranges
+                - self_hits: Corresponding indices into self ranges that are upstream
+                Each row represents a query-self pair where self precedes query.
         """
 
         if not isinstance(query, IRanges):
@@ -1917,14 +1939,13 @@ class IRanges:
         sort_idx = np.argsort(self._start, stable=True)
         sorted_starts = self._start[sort_idx]
 
-        # find intervals using searchsorted
-        indices = np.searchsorted(sorted_starts, query.get_end() + 1, side="right")
+        indices = find_interval(query.get_end(), sorted_starts) + 1
 
         # cases where no following interval exists
-        indices[indices >= len(sorted_starts)] = -1
+        indices[indices >= len(self._start)] = -1
 
         # back to original indices
-        valid = indices != -1
+        valid = indices >= 0
         if np.any(valid):
             indices[valid] = sort_idx[indices[valid]]
 
@@ -1933,44 +1954,44 @@ class IRanges:
             return result
         else:
             query_hits = np.where(valid)[0]
-            subject_hits = indices[valid]
-            return BiocFrame({"self_hits": subject_hits, "query_hits": query_hits})
+            self_hits = indices[valid]
+            return BiocFrame({"self_hits": self_hits, "query_hits": query_hits})
 
     def follow(
         self,
         query: "IRanges",
         select: Literal["all", "last"] = "last",
     ) -> Union[np.ndarray, BiocFrame]:
-        """Search nearest positions only downstream that overlap with each range in ``query``.
+        """Find nearest positions that are downstream/follow each query range.
 
         Args:
             query:
-                Query `IRanges` to find nearest positions.
+                Query `IRanges`.
 
             select:
-                Determine what hit to choose when there are
-                multiple hits for an interval in ``query``.
-
+                Whether to return "all" hits or just "last".
                 Defaults to "last".
 
         Returns:
-            if `select="first"`, returns a numpy array of length same as query.
-            if `select="all", returns a BiocFrame with hit indices.
+            If select="last":
+                A numpy array of integers with length matching query, containing indices
+                into self for the closest downstream position of each query range. Value may be
+                None if there are no matches.
+            If select="all":
+                A BiocFrame with two columns:
+                - query_hits: Indices into query ranges
+                - self_hits: Corresponding indices into self ranges that are upstream
+                Each row represents a query-self pair where self follows query.
         """
 
-        self_ends = self.get_end() + 1
+        self_ends = self.get_end()
 
-        sort_idx = np.argsort(self_ends)
+        sort_idx = np.argsort(self_ends, stable=True)
         sorted_ends = self_ends[sort_idx]
 
-        # find intervals using searchsorted on (start - 1)
-        indices = np.searchsorted(sorted_ends, query._start - 1, side="right") - 1
+        indices = find_interval(query._start - 1, sorted_ends)
 
-        # cases where no preceding interval exists
-        indices[indices < 0] = -1
-
-        # convert back to original indices
-        valid = indices != -1
+        valid = indices >= 0
         if np.any(valid):
             indices[valid] = sort_idx[indices[valid]]
 
@@ -1979,8 +2000,8 @@ class IRanges:
             return result
         else:
             query_hits = np.where(valid)[0]
-            subject_hits = indices[valid]
-            return BiocFrame({"self_hits": subject_hits, "query_hits": query_hits})
+            self_hits = indices[valid]
+            return BiocFrame({"self_hits": self_hits, "query_hits": query_hits})
 
     def distance(self, query: "IRanges") -> np.ndarray:
         """Calculate the pair-wise distance between ranges.
@@ -1990,142 +2011,192 @@ class IRanges:
                 Query `IRanges`.
 
         Returns:
-            Numpy vector containing distances for each range in query.
+            NumPy vector containing distances for each range in query.
         """
         if not isinstance(query, IRanges):
             raise TypeError("`query` is not a `IRanges` object.")
 
         if len(self) != len(query):
-            raise ValueError("'query' does not contain the same number of range.")
+            raise ValueError("'query' does not contain the same number of ranges.")
 
         max_starts = np.maximum(self._start, query._start)
         min_ends = np.minimum(self.get_end(), query.get_end())
         return np.maximum(max_starts - min_ends - 1, 0)
 
     def nearest(
-        self,
-        query: "IRanges",
-        select: Literal["all", "arbitrary"] = "arbitrary",
-        delete_index: bool = True,
-    ) -> List[List[int]]:
-        """Search nearest positions both upstream and downstream
-        that overlap with each range in ``query``.
+        self, query: "IRanges", select: Literal["all", "arbitrary"] = "arbitrary", delete_index: bool = True
+    ) -> Union[np.ndarray, BiocFrame]:
+        """Find nearest ranges in both directions.
 
         Args:
             query:
-                Query `IRanges` to find nearest positions.
+                Query IRanges.
 
             select:
-                Determine what hit to choose when there are
-                multiple hits for an interval in ``query``.
+                Whether to return "all" hits or "arbitrary" choice.
 
             delete_index:
                 Delete the cached ncls index.
                 Internal use only.
 
         Returns:
-            if `select="first"`, returns a numpy array of length same as query.
-            if `select="all", returns a BiocFrame with hit indices.
+            If select="arbitrary":
+                A numpy array of integers with length matching query, containing indices
+                into self for the closest for each query range. Value may be None if there
+                are no matches.
+            If select="all":
+                A BiocFrame with two columns:
+                - query_hits: Indices into query ranges
+                - self_hits: Corresponding indices into self ranges that are upstream
+                Each row represents a query-subject pair where subject is nearest to query.
         """
-
         if not isinstance(query, IRanges):
             raise TypeError("`query` is not a `IRanges` object.")
 
         if select not in ["all", "arbitrary"]:
-            raise ValueError(f"'select' must be one of {', '.join(['all', 'arbitrary'])}.")
+            raise ValueError("'select' must be one of 'all', 'arbitrary'")
 
-        overlaps = query.find_overlaps(self, select="all", max_gap=0, delete_index=delete_index)
-        oqhits = overlaps.get_column("query_hits")
-        oshits = overlaps.get_column("self_hits")
-
-        query_ends = query.get_end()
-        self_ends = self.get_end()
+        ol = self.find_overlaps(query, max_gap=0, select="all", delete_index=delete_index)
 
         if select == "arbitrary":
-            result = np.full(len(query), -1, dtype=np.int32)
+            result = np.full(len(query), None)
 
-            for i in range(len(query._start)):
-                overlap_mask = oqhits == i
+            # Handle overlaps
+            ol_query = ol.get_column("query_hits")
+            ol_subject = ol.get_column("self_hits")
 
-                if np.any(overlap_mask):
-                    # if there are overlaps, choose the first one
-                    result[i] = oshits[overlap_mask][0]
-                else:
-                    # find nearest non-overlapping interval
-                    # calculate distances to all hits
-                    dists = np.zeros(len(self._start))
-                    for j in range(len(self._start)):
-                        if query_ends[i] < self._start[j]:
-                            # query ends before subject starts
-                            dists[j] = self._start[j] - query_ends[i] - 1
-                        elif self_ends[j] < query._start[i]:
-                            # query starts after subject ends
-                            dists[j] = query._start[i] - self_ends[j] - 1
-                        else:
-                            # overlap case (should not happen as we checked overlaps)
-                            dists[j] = 0
+            if len(ol_query):
+                # pick first overlap for each query
+                # _, idx = np.unique(ol_query, return_index=True)
+                # result[ol_query[idx]] = ol_subject[idx]
 
-                    # find the closest hit
-                    min_dist = np.min(dists)
-                    closest_idx = np.where(dists == min_dist)[0]
+                # pick last overlap for each query
+                # unique_queries = np.unique(ol_query)
+                # for q in unique_queries:
+                #     matches = np.where(ol_query == q)[0]
+                #     # Take the last match for this query
+                #     result[q] = ol_subject[matches[-1]]
 
-                    # choose the first
-                    result[i] = closest_idx[0]
+                # sort the overlaps and pick the last
+                # probably missing some logic here compared to R implementation
+                # ideally should pick the one with the least overlap
+                # if they all overlap equally then pick the last one
+                # since the type is "arbitrary" it does not matter
+                unique_queries = np.unique(ol_query)
+
+                for q in unique_queries:
+                    # Find all overlaps for this query
+                    matches = np.where(ol_query == q)[0]
+
+                    sorted_order = self[ol_subject[matches]].order()
+                    result[q] = ol_subject[sorted_order[-1]]
+
+            missing = result == None  # noqa: E711
+            if np.any(missing):
+                missing_ranges = query[missing]
+                before = self.precede(missing_ranges, select="first")
+                after = self.follow(missing_ranges, select="last")
+
+                before_dist = np.full(len(missing_ranges), np.inf)
+                after_dist = np.full(len(missing_ranges), np.inf)
+
+                before_valid = before != None  # noqa: E711
+                after_valid = after != None  # noqa: E711
+
+                if np.any(before_valid):
+                    before_idx = before[before_valid].astype(np.int32)
+                    before_dist[before_valid] = self._start[before_idx] - missing_ranges.get_end()[before_valid]
+
+                if np.any(after_valid):
+                    after_idx = after[after_valid].astype(np.int32)
+                    after_dist[after_valid] = missing_ranges._start[after_valid] - self.get_end()[after_idx]
+
+                # Choose nearest (prefer before if distances are equal)
+                use_before = before_dist <= after_dist
+                missing_result = np.where(use_before, before, after)
+                result[missing] = missing_result
 
             return result
+
         else:
-            all_query_hits = []
-            all_subject_hits = []
+            hits = []
 
-            overlap_mask = np.ones(len(oqhits), dtype=bool)
-            all_query_hits.append(oqhits[overlap_mask])
-            all_subject_hits.append(oshits[overlap_mask])
+            if len(ol.get_column("query_hits")):
+                hits.append(ol)
 
-            has_overlap = np.zeros(len(query._start), dtype=bool)
-            has_overlap[oqhits] = True
+            has_ol = np.zeros(len(query), dtype=bool)
+            has_ol[ol.get_column("query_hits")] = True
+            missing = ~has_ol
 
-            for i in range(len(query._start)):
-                if not has_overlap[i]:
-                    # calculate distances to all hits
-                    dists = np.zeros(len(self._start))
-                    for j in range(len(self._start)):
-                        if query_ends[i] < self._start[j]:
-                            dists[j] = self._start[j] - query_ends[i] - 1
-                        elif self_ends[j] < query._start[i]:
-                            dists[j] = query._start[i] - self_ends[j] - 1
-                        else:
-                            dists[j] = 0
+            if np.any(missing):
+                missing_ranges = query[missing]
+                missing_idx = np.where(missing)[0]
 
-                    # find all hits at minimum distance
-                    min_dist = np.min(dists)
-                    min_dist_mask = dists == min_dist
+                before = self.precede(missing_ranges, select="all")
+                after = self.follow(missing_ranges, select="all")
 
-                    n_hits = np.sum(min_dist_mask)
-                    if n_hits > 0:
-                        all_query_hits.append(np.full(n_hits, i))
-                        all_subject_hits.append(np.where(min_dist_mask)[0])
+                if len(before.get_column("query_hits")):
+                    before_q = before.get_column("query_hits")
+                    before_s = before.get_column("self_hits")
+                    before_dist = self._start[before_s] - missing_ranges.get_end()[before_q]
 
-            # combine all hits
-            if all_query_hits:
-                final_query_hits = np.concatenate(all_query_hits)
-                final_subject_hits = np.concatenate(all_subject_hits)
+                    before.get_column("query_hits")[:] = missing_idx[before_q]
+                    hits.append(before)
 
-                # R rule: sort by query hits
-                sort_idx = np.argsort(final_query_hits, stable=True)
-                final_query_hits = final_query_hits[sort_idx]
-                final_subject_hits = final_subject_hits[sort_idx]
-            else:
-                final_query_hits = np.array([], dtype=np.int32)
-                final_subject_hits = np.array([], dtype=np.int32)
+                if len(after.get_column("query_hits")):
+                    after_q = after.get_column("query_hits")
+                    after_s = after.get_column("self_hits")
+                    after_dist = missing_ranges._start[after_q] - self.get_end()[after_s]
 
-            return BiocFrame({"query_hits": final_query_hits, "self_hits": final_subject_hits})
+                    after.get_column("query_hits")[:] = missing_idx[after_q]
+
+                    # Only include after hits if:
+                    # 1. No before hits exist for this query, or
+                    # 2. After distance is less than or equal to before distance
+                    if len(before.get_column("query_hits")):
+                        # Find corresponding before distances for each after hit
+                        after_queries = after.get_column("query_hits")
+                        before_queries = before.get_column("query_hits")
+
+                        # For each after hit, find if there's a before hit
+                        # for the same query, then compare distances
+                        mask = np.zeros(len(after_queries), dtype=bool)
+                        for i, q in enumerate(after_queries):
+                            before_idx = np.where(before_queries == q)[0]
+                            if len(before_idx) == 0:
+                                mask[i] = True
+                            else:
+                                mask[i] = after_dist[i] <= before_dist[before_idx[0]]
+
+                        # Only keep after hits that pass the distance check
+                        after = BiocFrame(
+                            {
+                                "query_hits": after.get_column("query_hits")[mask],
+                                "self_hits": after.get_column("self_hits")[mask],
+                            }
+                        )
+
+                    if len(after.get_column("query_hits")):
+                        hits.append(after)
+
+            if not hits:
+                return BiocFrame(
+                    {"query_hits": np.array([], dtype=np.int32), "self_hits": np.array([], dtype=np.int32)}
+                )
+
+            # Combine all hits and sort by query hits
+            all_queries = np.concatenate([h.get_column("query_hits") for h in hits])
+            all_subjects = np.concatenate([h.get_column("self_hits") for h in hits])
+
+            sort_idx = np.argsort(all_queries, stable=True)
+            return BiocFrame({"query_hits": all_queries[sort_idx], "self_hits": all_subjects[sort_idx]})
 
     ########################
     #### pandas interop ####
     ########################
 
     def to_pandas(self):
-        """Convert this ``IRanges`` object into a :py:class:`~pandas.DataFrame`.
+        """Convert this IRanges object to a :py:class:`~pandas.DataFrame`.
 
         Returns:
             A :py:class:`~pandas.DataFrame` object.
@@ -2148,7 +2219,7 @@ class IRanges:
 
     @classmethod
     def from_pandas(cls, input) -> "IRanges":
-        """Create a ``IRanges`` from a :py:class:`~pandas.DataFrame` object.
+        """Create an ``IRanges`` object from a :py:class:`~pandas.DataFrame`.
 
         Args:
             input:
@@ -2189,7 +2260,7 @@ class IRanges:
     ########################
 
     def to_polars(self):
-        """Convert this ``IRanges`` object into a :py:class:`~polars.DataFrame`.
+        """Convert this ``IRanges`` object to a :py:class:`~polars.DataFrame`.
 
         Returns:
             A :py:class:`~polars.DataFrame` object.
@@ -2212,7 +2283,7 @@ class IRanges:
 
     @classmethod
     def from_polars(cls, input) -> "IRanges":
-        """Create a ``IRanges`` from a :py:class:`~polars.DataFrame` object.
+        """Create an ``IRanges`` object from a :py:class:`~polars.DataFrame`.
 
         Args:
             input:
@@ -2255,7 +2326,7 @@ class IRanges:
         """Create an zero-length ``IRanges`` object.
 
         Returns:
-            same type as caller, in this case a ``IRanges``.
+            Same type as caller, in this case a ``IRanges``.
         """
         return cls([], [])
 
@@ -2272,6 +2343,108 @@ class IRanges:
             An `IRanges` containing all the combined ranges.
         """
         return _combine_IRanges(self, *other)
+
+    ################################
+    ######>> window methods <<######
+    ################################
+
+    def tile(
+        self, n: Optional[Union[int, np.ndarray]] = None, width: Optional[Union[int, np.ndarray]] = None
+    ) -> List["IRanges"]:
+        """Split ranges into either n equal parts or parts of fixed width.
+
+        Args:
+            n:
+                Number of tiles per range (mutually exclusive with width).
+
+            width:
+                Width of each tile (mutually exclusive with n).
+
+        Returns:
+            List of `IRanges` objects, one per input range containing the tiles.
+        """
+        if n is not None and width is not None:
+            raise ValueError("only one of 'n' and 'width' can be specified")
+
+        if n is not None:
+            if isinstance(n, int):
+                n = np.repeat(n, len(self))
+            else:
+                n = np.asarray(n, dtype=np.int32)
+
+            if np.any(self._width < n):
+                raise ValueError("some width(x) are less than 'n'")
+            if np.any(n < 0):
+                raise ValueError("some 'n' are negative")
+
+            # tile_widths = self._width / n
+
+        if width is not None:
+            if isinstance(n, int):
+                width = np.repeat(width, len(self))
+            else:
+                width = np.asarray(width, dtype=np.int32)
+
+            if np.any(width < 0):
+                raise ValueError("some 'width' are negative")
+
+            n = np.ceil(self._width / width).astype(np.int32)
+            # tile_widths = np.repeat(width, len(self))
+
+        widths_per_tile = self._width / n
+        positions = np.arange(1, np.max(n) + 1, dtype=np.int32)
+
+        result = []
+        for i in range(len(self)):
+            rel_ends = np.floor(positions[: n[i]] * widths_per_tile[i]).astype(np.int32)
+            abs_ends = rel_ends + self._start[i] - 1
+            prev_ends = np.concatenate([[self._start[i] - 1], abs_ends[:-1]])
+            widths = abs_ends - prev_ends
+            result.append(IRanges(start=abs_ends - widths + 1, width=widths))
+
+        return result
+
+    def sliding_windows(self, width: int, step: int = 1) -> List["IRanges"]:
+        """Create sliding windows of fixed width and step size.
+
+        Args:
+            width:
+                Width of each window.
+
+            step:
+                Step size between window starts.
+
+        Returns:
+            List of `IRanges` objects, one per input range containing the windows.
+        """
+        if not isinstance(width, (int, np.integer)):
+            raise ValueError("'width' must be a single, non-NA number")
+
+        if not isinstance(step, (int, np.integer)):
+            raise ValueError("'step' must be a single, non-NA number")
+
+        if width < 0:
+            raise ValueError("'width' cannot be negative")
+
+        if step < 0:
+            raise ValueError("'step' cannot be negative")
+
+        n = np.ceil(np.maximum(self._width - width, 0) / step).astype(np.int32) + 1
+
+        result = []
+        for i in range(len(self)):
+            window_starts = np.arange(n[i]) * step + 1
+
+            valid_windows = window_starts + width - 1 <= self._width[i]
+            if not np.all(valid_windows):
+                window_starts = window_starts[valid_windows]
+
+            abs_starts = window_starts + self._start[i] - 1
+            window_widths = np.repeat(width, len(window_starts))
+
+            result.append(IRanges(start=abs_starts, width=window_widths))
+
+        return result
 
 
 @combine_sequences.register
