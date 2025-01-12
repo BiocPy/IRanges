@@ -9,7 +9,7 @@ kernelspec:
 
 Python implementation of the [**IRanges**](https://bioconductor.org/packages/IRanges) Bioconductor package.
 
-An `IRanges` holds a **start** position and a **width**, and is typically used to represent coordinates along a genomic sequence. The interpretation of the **start** position depends on the application; for sequences, the **start** is usually a 1-based position, but other use cases may allow zero or even negative values, e.g., circular genomes.
+An `IRanges` holds a **start** position and a **width**, and is typically used to represent coordinates along a genomic sequence. The interpretation of the **start** position depends on the application; for sequences, the **start** is usually a 1-based position, but other use cases may allow zero or even negative values, e.g., circular genomes. Ends are inclusive.
 
 `IRanges` uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search based operations.
 
@@ -26,7 +26,7 @@ The descriptions for some of these methods come from the [Bioconductor documenta
 
 # Construct `IRanges`
 
-An `IRanges` holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a 1-based position, but other use cases may allow zero or even negative values (e.g. circular genomes).
+An `IRanges` holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic sequence. Ends are inclusive.
 
 ```{code-cell}
 from iranges import IRanges

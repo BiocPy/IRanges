@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Contributing" href="../contributing.html" /><link rel="prev" title="iranges" href="modules.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>iranges package - IRanges 0.4.1 documentation</title>
+        <title>iranges package - IRanges 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">IRanges 0.4.1 documentation</div></a>
+      <a href="../index.html"><div class="brand">IRanges 0.4.2 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -191,7 +191,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.4.1 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.4.2 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -267,10 +267,12 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iranges.IRanges.</span></span><span class="sig-name descname"><span class="pre">IRanges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.12/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A collection of integer ranges, equivalent to the <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> class from the
-<a class="reference external" href="https://bioconductor.org/packages/IRanges">Bioconductor package</a> of the same name.</p>
-<p>This holds a <strong>start</strong> position and a <strong>width</strong>, and is most typically used to represent coordinates along some genomic
-sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a
-1-based position, but other use cases may allow zero or even negative values.</p>
+<a class="reference external" href="https://bioconductor.org/packages/IRanges">Bioconductor package</a> of the same name.
+It enables efficient storage and manipulation of genomic intervals defined by start
+positions and widths.</p>
+<p>Each range consists of a start position and width. For genomic sequences, the start is
+typically 1-based, though other applications may use zero or negative values. The width
+represents the length of the interval. Ends are inclusive.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.__copy__">
 <span class="sig-name descname"><span class="pre">__copy__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.__copy__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.__copy__" title="Link to this definition">¶</a></dt>
@@ -447,8 +449,8 @@ Internal use only.</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Numpy vector with lenght same as number of query ranges,
-specifying the number of overlaps for each query.</p>
+<dd class="field-odd"><p>NumPy vector with length same as number of query ranges,
+value represents the number of overlaps in <cite>self</cite> for each query.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -477,7 +479,7 @@ Defaults to “auto”.</p></li>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Array containing coverage values</p>
+<dd class="field-odd"><p>NumPy array containing coverage values.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -509,7 +511,7 @@ Defaults to False.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>An ndarray indicating the bin index for each range.</p>
+<dd class="field-even"><p>An NumPy vector indicating the bin index for each range.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -526,7 +528,7 @@ Defaults to False.</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Numpy vector containing distances for each range in query.</p>
+<dd class="field-odd"><p>NumPy vector containing distances for each range in query.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -537,7 +539,7 @@ Defaults to False.</p>
 <dd><p>Create an zero-length <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>same type as caller, in this case a <code class="docutils literal notranslate"><span class="pre">IRanges</span></code>.</p>
+<dd class="field-odd"><p>Same type as caller, in this case a <code class="docutils literal notranslate"><span class="pre">IRanges</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -584,13 +586,16 @@ Defaults to 1.</p></li>
 Internal use only.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://biocpy.github.io/BiocFrame/api/biocframe.html#biocframe.BiocFrame.BiocFrame" title="(in BiocFrame v0.6.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BiocFrame</span></code></a></span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>query_hits: Indices into query ranges</p></li>
+<li><p>self_hits: Corresponding indices into self ranges that are upstream</p></li>
+</ul>
+<p>Each row represents a query-subject pair where subject precedes query.</p>
+</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <cite>BiocFrame</cite> with two columns,
-<code class="docutils literal notranslate"><span class="pre">query_hits</span></code> for each range in query and <code class="docutils literal notranslate"><span class="pre">self_hits</span></code> for
-indices in <code class="docutils literal notranslate"><span class="pre">self</span></code> that overlap with the query range.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A BiocFrame with two columns</p>
 </dd>
 </dl>
 </dd></dl>
@@ -604,9 +609,8 @@ otherwise the <cite>end</cite>.
 The <cite>widths</cite> of the flanks are given by the <code class="docutils literal notranslate"><span class="pre">width</span></code> parameter.</p>
 <p><code class="docutils literal notranslate"><span class="pre">width</span></code> can be negative, in which case the flanking region is
 reversed so that it represents a prefix or suffix of the range.</p>
-<p>Usage:</p>
-<blockquote>
-<div><p><cite>ir.flank(3, True)</cite>, where “x” indicates a range in <code class="docutils literal notranslate"><span class="pre">ir</span></code> and “-” indicates the
+<p class="rubric">Notes</p>
+<p><cite>ir.flank(3, True)</cite>, where “x” indicates a range in <code class="docutils literal notranslate"><span class="pre">ir</span></code> and “-” indicates the
 resulting flanking region:</p>
 <blockquote>
 <div><p>—xxxxxxx</p>
@@ -627,7 +631,7 @@ straddles the given endpoint and has twice the width given by width.</p>
 <dt>This is illustrated below for <cite>ir.flank(3, both=TRUE)</cite>:</dt><dd><p>—<a href="#id1"><span class="problematic" id="id2">**</span></a><a href="#id3"><span class="problematic" id="id4">*</span></a>xxxx</p>
 </dd>
 </dl>
-</div></blockquote>
+<p>Checkout the documentation on the Bioc package for more details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -654,23 +658,30 @@ modified and a reference to it is returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.follow">
 <span class="sig-name descname"><span class="pre">follow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.follow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.follow" title="Link to this definition">¶</a></dt>
-<dd><p>Search nearest positions only downstream that overlap with each range in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+<dd><p>Find nearest positions that are downstream/follow each query range.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Query <cite>IRanges</cite> to find nearest positions.</p></li>
-<li><p><strong>select</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'all'</span></code>, <code class="docutils literal notranslate"><span class="pre">'last'</span></code>]</span>) – <p>Determine what hit to choose when there are
-multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
-<p>Defaults to “last”.</p>
-</p></li>
+<li><p><strong>query</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Query <cite>IRanges</cite>.</p></li>
+<li><p><strong>select</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'all'</span></code>, <code class="docutils literal notranslate"><span class="pre">'last'</span></code>]</span>) – Whether to return “all” hits or just “last”.
+Defaults to “last”.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://biocpy.github.io/BiocFrame/api/biocframe.html#biocframe.BiocFrame.BiocFrame" title="(in BiocFrame v0.6.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BiocFrame</span></code></a>]</span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A numpy array of integers with length matching query, containing indices</dt><dd><p>into self for the closest downstream position of each query range. Value may be
+None if there are no matches.</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>if <cite>select=”first”</cite>, returns a numpy array of length same as query.
-if <a href="#id5"><span class="problematic" id="id6">`</span></a>select=”all”, returns a BiocFrame with hit indices.</p>
+<dt>If select=”all”:</dt><dd><p>A BiocFrame with two columns:
+- query_hits: Indices into query ranges
+- self_hits: Corresponding indices into self ranges that are upstream
+Each row represents a query-self pair where self follows query.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If select=”last”</p>
 </dd>
 </dl>
 </dd></dl>
@@ -678,7 +689,7 @@ if <a href="#id5"><span class="problematic" id="id6">`</span></a>select=”all�
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.from_pandas">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.from_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.from_pandas" title="Link to this definition">¶</a></dt>
-<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> from a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
+<dd><p>Create an <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object from a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>input</strong> – Input data must contain columns ‘start’ and ‘width’.</p>
@@ -695,7 +706,7 @@ if <a href="#id5"><span class="problematic" id="id6">`</span></a>select=”all�
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.from_polars">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_polars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.from_polars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.from_polars" title="Link to this definition">¶</a></dt>
-<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> from a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code> object.</p>
+<dd><p>Create an <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object from a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>input</strong> – Input data must contain columns ‘start’ and ‘width’.</p>
@@ -894,7 +905,7 @@ ranges.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if all ranges are non-overlapping.</p>
+<dd class="field-even"><p>True if all ranges are non-overlapping, otherwise False.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -951,16 +962,11 @@ Defaults to None.</p></li>
 Defaults to False.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.12/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – If <cite>width</cite> is provided, either <cite>start</cite> or <cite>end</cite> must be provided.
-    Provide two of the three parameters - <cite>start</cite>, <cite>end</cite> and <cite>width</cite>
-    but not all.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span></p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
 narrowed ranges. Otherwise, the current object is directly
 modified and a reference to it is returned.</p>
 </dd>
@@ -970,24 +976,31 @@ modified and a reference to it is returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.nearest">
 <span class="sig-name descname"><span class="pre">nearest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'arbitrary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.nearest" title="Link to this definition">¶</a></dt>
-<dd><p>Search nearest positions both upstream and downstream
-that overlap with each range in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+<dd><p>Find nearest ranges in both directions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Query <cite>IRanges</cite> to find nearest positions.</p></li>
-<li><p><strong>select</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'all'</span></code>, <code class="docutils literal notranslate"><span class="pre">'arbitrary'</span></code>]</span>) – Determine what hit to choose when there are
-multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p></li>
+<li><p><strong>query</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Query IRanges.</p></li>
+<li><p><strong>select</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'all'</span></code>, <code class="docutils literal notranslate"><span class="pre">'arbitrary'</span></code>]</span>) – Whether to return “all” hits or “arbitrary” choice.</p></li>
 <li><p><strong>delete_index</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Delete the cached ncls index.
 Internal use only.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A numpy array of integers with length matching query, containing indices</dt><dd><p>into self for the closest for each query range. Value may be None if there
+are no matches.</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>if <cite>select=”first”</cite>, returns a numpy array of length same as query.
-if <a href="#id7"><span class="problematic" id="id8">`</span></a>select=”all”, returns a BiocFrame with hit indices.</p>
+<dt>If select=”all”:</dt><dd><p>A BiocFrame with two columns:
+- query_hits: Indices into query ranges
+- self_hits: Corresponding indices into self ranges that are upstream
+Each row represents a query-subject pair where subject is nearest to query.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If select=”arbitrary”</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1024,7 +1037,7 @@ if <a href="#id7"><span class="problematic" id="id8">`</span></a>select=”all�
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Numpy vector containing indices that overlap with
+<dd class="field-odd"><p>NumPy vector containing indices that overlap with
 the given range.</p>
 </dd>
 </dl>
@@ -1033,23 +1046,30 @@ the given range.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.precede">
 <span class="sig-name descname"><span class="pre">precede</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.precede"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.precede" title="Link to this definition">¶</a></dt>
-<dd><p>Search nearest positions only downstream that overlap with each range in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
+<dd><p>Find nearest positions that are upstream/precede each query range.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>query</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Query <cite>IRanges</cite> to find nearest positions.</p></li>
-<li><p><strong>select</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'all'</span></code>, <code class="docutils literal notranslate"><span class="pre">'first'</span></code>]</span>) – <p>Determine what hit to choose when there are
-multiple hits for an interval in <code class="docutils literal notranslate"><span class="pre">query</span></code>.</p>
-<p>Defaults to “first”.</p>
-</p></li>
+<li><p><strong>query</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Query <cite>IRanges</cite>.</p></li>
+<li><p><strong>select</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Literal" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'all'</span></code>, <code class="docutils literal notranslate"><span class="pre">'first'</span></code>]</span>) – Whether to return “all” hits or just “first”.
+Defaults to “first”.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://biocpy.github.io/BiocFrame/api/biocframe.html#biocframe.BiocFrame.BiocFrame" title="(in BiocFrame v0.6.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BiocFrame</span></code></a>]</span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A numpy array of integers with length matching query, containing indices</dt><dd><p>into self for the closest upstream position of each query range. Value may be
+None if there are no matches.</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>if <cite>select=”first”</cite>, returns a numpy array who length is same as query.
-if <a href="#id9"><span class="problematic" id="id10">`</span></a>select=”all”, returns a BiocFrame with hit indices.</p>
+<dt>If select=”all”:</dt><dd><p>A BiocFrame with two columns:
+- query_hits: Indices into query ranges
+- self_hits: Corresponding indices into self ranges that are upstream
+Each row represents a query-self pair where self precedes query.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If select=”first”</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1088,7 +1108,7 @@ modified and a reference to it is returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.range">
 <span class="sig-name descname"><span class="pre">range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.range" title="Link to this definition">¶</a></dt>
-<dd><p>Concatenate all ranges.</p>
+<dd><p>Concatenate and compute the mix and max across all ranges.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span></p>
@@ -1173,15 +1193,11 @@ anchor for each interval.</p>
 Defaults to False.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.12/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – If parameter <code class="docutils literal notranslate"><span class="pre">fix</span></code> is neither <cite>start</cite>, <cite>end</cite>, nor <cite>center</cite>.
-    If <code class="docutils literal notranslate"><span class="pre">width</span></code> is negative.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span></p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If <code class="docutils literal notranslate"><span class="pre">in_place</span> <span class="pre">=</span> <span class="pre">False</span></code>, a new <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> is returned with the
 resized ranges. Otherwise, the current object is directly
 modified and a reference to it is returned.</p>
 </dd>
@@ -1391,6 +1407,26 @@ Defaults to None for linear sequence.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.sliding_windows">
+<span class="sig-name descname"><span class="pre">sliding_windows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.sliding_windows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.sliding_windows" title="Link to this definition">¶</a></dt>
+<dd><p>Create sliding windows of fixed width and step size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Width of each window.</p></li>
+<li><p><strong>step</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Step size between window starts.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of <cite>IRanges</cite> objects, one per input range containing the windows.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.sort">
 <span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decreasing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_place</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.sort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.sort" title="Link to this definition">¶</a></dt>
 <dd><p>Sort the ranges.</p>
@@ -1505,9 +1541,9 @@ modified and a reference to it is returned.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>‘left’: (starts, widths) for left bands
-‘middle’: (starts, widths) for middle bands
-‘right’: (starts, widths) for right bands</p>
+<dd class="field-even"><p>‘left’: IRanges for left bands
+‘middle’: IRanges for middle bands
+‘right’: IRanges for right bands</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Dictionary with</p>
@@ -1516,9 +1552,29 @@ modified and a reference to it is returned.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="iranges.IRanges.IRanges.tile">
+<span class="sig-name descname"><span class="pre">tile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.tile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.tile" title="Link to this definition">¶</a></dt>
+<dd><p>Split ranges into either n equal parts or parts of fixed width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3.12/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Number of tiles per range (mutually exclusive with width).</p></li>
+<li><p><strong>width</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3.12/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Width of each tile (mutually exclusive with n).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of <cite>IRanges</cite> objects, one per input range containing the tiles.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.to_pandas">
 <span class="sig-name descname"><span class="pre">to_pandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.to_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.to_pandas" title="Link to this definition">¶</a></dt>
-<dd><p>Convert this <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object into a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
+<dd><p>Convert this IRanges object to a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
@@ -1529,7 +1585,7 @@ modified and a reference to it is returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.to_polars">
 <span class="sig-name descname"><span class="pre">to_polars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.to_polars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.to_polars" title="Link to this definition">¶</a></dt>
-<dd><p>Convert this <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object into a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>.</p>
+<dd><p>Convert this <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object to a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code> object.</p>
@@ -1578,7 +1634,7 @@ ranges.</p>
 <p>An iterator to <a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><em>IRanges</em></a>) – Object to iterate.</p>
+<dd class="field-odd"><p><strong>obj</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – Object to iterate.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -1726,6 +1782,26 @@ Defaults to None for no upper bound.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Tuple" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="iranges.utils.find_interval">
+<span class="sig-prename descclassname"><span class="pre">iranges.utils.</span></span><span class="sig-name descname"><span class="pre">find_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/utils.html#find_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.utils.find_interval" title="Link to this definition">¶</a></dt>
+<dd><p>Python implementation of R’s findInterval function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – Values to find intervals for.</p></li>
+<li><p><strong>vec</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – Sorted vector to find intervals in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NumPy array of indices indicating which interval each x value falls into.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1890,11 +1966,13 @@ Defaults to None for no upper bound.</p></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.setdiff"><code class="docutils literal notranslate"><span class="pre">IRanges.setdiff()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.shift"><code class="docutils literal notranslate"><span class="pre">IRanges.shift()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.shift_and_clip_ranges"><code class="docutils literal notranslate"><span class="pre">IRanges.shift_and_clip_ranges()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.sliding_windows"><code class="docutils literal notranslate"><span class="pre">IRanges.sliding_windows()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.sort"><code class="docutils literal notranslate"><span class="pre">IRanges.sort()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.start"><code class="docutils literal notranslate"><span class="pre">IRanges.start</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.subset_by_overlaps"><code class="docutils literal notranslate"><span class="pre">IRanges.subset_by_overlaps()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.terminators"><code class="docutils literal notranslate"><span class="pre">IRanges.terminators()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.threebands"><code class="docutils literal notranslate"><span class="pre">IRanges.threebands()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.IRanges.IRanges.tile"><code class="docutils literal notranslate"><span class="pre">IRanges.tile()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.to_pandas"><code class="docutils literal notranslate"><span class="pre">IRanges.to_pandas()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.to_polars"><code class="docutils literal notranslate"><span class="pre">IRanges.to_polars()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.IRanges.IRanges.union"><code class="docutils literal notranslate"><span class="pre">IRanges.union()</span></code></a></li>
@@ -1930,6 +2008,7 @@ Defaults to None for no upper bound.</p></li>
 <li><a class="reference internal" href="#iranges.utils.calc_gap_and_overlap"><code class="docutils literal notranslate"><span class="pre">calc_gap_and_overlap()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.utils.clip_ranges"><code class="docutils literal notranslate"><span class="pre">clip_ranges()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.utils.compute_up_down"><code class="docutils literal notranslate"><span class="pre">compute_up_down()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.utils.find_interval"><code class="docutils literal notranslate"><span class="pre">find_interval()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.utils.handle_negative_coords"><code class="docutils literal notranslate"><span class="pre">handle_negative_coords()</span></code></a></li>
 <li><a class="reference internal" href="#iranges.utils.normalize_array"><code class="docutils literal notranslate"><span class="pre">normalize_array()</span></code></a></li>
 </ul>
@@ -1946,7 +2025,7 @@ Defaults to None for no upper bound.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=c87aa342"></script>
+</div><script src="../_static/documentation_options.js?v=ff822928"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

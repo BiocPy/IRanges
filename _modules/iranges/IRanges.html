@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>iranges.IRanges - IRanges 0.4.1 documentation</title>
+        <title>iranges.IRanges - IRanges 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">IRanges 0.4.1 documentation</div></a>
+      <a href="../../index.html"><div class="brand">IRanges 0.4.2 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.4.1 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.4.2 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -260,7 +260,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">lib_iranges</span> <span class="k">as</span> <span class="n">libir</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.sew_handler</span><span class="w"> </span><span class="kn">import</span> <span class="n">SEWWrangler</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_up_down</span><span class="p">,</span> <span class="n">normalize_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_up_down</span><span class="p">,</span> <span class="n">find_interval</span><span class="p">,</span> <span class="n">normalize_array</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Aaron Lun, Jayaram Kancherla&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;LTLA, jkanche&quot;</span>
@@ -273,7 +273,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An iterator to :py:class:`~iranges.IRanges.IRanges`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        obj (IRanges): Object to iterate.</span>
+<span class="sd">        obj:</span>
+<span class="sd">            Object to iterate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="IRangesIter.__init__">
@@ -315,10 +316,12 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">IRanges</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A collection of integer ranges, equivalent to the ``IRanges`` class from the</span>
 <span class="sd">    `Bioconductor package &lt;https://bioconductor.org/packages/IRanges&gt;`_ of the same name.</span>
+<span class="sd">    It enables efficient storage and manipulation of genomic intervals defined by start</span>
+<span class="sd">    positions and widths.</span>
 
-<span class="sd">    This holds a **start** position and a **width**, and is most typically used to represent coordinates along some genomic</span>
-<span class="sd">    sequence. The interpretation of the start position depends on the application; for sequences, the start is usually a</span>
-<span class="sd">    1-based position, but other use cases may allow zero or even negative values.</span>
+<span class="sd">    Each range consists of a start position and width. For genomic sequences, the start is</span>
+<span class="sd">    typically 1-based, though other applications may use zero or negative values. The width</span>
+<span class="sd">    represents the length of the interval. Ends are inclusive.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="IRanges.__init__">
@@ -804,8 +807,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">normalize_subscript</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span>
-            <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[],</span>
-            <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">ut</span><span class="o">.</span><span class="n">subset_sequence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">,</span> <span class="n">idx</span><span class="p">),</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">ut</span><span class="o">.</span><span class="n">subset_sequence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">idx</span><span class="p">),</span>
             <span class="n">names</span><span class="o">=</span><span class="n">ut</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">mcols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mcols</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">idx</span><span class="p">),</span> <span class="p">:],</span>
             <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">,</span>
@@ -1105,7 +1108,7 @@
 <span class="sd">                Defaults to &quot;auto&quot;.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Array containing coverage values</span>
+<span class="sd">            NumPy array containing coverage values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
@@ -1123,7 +1126,7 @@
 <div class="viewcode-block" id="IRanges.range">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.range">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate all ranges.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate and compute the mix and max across all ranges.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            An new ``IRanges`` instance with a single range,</span>
@@ -1164,7 +1167,7 @@
         <span class="k">if</span> <span class="n">min_gap_width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;min_gap_width&#39; cannot be negative.&quot;</span><span class="p">)</span>
 
-        <span class="n">reduced</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="n">libir</span><span class="o">.</span><span class="n">reduce_ranges</span><span class="p">(</span>
+        <span class="n">reduced</span> <span class="o">=</span> <span class="n">libir</span><span class="o">.</span><span class="n">reduce_ranges</span><span class="p">(</span>
             <span class="n">starts</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">,</span>
             <span class="n">widths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span>
             <span class="n">drop_empty_ranges</span><span class="o">=</span><span class="n">drop_empty_ranges</span><span class="p">,</span>
@@ -1312,7 +1315,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the ranges are disjoint.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            True if all ranges are non-overlapping.</span>
+<span class="sd">            True if all ranges are non-overlapping, otherwise False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
@@ -1332,7 +1335,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Split ranges into a set of bins so that the ranges in each bin are disjoint.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            An ndarray indicating the bin index for each range.</span>
+<span class="sd">            An NumPy vector indicating the bin index for each range.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">libir</span><span class="o">.</span><span class="n">disjoint_bins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">order</span><span class="p">])</span>
@@ -1407,12 +1410,6 @@
 <span class="sd">                Whether to modify the object in place.</span>
 <span class="sd">                Defaults to False.</span>
 
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError:</span>
-<span class="sd">                If `width` is provided, either `start` or `end` must be provided.</span>
-<span class="sd">                Provide two of the three parameters - `start`, `end` and `width`</span>
-<span class="sd">                but not all.</span>
-
 <span class="sd">        Returns:</span>
 <span class="sd">            If ``in_place = False``, a new ``IRanges`` is returned with the</span>
 <span class="sd">            narrowed ranges. Otherwise, the current object is directly</span>
@@ -1458,11 +1455,6 @@
 <span class="sd">            in_place:</span>
 <span class="sd">                Whether to modify the object in place.</span>
 <span class="sd">                Defaults to False.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError:</span>
-<span class="sd">                If parameter ``fix`` is neither `start`, `end`, nor `center`.</span>
-<span class="sd">                If ``width`` is negative.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            If ``in_place = False``, a new ``IRanges`` is returned with the</span>
@@ -1513,7 +1505,7 @@
 <span class="sd">        ``width`` can be negative, in which case the flanking region is</span>
 <span class="sd">        reversed so that it represents a prefix or suffix of the range.</span>
 
-<span class="sd">        Usage:</span>
+<span class="sd">        Notes:</span>
 
 <span class="sd">            `ir.flank(3, True)`, where &quot;x&quot; indicates a range in ``ir`` and &quot;-&quot; indicates the</span>
 <span class="sd">            resulting flanking region:</span>
@@ -1529,6 +1521,8 @@
 
 <span class="sd">            This is illustrated below for `ir.flank(3, both=TRUE)`:</span>
 <span class="sd">                ---***xxxx</span>
+
+<span class="sd">            Checkout the documentation on the Bioc package for more details.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            width:</span>
@@ -1757,31 +1751,42 @@
                 <span class="n">too_left</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">start_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_starts</span> <span class="o">&lt;</span> <span class="n">start_arr</span><span class="p">)</span>
                 <span class="n">new_starts</span><span class="p">[</span><span class="n">too_left</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_arr</span><span class="p">[</span><span class="n">too_left</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># drop ranges too far left</span>
-                <span class="n">far_left</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">start_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">range_ends</span> <span class="o">&lt;</span> <span class="n">start_arr</span> <span class="o">-</span> <span class="p">(</span><span class="n">drop_mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="c1"># In drop_mode 1, keep ranges that end at start-1 or later</span>
+                <span class="n">far_left</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">start_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">range_ends</span> <span class="o">&lt;</span> <span class="n">start_arr</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">keep_mask</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">far_left</span>
+                <span class="c1"># Then adjust remaining starts if needed</span>
                 <span class="n">too_left</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">start_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_starts</span> <span class="o">&lt;</span> <span class="n">start_arr</span><span class="p">)</span>
                 <span class="n">new_starts</span><span class="p">[</span><span class="n">too_left</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_arr</span><span class="p">[</span><span class="n">too_left</span><span class="p">]</span>
 
         <span class="c1"># right/end restriction</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">end_arr</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">drop_mode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="c1"># keep but clip ranges</span>
+                <span class="c1"># First handle ranges that are too far right by setting their starts to end+1</span>
+                <span class="n">far_right</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">end_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_starts</span> <span class="o">&gt;</span> <span class="n">end_arr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">new_starts</span><span class="p">[</span><span class="n">far_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_arr</span><span class="p">[</span><span class="n">far_right</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="c1"># Then clip any remaining ends that exceed the boundary</span>
                 <span class="n">too_right</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">end_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_ends</span> <span class="o">&gt;</span> <span class="n">end_arr</span><span class="p">)</span>
                 <span class="n">new_ends</span><span class="p">[</span><span class="n">too_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_arr</span><span class="p">[</span><span class="n">too_right</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># drop ranges too far right</span>
-                <span class="n">far_right</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">end_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_starts</span> <span class="o">&gt;</span> <span class="n">end_arr</span> <span class="o">+</span> <span class="p">(</span><span class="n">drop_mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="c1"># In drop_mode 1, keep ranges that start at end+1 or earlier</span>
+                <span class="n">far_right</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">end_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_starts</span> <span class="o">&gt;</span> <span class="n">end_arr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">keep_mask</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">far_right</span>
+                <span class="c1"># Then adjust remaining ends if needed</span>
                 <span class="n">too_right</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">end_arr</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_ends</span> <span class="o">&gt;</span> <span class="n">end_arr</span><span class="p">)</span>
                 <span class="n">new_ends</span><span class="p">[</span><span class="n">too_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_arr</span><span class="p">[</span><span class="n">too_right</span><span class="p">]</span>
 
+        <span class="c1"># if keep_all_ranges is True, some ranges may not</span>
+        <span class="c1"># satisfy the validation requirements</span>
+        <span class="n">validate</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">drop_mode</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">new_starts</span> <span class="o">=</span> <span class="n">new_starts</span><span class="p">[</span><span class="n">keep_mask</span><span class="p">]</span>
             <span class="n">new_ends</span> <span class="o">=</span> <span class="n">new_ends</span><span class="p">[</span><span class="n">keep_mask</span><span class="p">]</span>
+            <span class="n">validate</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">new_widths</span> <span class="o">=</span> <span class="n">new_ends</span> <span class="o">-</span> <span class="n">new_starts</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span><span class="n">new_starts</span><span class="p">,</span> <span class="n">new_widths</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">IRanges</span><span class="p">(</span>
+            <span class="n">new_starts</span><span class="p">,</span> <span class="n">new_widths</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;revmap&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">keep_mask</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]}),</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IRanges.threebands">
@@ -1812,9 +1817,9 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dictionary with:</span>
-<span class="sd">                &#39;left&#39;: (starts, widths) for left bands</span>
-<span class="sd">                &#39;middle&#39;: (starts, widths) for middle bands</span>
-<span class="sd">                &#39;right&#39;: (starts, widths) for right bands</span>
+<span class="sd">                &#39;left&#39;: IRanges for left bands</span>
+<span class="sd">                &#39;middle&#39;: IRanges for middle bands</span>
+<span class="sd">                &#39;right&#39;: IRanges for right bands</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># calculate middle band using narrow</span>
         <span class="n">middle_ranges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
@@ -1849,7 +1854,7 @@
 <span class="sd">                End position. Defaults to None.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Numpy vector containing indices that overlap with</span>
+<span class="sd">            NumPy vector containing indices that overlap with</span>
 <span class="sd">            the given range.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2070,9 +2075,10 @@
 <span class="sd">                Internal use only.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A `BiocFrame` with two columns,</span>
-<span class="sd">            ``query_hits`` for each range in query and ``self_hits`` for</span>
-<span class="sd">            indices in ``self`` that overlap with the query range.</span>
+<span class="sd">            A BiocFrame with two columns:</span>
+<span class="sd">            - query_hits: Indices into query ranges</span>
+<span class="sd">            - self_hits: Corresponding indices into self ranges that are upstream</span>
+<span class="sd">            Each row represents a query-subject pair where subject precedes query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">max_gap</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
@@ -2096,13 +2102,21 @@
                 <span class="s2">&quot;when query_type=&#39;any&#39;, at least one of max_gap and min_overlap must be set to its default value&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">max_gap</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">max_gap</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
-            <span class="n">search_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="n">max_gap</span>
-            <span class="n">search_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">max_gap</span>
+        <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">min_overlap</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">max_gap</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">min_overlap</span>
+
+            <span class="n">search_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="n">offset</span>
+            <span class="n">search_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">offset</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">search_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span>
             <span class="n">search_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
@@ -2110,17 +2124,23 @@
         <span class="n">query_hits</span><span class="p">,</span> <span class="n">self_hits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span><span class="n">search_starts</span><span class="p">,</span> <span class="n">search_ends</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)))</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="p">[]})</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
+            <span class="p">)</span>
+
+        <span class="n">q_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">query_hits</span><span class="p">]</span>
+        <span class="n">q_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">query_hits</span><span class="p">]</span>
+        <span class="n">s_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">self_hits</span><span class="p">]</span>
+        <span class="n">s_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">self_hits</span><span class="p">]</span>
 
         <span class="c1"># filter based on overlap type and minoverlap</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">query_type</span> <span class="o">!=</span> <span class="s2">&quot;any&quot;</span> <span class="ow">or</span> <span class="n">min_overlap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">q_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">query_hits</span><span class="p">]</span>
-            <span class="n">q_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">query_hits</span><span class="p">]</span>
-            <span class="n">s_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">self_hits</span><span class="p">]</span>
-            <span class="n">s_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">self_hits</span><span class="p">]</span>
-
+        <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">min_overlap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">overlap_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">q_ends</span><span class="p">,</span> <span class="n">s_ends</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">q_starts</span><span class="p">,</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">overlap_lengths</span> <span class="o">&gt;=</span> <span class="n">min_overlap</span> <span class="o">-</span> <span class="n">max_gap</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span>
                 <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q_starts</span> <span class="o">-</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_gap</span>
             <span class="k">elif</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span>
@@ -2135,39 +2155,36 @@
 
             <span class="k">if</span> <span class="n">min_overlap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">overlap_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">q_ends</span><span class="p">,</span> <span class="n">s_ends</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">q_starts</span><span class="p">,</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">overlap_lengths</span> <span class="o">&gt;=</span> <span class="n">min_overlap</span>
+                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">overlap_lengths</span> <span class="o">&gt;=</span> <span class="n">min_overlap</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="n">query_hits</span> <span class="o">=</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
         <span class="n">self_hits</span> <span class="o">=</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">select</span> <span class="o">!=</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="p">[]})</span>
-
-            <span class="n">unique_queries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">unique_queries</span><span class="p">:</span>
-                <span class="n">q_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">query_hits</span> <span class="o">==</span> <span class="n">q</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
-                    <span class="n">mask</span><span class="p">[</span><span class="n">q_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">elif</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
-                    <span class="n">mask</span><span class="p">[</span><span class="n">q_indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">elif</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">:</span>
-                    <span class="n">mask</span><span class="p">[</span><span class="n">q_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="n">query_hits</span> <span class="o">=</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-            <span class="n">self_hits</span> <span class="o">=</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># sort by query hits as per R implementation</span>
-            <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">query_hits</span> <span class="o">=</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
-            <span class="n">self_hits</span> <span class="o">=</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
-
         <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">,</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">})</span></div>
+        <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+            <span class="c1"># sort by query hits for consistency with R</span>
+            <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
+                <span class="p">)</span>
+
+            <span class="n">_</span><span class="p">,</span> <span class="n">unique_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+                <span class="c1"># Find the last occurrence of each unique query</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">unique_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">query_hits</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">unique_indices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">unique_indices</span>
+
+            <span class="c1"># Create mask for selected hits</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">unique_indices</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]})</span></div>
 
 
 <div class="viewcode-block" id="IRanges.count_overlaps">
@@ -2209,8 +2226,8 @@
 <span class="sd">                Internal use only.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Numpy vector with lenght same as number of query ranges,</span>
-<span class="sd">            specifying the number of overlaps for each query.</span>
+<span class="sd">            NumPy vector with length same as number of query ranges,</span>
+<span class="sd">            value represents the number of overlaps in `self` for each query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_overlaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span>
             <span class="n">query</span><span class="p">,</span>
@@ -2299,21 +2316,26 @@
         <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span>
         <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">BiocFrame</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search nearest positions only downstream that overlap with each range in ``query``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find nearest positions that are upstream/precede each query range.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            query:</span>
-<span class="sd">                Query `IRanges` to find nearest positions.</span>
+<span class="sd">                Query `IRanges`.</span>
 
 <span class="sd">            select:</span>
-<span class="sd">                Determine what hit to choose when there are</span>
-<span class="sd">                multiple hits for an interval in ``query``.</span>
-
+<span class="sd">                Whether to return &quot;all&quot; hits or just &quot;first&quot;.</span>
 <span class="sd">                Defaults to &quot;first&quot;.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            if `select=&quot;first&quot;`, returns a numpy array who length is same as query.</span>
-<span class="sd">            if `select=&quot;all&quot;, returns a BiocFrame with hit indices.</span>
+<span class="sd">            If select=&quot;first&quot;:</span>
+<span class="sd">                A numpy array of integers with length matching query, containing indices</span>
+<span class="sd">                into self for the closest upstream position of each query range. Value may be</span>
+<span class="sd">                None if there are no matches.</span>
+<span class="sd">            If select=&quot;all&quot;:</span>
+<span class="sd">                A BiocFrame with two columns:</span>
+<span class="sd">                - query_hits: Indices into query ranges</span>
+<span class="sd">                - self_hits: Corresponding indices into self ranges that are upstream</span>
+<span class="sd">                Each row represents a query-self pair where self precedes query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
@@ -2325,14 +2347,13 @@
         <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">sorted_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
 
-        <span class="c1"># find intervals using searchsorted</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">sorted_starts</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">find_interval</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">(),</span> <span class="n">sorted_starts</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
         <span class="c1"># cases where no following interval exists</span>
-        <span class="n">indices</span><span class="p">[</span><span class="n">indices</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_starts</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">indices</span><span class="p">[</span><span class="n">indices</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="c1"># back to original indices</span>
-        <span class="n">valid</span> <span class="o">=</span> <span class="n">indices</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">indices</span> <span class="o">&gt;=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">valid</span><span class="p">):</span>
             <span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span> <span class="o">=</span> <span class="n">sort_idx</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]]</span>
 
@@ -2341,8 +2362,8 @@
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">query_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">subject_hits</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">subject_hits</span><span class="p">,</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">})</span></div>
+            <span class="n">self_hits</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">,</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="IRanges.follow">
@@ -2352,36 +2373,36 @@
         <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span>
         <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;last&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">BiocFrame</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search nearest positions only downstream that overlap with each range in ``query``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find nearest positions that are downstream/follow each query range.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            query:</span>
-<span class="sd">                Query `IRanges` to find nearest positions.</span>
+<span class="sd">                Query `IRanges`.</span>
 
 <span class="sd">            select:</span>
-<span class="sd">                Determine what hit to choose when there are</span>
-<span class="sd">                multiple hits for an interval in ``query``.</span>
-
+<span class="sd">                Whether to return &quot;all&quot; hits or just &quot;last&quot;.</span>
 <span class="sd">                Defaults to &quot;last&quot;.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            if `select=&quot;first&quot;`, returns a numpy array of length same as query.</span>
-<span class="sd">            if `select=&quot;all&quot;, returns a BiocFrame with hit indices.</span>
+<span class="sd">            If select=&quot;last&quot;:</span>
+<span class="sd">                A numpy array of integers with length matching query, containing indices</span>
+<span class="sd">                into self for the closest downstream position of each query range. Value may be</span>
+<span class="sd">                None if there are no matches.</span>
+<span class="sd">            If select=&quot;all&quot;:</span>
+<span class="sd">                A BiocFrame with two columns:</span>
+<span class="sd">                - query_hits: Indices into query ranges</span>
+<span class="sd">                - self_hits: Corresponding indices into self ranges that are upstream</span>
+<span class="sd">                Each row represents a query-self pair where self follows query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">self_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">self_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span>
 
-        <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">self_ends</span><span class="p">)</span>
+        <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">self_ends</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">sorted_ends</span> <span class="o">=</span> <span class="n">self_ends</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
 
-        <span class="c1"># find intervals using searchsorted on (start - 1)</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">sorted_ends</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">find_interval</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sorted_ends</span><span class="p">)</span>
 
-        <span class="c1"># cases where no preceding interval exists</span>
-        <span class="n">indices</span><span class="p">[</span><span class="n">indices</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-        <span class="c1"># convert back to original indices</span>
-        <span class="n">valid</span> <span class="o">=</span> <span class="n">indices</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">indices</span> <span class="o">&gt;=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">valid</span><span class="p">):</span>
             <span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span> <span class="o">=</span> <span class="n">sort_idx</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]]</span>
 
@@ -2390,8 +2411,8 @@
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">query_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">valid</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">subject_hits</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">subject_hits</span><span class="p">,</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">})</span></div>
+            <span class="n">self_hits</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">,</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="IRanges.distance">
@@ -2404,13 +2425,13 @@
 <span class="sd">                Query `IRanges`.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Numpy vector containing distances for each range in query.</span>
+<span class="sd">            NumPy vector containing distances for each range in query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;query&#39; does not contain the same number of range.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;query&#39; does not contain the same number of ranges.&quot;</span><span class="p">)</span>
 
         <span class="n">max_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">,</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">)</span>
         <span class="n">min_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">(),</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">())</span>
@@ -2420,122 +2441,172 @@
 <div class="viewcode-block" id="IRanges.nearest">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.nearest">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">nearest</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span>
-        <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">,</span>
-        <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search nearest positions both upstream and downstream</span>
-<span class="sd">        that overlap with each range in ``query``.</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">,</span> <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">BiocFrame</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find nearest ranges in both directions.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            query:</span>
-<span class="sd">                Query `IRanges` to find nearest positions.</span>
+<span class="sd">                Query IRanges.</span>
 
 <span class="sd">            select:</span>
-<span class="sd">                Determine what hit to choose when there are</span>
-<span class="sd">                multiple hits for an interval in ``query``.</span>
+<span class="sd">                Whether to return &quot;all&quot; hits or &quot;arbitrary&quot; choice.</span>
 
 <span class="sd">            delete_index:</span>
 <span class="sd">                Delete the cached ncls index.</span>
 <span class="sd">                Internal use only.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            if `select=&quot;first&quot;`, returns a numpy array of length same as query.</span>
-<span class="sd">            if `select=&quot;all&quot;, returns a BiocFrame with hit indices.</span>
+<span class="sd">            If select=&quot;arbitrary&quot;:</span>
+<span class="sd">                A numpy array of integers with length matching query, containing indices</span>
+<span class="sd">                into self for the closest for each query range. Value may be None if there</span>
+<span class="sd">                are no matches.</span>
+<span class="sd">            If select=&quot;all&quot;:</span>
+<span class="sd">                A BiocFrame with two columns:</span>
+<span class="sd">                - query_hits: Indices into query ranges</span>
+<span class="sd">                - self_hits: Corresponding indices into self ranges that are upstream</span>
+<span class="sd">                Each row represents a query-subject pair where subject is nearest to query.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`query` is not a `IRanges` object.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">select</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;select&#39; must be one of </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;all&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;arbitrary&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;select&#39; must be one of &#39;all&#39;, &#39;arbitrary&#39;&quot;</span><span class="p">)</span>
 
-        <span class="n">overlaps</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">max_gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">delete_index</span><span class="o">=</span><span class="n">delete_index</span><span class="p">)</span>
-        <span class="n">oqhits</span> <span class="o">=</span> <span class="n">overlaps</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span>
-        <span class="n">oshits</span> <span class="o">=</span> <span class="n">overlaps</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">)</span>
-
-        <span class="n">query_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span>
-        <span class="n">self_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span>
+        <span class="n">ol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">max_gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">delete_index</span><span class="o">=</span><span class="n">delete_index</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;arbitrary&quot;</span><span class="p">:</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">)):</span>
-                <span class="n">overlap_mask</span> <span class="o">=</span> <span class="n">oqhits</span> <span class="o">==</span> <span class="n">i</span>
+            <span class="c1"># Handle overlaps</span>
+            <span class="n">ol_query</span> <span class="o">=</span> <span class="n">ol</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span>
+            <span class="n">ol_subject</span> <span class="o">=</span> <span class="n">ol</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">overlap_mask</span><span class="p">):</span>
-                    <span class="c1"># if there are overlaps, choose the first one</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">oshits</span><span class="p">[</span><span class="n">overlap_mask</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># find nearest non-overlapping interval</span>
-                    <span class="c1"># calculate distances to all hits</span>
-                    <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">))</span>
-                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)):</span>
-                        <span class="k">if</span> <span class="n">query_ends</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
-                            <span class="c1"># query ends before subject starts</span>
-                            <span class="n">dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">query_ends</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="k">elif</span> <span class="n">self_ends</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                            <span class="c1"># query starts after subject ends</span>
-                            <span class="n">dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">self_ends</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># overlap case (should not happen as we checked overlaps)</span>
-                            <span class="n">dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ol_query</span><span class="p">):</span>
+                <span class="c1"># pick first overlap for each query</span>
+                <span class="c1"># _, idx = np.unique(ol_query, return_index=True)</span>
+                <span class="c1"># result[ol_query[idx]] = ol_subject[idx]</span>
 
-                    <span class="c1"># find the closest hit</span>
-                    <span class="n">min_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
-                    <span class="n">closest_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dists</span> <span class="o">==</span> <span class="n">min_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># pick last overlap for each query</span>
+                <span class="c1"># unique_queries = np.unique(ol_query)</span>
+                <span class="c1"># for q in unique_queries:</span>
+                <span class="c1">#     matches = np.where(ol_query == q)[0]</span>
+                <span class="c1">#     # Take the last match for this query</span>
+                <span class="c1">#     result[q] = ol_subject[matches[-1]]</span>
 
-                    <span class="c1"># choose the first</span>
-                    <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">closest_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># sort the overlaps and pick the last</span>
+                <span class="c1"># probably missing some logic here compared to R implementation</span>
+                <span class="c1"># ideally should pick the one with the least overlap</span>
+                <span class="c1"># if they all overlap equally then pick the last one</span>
+                <span class="c1"># since the type is &quot;arbitrary&quot; it does not matter</span>
+                <span class="n">unique_queries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ol_query</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">unique_queries</span><span class="p">:</span>
+                    <span class="c1"># Find all overlaps for this query</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ol_query</span> <span class="o">==</span> <span class="n">q</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="n">sorted_order</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">ol_subject</span><span class="p">[</span><span class="n">matches</span><span class="p">]]</span><span class="o">.</span><span class="n">order</span><span class="p">()</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">ol_subject</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="n">missing</span> <span class="o">=</span> <span class="n">result</span> <span class="o">==</span> <span class="kc">None</span>  <span class="c1"># noqa: E711</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">missing</span><span class="p">):</span>
+                <span class="n">missing_ranges</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">missing</span><span class="p">]</span>
+                <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precede</span><span class="p">(</span><span class="n">missing_ranges</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
+                <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">follow</span><span class="p">(</span><span class="n">missing_ranges</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span>
+
+                <span class="n">before_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">missing_ranges</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+                <span class="n">after_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">missing_ranges</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+                <span class="n">before_valid</span> <span class="o">=</span> <span class="n">before</span> <span class="o">!=</span> <span class="kc">None</span>  <span class="c1"># noqa: E711</span>
+                <span class="n">after_valid</span> <span class="o">=</span> <span class="n">after</span> <span class="o">!=</span> <span class="kc">None</span>  <span class="c1"># noqa: E711</span>
+
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">before_valid</span><span class="p">):</span>
+                    <span class="n">before_idx</span> <span class="o">=</span> <span class="n">before</span><span class="p">[</span><span class="n">before_valid</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                    <span class="n">before_dist</span><span class="p">[</span><span class="n">before_valid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">before_idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">missing_ranges</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">before_valid</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">after_valid</span><span class="p">):</span>
+                    <span class="n">after_idx</span> <span class="o">=</span> <span class="n">after</span><span class="p">[</span><span class="n">after_valid</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                    <span class="n">after_dist</span><span class="p">[</span><span class="n">after_valid</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_ranges</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">after_valid</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">after_idx</span><span class="p">]</span>
+
+                <span class="c1"># Choose nearest (prefer before if distances are equal)</span>
+                <span class="n">use_before</span> <span class="o">=</span> <span class="n">before_dist</span> <span class="o">&lt;=</span> <span class="n">after_dist</span>
+                <span class="n">missing_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">use_before</span><span class="p">,</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">missing</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_result</span>
 
             <span class="k">return</span> <span class="n">result</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">all_query_hits</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">all_subject_hits</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">hits</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="n">overlap_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">oqhits</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-            <span class="n">all_query_hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oqhits</span><span class="p">[</span><span class="n">overlap_mask</span><span class="p">])</span>
-            <span class="n">all_subject_hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oshits</span><span class="p">[</span><span class="n">overlap_mask</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ol</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)):</span>
+                <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ol</span><span class="p">)</span>
 
-            <span class="n">has_overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-            <span class="n">has_overlap</span><span class="p">[</span><span class="n">oqhits</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">has_ol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+            <span class="n">has_ol</span><span class="p">[</span><span class="n">ol</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="o">~</span><span class="n">has_ol</span>
 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">has_overlap</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                    <span class="c1"># calculate distances to all hits</span>
-                    <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">))</span>
-                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)):</span>
-                        <span class="k">if</span> <span class="n">query_ends</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
-                            <span class="n">dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">query_ends</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="k">elif</span> <span class="n">self_ends</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                            <span class="n">dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">self_ends</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">dists</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">missing</span><span class="p">):</span>
+                <span class="n">missing_ranges</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">missing</span><span class="p">]</span>
+                <span class="n">missing_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">missing</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-                    <span class="c1"># find all hits at minimum distance</span>
-                    <span class="n">min_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
-                    <span class="n">min_dist_mask</span> <span class="o">=</span> <span class="n">dists</span> <span class="o">==</span> <span class="n">min_dist</span>
+                <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precede</span><span class="p">(</span><span class="n">missing_ranges</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+                <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">follow</span><span class="p">(</span><span class="n">missing_ranges</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
-                    <span class="n">n_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">min_dist_mask</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">n_hits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">all_query_hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_hits</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
-                        <span class="n">all_subject_hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">min_dist_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">before</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)):</span>
+                    <span class="n">before_q</span> <span class="o">=</span> <span class="n">before</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span>
+                    <span class="n">before_s</span> <span class="o">=</span> <span class="n">before</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">)</span>
+                    <span class="n">before_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">before_s</span><span class="p">]</span> <span class="o">-</span> <span class="n">missing_ranges</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">before_q</span><span class="p">]</span>
 
-            <span class="c1"># combine all hits</span>
-            <span class="k">if</span> <span class="n">all_query_hits</span><span class="p">:</span>
-                <span class="n">final_query_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_query_hits</span><span class="p">)</span>
-                <span class="n">final_subject_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_subject_hits</span><span class="p">)</span>
+                    <span class="n">before</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)[:]</span> <span class="o">=</span> <span class="n">missing_idx</span><span class="p">[</span><span class="n">before_q</span><span class="p">]</span>
+                    <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">before</span><span class="p">)</span>
 
-                <span class="c1"># R rule: sort by query hits</span>
-                <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">final_query_hits</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">final_query_hits</span> <span class="o">=</span> <span class="n">final_query_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
-                <span class="n">final_subject_hits</span> <span class="o">=</span> <span class="n">final_subject_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">final_query_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-                <span class="n">final_subject_hits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)):</span>
+                    <span class="n">after_q</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span>
+                    <span class="n">after_s</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">)</span>
+                    <span class="n">after_dist</span> <span class="o">=</span> <span class="n">missing_ranges</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">after_q</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">after_s</span><span class="p">]</span>
 
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">final_query_hits</span><span class="p">,</span> <span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">final_subject_hits</span><span class="p">})</span></div>
+                    <span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)[:]</span> <span class="o">=</span> <span class="n">missing_idx</span><span class="p">[</span><span class="n">after_q</span><span class="p">]</span>
+
+                    <span class="c1"># Only include after hits if:</span>
+                    <span class="c1"># 1. No before hits exist for this query, or</span>
+                    <span class="c1"># 2. After distance is less than or equal to before distance</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">before</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)):</span>
+                        <span class="c1"># Find corresponding before distances for each after hit</span>
+                        <span class="n">after_queries</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span>
+                        <span class="n">before_queries</span> <span class="o">=</span> <span class="n">before</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span>
+
+                        <span class="c1"># For each after hit, find if there&#39;s a before hit</span>
+                        <span class="c1"># for the same query, then compare distances</span>
+                        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">after_queries</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">after_queries</span><span class="p">):</span>
+                            <span class="n">before_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">before_queries</span> <span class="o">==</span> <span class="n">q</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">before_idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">after_dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">before_dist</span><span class="p">[</span><span class="n">before_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+                        <span class="c1"># Only keep after hits that pass the distance check</span>
+                        <span class="n">after</span> <span class="o">=</span> <span class="n">BiocFrame</span><span class="p">(</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)[</span><span class="n">mask</span><span class="p">],</span>
+                                <span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">)[</span><span class="n">mask</span><span class="p">],</span>
+                            <span class="p">}</span>
+                        <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">after</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)):</span>
+                        <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">hits</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Combine all hits and sort by query hits</span>
+            <span class="n">all_queries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">])</span>
+            <span class="n">all_subjects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">])</span>
+
+            <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">all_queries</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">({</span><span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">all_queries</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">],</span> <span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">all_subjects</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]})</span></div>
 
 
     <span class="c1">########################</span>
@@ -2545,7 +2616,7 @@
 <div class="viewcode-block" id="IRanges.to_pandas">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.to_pandas">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this ``IRanges`` object into a :py:class:`~pandas.DataFrame`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this IRanges object to a :py:class:`~pandas.DataFrame`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A :py:class:`~pandas.DataFrame` object.</span>
@@ -2571,7 +2642,7 @@
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.from_pandas">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_pandas</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a ``IRanges`` from a :py:class:`~pandas.DataFrame` object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an ``IRanges`` object from a :py:class:`~pandas.DataFrame`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            input:</span>
@@ -2615,7 +2686,7 @@
 <div class="viewcode-block" id="IRanges.to_polars">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.to_polars">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_polars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this ``IRanges`` object into a :py:class:`~polars.DataFrame`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this ``IRanges`` object to a :py:class:`~polars.DataFrame`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A :py:class:`~polars.DataFrame` object.</span>
@@ -2641,7 +2712,7 @@
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.from_polars">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_polars</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a ``IRanges`` from a :py:class:`~polars.DataFrame` object.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an ``IRanges`` object from a :py:class:`~polars.DataFrame`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            input:</span>
@@ -2687,7 +2758,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an zero-length ``IRanges`` object.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            same type as caller, in this case a ``IRanges``.</span>
+<span class="sd">            Same type as caller, in this case a ``IRanges``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">([],</span> <span class="p">[])</span></div>
 
@@ -2707,6 +2778,114 @@
 <span class="sd">            An `IRanges` containing all the combined ranges.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_combine_IRanges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">other</span><span class="p">)</span></div>
+
+
+    <span class="c1">################################</span>
+    <span class="c1">######&gt;&gt; window methods &lt;&lt;######</span>
+    <span class="c1">################################</span>
+
+<div class="viewcode-block" id="IRanges.tile">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.tile">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;IRanges&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split ranges into either n equal parts or parts of fixed width.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n:</span>
+<span class="sd">                Number of tiles per range (mutually exclusive with width).</span>
+
+<span class="sd">            width:</span>
+<span class="sd">                Width of each tile (mutually exclusive with n).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of `IRanges` objects, one per input range containing the tiles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;only one of &#39;n&#39; and &#39;width&#39; can be specified&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;some width(x) are less than &#39;n&#39;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;some &#39;n&#39; are negative&quot;</span><span class="p">)</span>
+
+            <span class="c1"># tile_widths = self._width / n</span>
+
+        <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;some &#39;width&#39; are negative&quot;</span><span class="p">)</span>
+
+            <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">/</span> <span class="n">width</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="c1"># tile_widths = np.repeat(width, len(self))</span>
+
+        <span class="n">widths_per_tile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">rel_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">positions</span><span class="p">[:</span> <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">*</span> <span class="n">widths_per_tile</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">abs_ends</span> <span class="o">=</span> <span class="n">rel_ends</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">prev_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">abs_ends</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="n">widths</span> <span class="o">=</span> <span class="n">abs_ends</span> <span class="o">-</span> <span class="n">prev_ends</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">IRanges</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">abs_ends</span> <span class="o">-</span> <span class="n">widths</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">widths</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="IRanges.sliding_windows">
+<a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.sliding_windows">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sliding_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;IRanges&quot;</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create sliding windows of fixed width and step size.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            width:</span>
+<span class="sd">                Width of each window.</span>
+
+<span class="sd">            step:</span>
+<span class="sd">                Step size between window starts.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of `IRanges` objects, one per input range containing the windows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;width&#39; must be a single, non-NA number&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;step&#39; must be a single, non-NA number&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">width</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;width&#39; cannot be negative&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;step&#39; cannot be negative&quot;</span><span class="p">)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">-</span> <span class="n">width</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">window_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="n">valid_windows</span> <span class="o">=</span> <span class="n">window_starts</span> <span class="o">+</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">valid_windows</span><span class="p">):</span>
+                <span class="n">window_starts</span> <span class="o">=</span> <span class="n">window_starts</span><span class="p">[</span><span class="n">valid_windows</span><span class="p">]</span>
+
+            <span class="n">abs_starts</span> <span class="o">=</span> <span class="n">window_starts</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">window_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">window_starts</span><span class="p">))</span>
+
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">IRanges</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">abs_starts</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">window_widths</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
 </div>
 
 
@@ -2768,7 +2947,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=c87aa342"></script>
+</div><script src="../../_static/documentation_options.js?v=ff822928"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
