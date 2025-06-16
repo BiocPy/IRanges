@@ -1595,18 +1595,21 @@ class IRanges:
 
         other._build_ncls_index()
 
-        self_indexes, other_indexes = other._ncls.all_overlaps_both(self.start, self.end, np.arange(len(self)))
+        res = other._nclist.find_overlaps(self.start, self.end)
+        print(res)
+        self_indexes, other_indexes = zip(*res)
+        print(other_indexes, self_indexes)
 
         if delete_index:
             other._delete_ncls_index()
 
-        self_new_starts = self.start[self_indexes]
-        other_new_starts = other.start[other_indexes]
+        self_new_starts = self.start[list(self_indexes)]
+        other_new_starts = other.start[list(other_indexes)]
 
         new_starts = np.where(self_new_starts > other_new_starts, self_new_starts, other_new_starts)
 
-        self_new_ends = self.end[self_indexes]
-        other_new_ends = other.end[other_indexes]
+        self_new_ends = self.end[list(self_indexes)]
+        other_new_ends = other.end[list(other_indexes)]
 
         new_ends = np.where(self_new_ends < other_new_ends, self_new_ends, other_new_ends)
 
@@ -1617,18 +1620,12 @@ class IRanges:
     ############################
 
     def _build_ncls_index(self):
-        if not ut.package_utils.is_package_installed("ncls"):
-            raise ImportError("package: 'ncls' is not installed.")
-
-        from ncls import NCLS
-
-        if not hasattr(self, "_ncls"):
-            # NCLS needs non-inclusive ends
-            self._ncls = NCLS(self.start, self.get_end() + 1, np.arange(len(self)))
+        if not hasattr(self, "_nclist"):
+            self._nclist = libir.NCListHandler(self.get_start(), self.get_end() + 1)
 
     def _delete_ncls_index(self):
-        if hasattr(self, "_ncls"):
-            del self._ncls
+        if hasattr(self, "_nclist"):
+            del self._nclist
 
     def find_overlaps(
         self,
@@ -1700,92 +1697,32 @@ class IRanges:
         # R rule: when type="any", at least one of maxgap and minoverlap must be at default
         if query_type == "any" and max_gap != -1 and min_overlap != 0:
             raise ValueError(
-                "when query_type='any', at least one of max_gap and min_overlap must be set to its default value"
+                "when query_type='any', at least one of 'max_gap' and 'min_overlap' must be set to its default value"
             )
 
         if len(query) == 0 or len(self) == 0:
             return BiocFrame(
                 data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
             )
-
+        
         self._build_ncls_index()
 
-        if query_type == "any":
-            if min_overlap == 0:
-                offset = max_gap + 1
-            else:
-                offset = 1 - min_overlap
+        _overlaps = self._nclist.find_overlaps(
+            query.get_start(),
+            query.get_end() + 1,
+            min_overlap=min_overlap,
+            max_gap=max_gap,
+            query_type=query_type,
+            select=select,
+        )
 
-            search_starts = query._start - offset
-            search_ends = query.get_end() + 1 + offset
-        else:
-            search_starts = query._start
-            search_ends = query.get_end() + 1
-
-        query_hits, self_hits = self._ncls.all_overlaps_both(search_starts, search_ends, np.arange(len(query)))
-
-        if len(query_hits) == 0:
+        if len(_overlaps) == 0:
             return BiocFrame(
                 data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
             )
 
-        q_starts = query._start[query_hits]
-        q_ends = query.get_end()[query_hits]
-        s_starts = self._start[self_hits]
-        s_ends = self.get_end()[self_hits]
-
-        # filter based on overlap type and minoverlap
-        mask = np.ones(len(query_hits), dtype=bool)
-
-        if query_type == "any":
-            if min_overlap > 0:
-                overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
-                mask &= overlap_lengths >= min_overlap - max_gap - 2
-        else:
-            if query_type == "start":
-                mask &= np.abs(q_starts - s_starts) <= max_gap
-            elif query_type == "end":
-                mask &= np.abs(q_ends - s_ends) <= max_gap
-            elif query_type == "within":
-                mask &= (q_starts >= s_starts) & (q_ends <= s_ends)
-                if max_gap > 0:
-                    gaps = (q_starts - s_starts) + (s_ends - q_ends)
-                    mask &= gaps <= max_gap
-            elif query_type == "equal":
-                mask &= (np.abs(q_starts - s_starts) <= max_gap) & (np.abs(q_ends - s_ends) <= max_gap)
-
-            if min_overlap > 0:
-                overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
-                mask &= overlap_lengths >= min_overlap - 1
-
-        query_hits = query_hits[mask]
-        self_hits = self_hits[mask]
-
-        if delete_index:
-            self._delete_ncls_index()
-
-        if select == "all":
-            # sort by query hits for consistency with R
-            sort_idx = np.argsort(query_hits, stable=True)
-            return BiocFrame(data={"self_hits": self_hits[sort_idx], "query_hits": query_hits[sort_idx]})
-        else:
-            if len(query_hits) == 0:
-                return BiocFrame(
-                    data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
-                )
-
-            _, unique_indices = np.unique(query_hits, return_index=True)
-
-            if select == "last":
-                # Find the last occurrence of each unique query
-                _, unique_indices = np.unique(query_hits[::-1], return_index=True)
-                unique_indices = len(query_hits) - 1 - unique_indices
-
-            # Create mask for selected hits
-            mask = np.zeros_like(query_hits, dtype=bool)
-            mask[unique_indices] = True
-
-            return BiocFrame(data={"self_hits": self_hits[mask], "query_hits": query_hits[mask]})
+        _query_hits, _self_hits = zip(*_overlaps)
+        return BiocFrame(data={"self_hits": np.array(_self_hits), "query_hits": np.array(_query_hits)})
 
     def count_overlaps(
         self,
