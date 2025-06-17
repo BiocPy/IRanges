@@ -82,7 +82,7 @@ std::vector<std::pair<Index, Index>> perform_find_overlaps(
         params.min_overlap = min_overlap > 0 ? min_overlap : 0;
         if (max_gap >= 0) {
             params.max_gap = max_gap;
-        }        
+        }
         params.quit_on_first = use_quit_on_first_opt;
         for (Index i = 0; i < n_queries; ++i) {
             nclist::overlaps_start(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, self.ws_start, single_query_matches);

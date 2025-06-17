@@ -1704,7 +1704,7 @@ class IRanges:
             return BiocFrame(
                 data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
             )
-        
+
         self._build_ncls_index()
 
         _overlaps = self._nclist.find_overlaps(
