@@ -1595,7 +1595,7 @@ class IRanges:
 
         other._build_ncls_index()
 
-        res = other._nclist.find_overlaps(self.start, self.end)
+        res = other._nclist.find_overlaps(self.get_start().astype(np.int32), self.get_end().astype(np.int32))
         self_indexes, other_indexes = zip(*res)
 
         if delete_index:
@@ -1619,7 +1619,7 @@ class IRanges:
 
     def _build_ncls_index(self):
         if not hasattr(self, "_nclist"):
-            self._nclist = libir.NCListHandler(self.get_start(), self.get_end() + 1)
+            self._nclist = libir.NCListHandler(self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1)
 
     def _delete_ncls_index(self):
         if hasattr(self, "_nclist"):
@@ -1703,24 +1703,44 @@ class IRanges:
                 data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
             )
 
-        self._build_ncls_index()
+        if len(self) >= len(query):
+            self._build_ncls_index()
 
-        _overlaps = self._nclist.find_overlaps(
-            query.get_start(),
-            query.get_end() + 1,
-            min_overlap=min_overlap,
-            max_gap=max_gap,
-            query_type=query_type,
-            select=select,
-        )
-
-        if len(_overlaps) == 0:
-            return BiocFrame(
-                data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+            _overlaps = self._nclist.find_overlaps(
+                query.get_start().astype(np.int32),
+                query.get_end().astype(np.int32) + 1,
+                min_overlap=min_overlap,
+                max_gap=max_gap,
+                query_type=query_type,
+                select=select,
             )
 
-        _query_hits, _self_hits = zip(*_overlaps)
-        return BiocFrame(data={"self_hits": np.array(_self_hits), "query_hits": np.array(_query_hits)})
+            if len(_overlaps) == 0:
+                return BiocFrame(
+                    data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+                )
+
+            _query_hits, _self_hits = zip(*_overlaps)
+            return BiocFrame(data={"self_hits": np.array(_self_hits), "query_hits": np.array(_query_hits)})
+        else:
+            query._build_ncls_index()
+
+            _overlaps = query._nclist.find_overlaps(
+                self.get_start().astype(np.int32),
+                self.get_end().astype(np.int32) + 1,
+                min_overlap=min_overlap,
+                max_gap=max_gap,
+                query_type=query_type,
+                select=select,
+            )
+
+            if len(_overlaps) == 0:
+                return BiocFrame(
+                    data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+                )
+
+            _query_hits, _self_hits = zip(*_overlaps)
+            return BiocFrame(data={"query_hits": np.array(_query_hits), "self_hits": np.array(_self_hits)})
 
     def count_overlaps(
         self,
