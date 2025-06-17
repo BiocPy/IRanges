@@ -1608,8 +1608,6 @@ class IRanges:
         res = other._nclist.find_overlaps(
             self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1, num_workers=num_threads
         )
-        print(res)
-        # self_indexes, other_indexes = zip(*res)
 
         if delete_index:
             other._delete_ncls_index()
@@ -1721,16 +1719,9 @@ class IRanges:
                 data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
             )
 
-        import time
-
         if len(self) >= len(query):
-            start1 = time.time()
             self._build_ncls_index()
-            end1 = time.time()
 
-            print(end1 - start1)
-
-            start1 = time.time()
             _overlaps = self._nclist.find_overlaps(
                 query.get_start().astype(np.int32),
                 query.get_end().astype(np.int32) + 1,
@@ -1740,8 +1731,6 @@ class IRanges:
                 select=select,
                 num_workers=num_threads,
             )
-            end1 = time.time()
-            print(end1 - start1)
 
             if delete_index:
                 self._delete_ncls_index()
@@ -1753,13 +1742,8 @@ class IRanges:
 
             return BiocFrame(data={"self_hits": _overlaps[0], "query_hits": _overlaps[1]})
         else:
-            start1 = time.time()
             query._build_ncls_index()
-            end1 = time.time()
 
-            print(end1 - start1)
-
-            start1 = time.time()
             _overlaps = query._nclist.find_overlaps(
                 self.get_start().astype(np.int32),
                 self.get_end().astype(np.int32) + 1,
@@ -1769,12 +1753,9 @@ class IRanges:
                 select=select,
                 num_workers=num_threads,
             )
-            end1 = time.time()
 
             if delete_index:
                 query._delete_ncls_index()
-
-            print(end1 - start1)
 
             if len(_overlaps) == 0:
                 return BiocFrame(
