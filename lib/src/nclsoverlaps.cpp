@@ -70,7 +70,7 @@ pybind11::tuple perform_find_overlaps(
         workers.reserve(num_workers);
         for (int i = 0; i < num_workers; ++i) {
             int current_jobs = num_jobs + (i < num_remaining);
-            
+
             if (current_jobs == 0) {
                 break;
             }
@@ -99,7 +99,7 @@ pybind11::tuple perform_find_overlaps(
         for (auto& worker : workers) {
             worker.join();
         }
-    } 
+    }
     else if (query_type == "start") {
         nclist::OverlapsStartParameters<Position> params;
         params.min_overlap = min_overlap > 0 ? min_overlap : 0;
@@ -115,7 +115,7 @@ pybind11::tuple perform_find_overlaps(
         workers.reserve(num_workers);
         for (int i = 0; i < num_workers; ++i) {
             int current_jobs = num_jobs + (i < num_remaining);
-            
+
             if (current_jobs == 0) {
                 break;
             }
@@ -158,7 +158,7 @@ pybind11::tuple perform_find_overlaps(
         workers.reserve(num_workers);
         for (int i = 0; i < num_workers; ++i) {
             int current_jobs = num_jobs + (i < num_remaining);
-            
+
             if (current_jobs == 0) {
                 break;
             }
@@ -201,7 +201,7 @@ pybind11::tuple perform_find_overlaps(
         workers.reserve(num_workers);
         for (int i = 0; i < num_workers; ++i) {
             int current_jobs = num_jobs + (i < num_remaining);
-            
+
             if (current_jobs == 0) {
                 break;
             }

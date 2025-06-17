@@ -65,6 +65,7 @@ def test_count_overlaps():
     res = query.count_overlaps(subject, max_gap=0, num_threads=2)
     assert np.all(res == [1, 2, 1])
 
+
 def test_subset_overlaps():
     subject = IRanges([1, 4, 9], [5, 4, 2])
     query = IRanges([2, 2, 10], [1, 2, 3])
