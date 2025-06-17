@@ -44,7 +44,6 @@ def test_find_overlaps():
     assert np.all(res.get_column("query_hits") == [])
 
     res = query.find_overlaps(subject, query_type="within", max_gap=1)
-    print(res)
     assert np.all(res.get_column("self_hits") == [])
     assert np.all(res.get_column("query_hits") == [])
 

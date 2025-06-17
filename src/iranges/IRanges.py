@@ -1596,9 +1596,7 @@ class IRanges:
         other._build_ncls_index()
 
         res = other._nclist.find_overlaps(self.start, self.end)
-        print(res)
         self_indexes, other_indexes = zip(*res)
-        print(other_indexes, self_indexes)
 
         if delete_index:
             other._delete_ncls_index()
