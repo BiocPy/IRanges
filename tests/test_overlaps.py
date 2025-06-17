@@ -47,6 +47,10 @@ def test_find_overlaps():
     assert np.all(res.get_column("self_hits") == [])
     assert np.all(res.get_column("query_hits") == [])
 
+    res = query.find_overlaps(subject, max_gap=0, num_threads=2)
+    assert np.all(res.get_column("self_hits") == [0, 0, 1, 2])
+    assert np.all(res.get_column("query_hits") == [0, 1, 1, 2])
+
 
 def test_count_overlaps():
     query = IRanges([1, 4, 9], [5, 4, 2])
@@ -58,6 +62,8 @@ def test_count_overlaps():
     res = query.count_overlaps(subject, max_gap=0)
     assert np.all(res == [1, 2, 1])
 
+    res = query.count_overlaps(subject, max_gap=0, num_threads=2)
+    assert np.all(res == [1, 2, 1])
 
 def test_subset_overlaps():
     subject = IRanges([1, 4, 9], [5, 4, 2])
