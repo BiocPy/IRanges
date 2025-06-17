@@ -5,13 +5,14 @@ PyScaffold helps you to put up the scaffold of your new Python project.
 Learn more under: https://pyscaffold.org/
 """
 
-from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext as build_ext_orig
-import pathlib
 import os
+import pathlib
 import shutil
 import sys
+
 import pybind11
+from setuptools import Extension, setup
+from setuptools.command.build_ext import build_ext as build_ext_orig
 
 
 ###  Adapted from dolomite_base: https://github.com/ArtifactDB/dolomite-base/blob/master/setup.py
@@ -28,9 +29,11 @@ class build_ext(build_ext_orig):
 
     def build_cmake(self, ext):
         build_temp = pathlib.Path(self.build_temp)
+        build_temp.mkdir(parents=True, exist_ok=True)
         build_lib = pathlib.Path(self.build_lib)
         outpath = os.path.join(build_lib.absolute(), ext.name)
 
+        build_temp = os.path.join(build_temp, "build")
         if not os.path.exists(build_temp):
             cmd = [
                 "cmake",
