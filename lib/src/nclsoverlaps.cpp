@@ -101,7 +101,7 @@ pybind11::tuple perform_find_overlaps(
                     params.quit_on_first = quit_on_first;
                     nclist::overlaps_within(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_within, single_query_matches);
                 }
-                
+
                 if (!single_query_matches.empty()) {
                     if (select == "last" && !quit_on_first) {
                         all_results[i] = {single_query_matches.back()};
@@ -117,7 +117,7 @@ pybind11::tuple perform_find_overlaps(
     for (auto& worker : workers) {
         worker.join();
     }
-    
+
     size_t total_hits = 0;
     for(const auto& res : all_results) {
         total_hits += res.size();
@@ -127,7 +127,7 @@ pybind11::tuple perform_find_overlaps(
     py::array_t<Index> query_hits(total_hits);
     auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
     auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
-    
+
     size_t current_pos = 0;
     for (Index i = 0; i < n_queries; ++i) {
         if (!all_results[i].empty()) {
@@ -172,7 +172,7 @@ pybind11::tuple perform_find_overlaps_groups(
     if (select != "all" && select != "last" && !quit_on_first) {
         throw std::runtime_error("Invalid 'select' parameter. Must be 'all', 'first', 'last', or 'arbitrary'.");
     }
-    
+
     std::vector<GroupInfo> self_group_info(n_groups);
     std::vector<GroupInfo> query_group_info(n_groups);
     for (size_t i = 0; i < n_groups; ++i) {
@@ -214,7 +214,7 @@ pybind11::tuple perform_find_overlaps_groups(
 
                 for (size_t k = 0; k < q_info.size; ++k) {
                     Index original_query_idx = q_info.ptr[k];
-                    
+
                     if (query_type == "any") {
                         nclist::OverlapsAnyWorkspace<Index> ws_any;
                         nclist::OverlapsAnyParameters<Position> params;
@@ -255,13 +255,13 @@ pybind11::tuple perform_find_overlaps_groups(
                         }
                     }
                 }
-                
+
                 if (!local_group_results.empty()){
                     all_group_results[j] = std::move(local_group_results);
                 }
             }
         }, jobs_so_far, current_jobs);
-        
+
         jobs_so_far += current_jobs;
     }
 
