@@ -118,7 +118,7 @@ pybind11::tuple perform_find_overlaps(
     for (auto& worker : workers) {
         worker.join();
     }
-    
+
     std::size_t total_hits = 0;
     for(const auto& res : all_results) {
         total_hits += res.size();
@@ -128,7 +128,7 @@ pybind11::tuple perform_find_overlaps(
     py::array_t<Index> query_hits(total_hits);
     auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
     auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
-    
+
     std::size_t current_pos = 0;
     for (Index i = 0; i < n_queries; ++i) {
         if (!all_results[i].empty()) {
