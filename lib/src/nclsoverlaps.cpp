@@ -8,12 +8,13 @@
 #include <stdexcept>
 #include "nclist/nclist.hpp"
 #include <thread>
+#include <numeric>
 
 namespace py = pybind11;
 
-// probably not good to specify type ahead, but works for now
-using Index = int;
-using Position = int;
+// Using integer types for consistency with numpy
+using Index = int32_t;
+using Position = int32_t;
 struct NCListHandler {
     NCListHandler(py::array_t<Position> starts, py::array_t<Position> ends) {
         py::buffer_info starts_buf = starts.request();
@@ -51,229 +52,264 @@ pybind11::tuple perform_find_overlaps(
         throw std::runtime_error("Invalid 'select' parameter. Must be 'all', 'first', 'last', or 'arbitrary'.");
     }
 
-    std::vector<std::vector<Index> > final_results(n_queries);
+    std::vector<std::vector<Index> > all_results(n_queries);
+    std::vector<std::thread> workers;
+    workers.reserve(num_workers);
 
-    bool use_quit_on_first_opt = quit_on_first;
+    int num_jobs = n_queries / num_workers;
+    int num_remaining = n_queries % num_workers;
+    int jobs_so_far = 0;
+    for (int i = 0; i < num_workers; ++i) {
+        int current_jobs = num_jobs + (i < num_remaining);
 
-    if (query_type == "any") {
-        nclist::OverlapsAnyParameters<Position> params;
-        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
-        if (max_gap >= 0) {
-            params.max_gap = max_gap;
+        if (current_jobs == 0) {
+            break;
         }
-        params.quit_on_first = use_quit_on_first_opt;
 
-        int num_jobs = n_queries / num_workers;
-        int num_remaining = n_queries % num_workers;
-        int jobs_so_far = 0;
-        std::vector<std::thread> workers;
-        workers.reserve(num_workers);
-        for (int i = 0; i < num_workers; ++i) {
-            int current_jobs = num_jobs + (i < num_remaining);
+        workers.emplace_back([&](int first, int length) -> void {
+            std::vector<Index> single_query_matches;
 
-            if (current_jobs == 0) {
-                break;
-            }
-
-            workers.emplace_back([&](int first, int length) -> void {
-                std::vector<Index> single_query_matches;
-                nclist::OverlapsAnyWorkspace<Index> ws_any;
-
-                for (Index i = first, last = first + length; i < last; ++i) {
-                // for (Index i = 0; i < n_queries; ++i) {
+            for (Index i = first, last = first + length; i < last; ++i) {
+                if (query_type == "any") {
+                    nclist::OverlapsAnyWorkspace<Index> ws_any;
+                    nclist::OverlapsAnyParameters<Position> params;
+                    params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                    if (max_gap >= 0) params.max_gap = max_gap;
+                    params.quit_on_first = quit_on_first;
                     nclist::overlaps_any(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_any, single_query_matches);
-                    if (!single_query_matches.empty()) {
-                        if (select == "last") {
-                            std::vector<Index> last_value = {single_query_matches.back()};
-                            final_results[i] = last_value;
-                        } else {
-                            final_results[i] = single_query_matches;
-                        }
-                    }
-                }
-            }, jobs_so_far, current_jobs);
-
-            jobs_so_far += current_jobs;
-        }
-
-        for (auto& worker : workers) {
-            worker.join();
-        }
-    }
-    else if (query_type == "start") {
-        nclist::OverlapsStartParameters<Position> params;
-        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
-        if (max_gap >= 0) {
-            params.max_gap = max_gap;
-        }
-        params.quit_on_first = use_quit_on_first_opt;
-
-        int num_jobs = n_queries / num_workers;
-        int num_remaining = n_queries % num_workers;
-        int jobs_so_far = 0;
-        std::vector<std::thread> workers;
-        workers.reserve(num_workers);
-        for (int i = 0; i < num_workers; ++i) {
-            int current_jobs = num_jobs + (i < num_remaining);
-
-            if (current_jobs == 0) {
-                break;
-            }
-
-            workers.emplace_back([&](int first, int length) -> void {
-                std::vector<Index> single_query_matches;
-                nclist::OverlapsStartWorkspace<Index> ws_start;
-
-                for (Index i = first, last = first + length; i < last; ++i) {
+                } else if (query_type == "start") {
+                    nclist::OverlapsStartWorkspace<Index> ws_start;
+                    nclist::OverlapsStartParameters<Position> params;
+                    params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                    if (max_gap >= 0) params.max_gap = max_gap;
+                    params.quit_on_first = quit_on_first;
                     nclist::overlaps_start(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_start, single_query_matches);
-                    if (!single_query_matches.empty()) {
-                        if (select == "last") {
-                            std::vector<Index> last_value = {single_query_matches.back()};
-                            final_results[i] = last_value;
-                        } else {
-                            final_results[i] = single_query_matches;
-                        }
-                    }
-                }
-            }, jobs_so_far, current_jobs);
-
-            jobs_so_far += current_jobs;
-        }
-
-        for (auto& worker : workers) {
-            worker.join();
-        }
-    } else if (query_type == "end") {
-        nclist::OverlapsEndParameters<Position> params;
-        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
-        if (max_gap >= 0) {
-            params.max_gap = max_gap;
-        }
-        params.quit_on_first = use_quit_on_first_opt;
-
-        int num_jobs = n_queries / num_workers;
-        int num_remaining = n_queries % num_workers;
-        int jobs_so_far = 0;
-        std::vector<std::thread> workers;
-        workers.reserve(num_workers);
-        for (int i = 0; i < num_workers; ++i) {
-            int current_jobs = num_jobs + (i < num_remaining);
-
-            if (current_jobs == 0) {
-                break;
-            }
-
-            workers.emplace_back([&](int first, int length) -> void {
-                std::vector<Index> single_query_matches;
-                nclist::OverlapsEndWorkspace<Index> ws_end;
-
-                for (Index i = first, last = first + length; i < last; ++i) {
+                } else if (query_type == "end") {
+                    nclist::OverlapsEndWorkspace<Index> ws_end;
+                    nclist::OverlapsEndParameters<Position> params;
+                    params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                    if (max_gap >= 0) params.max_gap = max_gap;
+                    params.quit_on_first = quit_on_first;
                     nclist::overlaps_end(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_end, single_query_matches);
-                    if (!single_query_matches.empty()) {
-                        if (select == "last") {
-                            std::vector<Index> last_value = {single_query_matches.back()};
-                            final_results[i] = last_value;
-                        } else {
-                            final_results[i] = single_query_matches;
-                        }
+                } else if (query_type == "within") {
+                    nclist::OverlapsWithinWorkspace<Index> ws_within;
+                    nclist::OverlapsWithinParameters<Position> params;
+                    params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                    if (max_gap >= 0) {
+                        params.max_gap = max_gap;
                     }
-                }
-            }, jobs_so_far, current_jobs);
-
-            jobs_so_far += current_jobs;
-        }
-
-        for (auto& worker : workers) {
-            worker.join();
-        }
-    } else if (query_type == "within") {
-        nclist::OverlapsWithinParameters<Position> params;
-        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
-        if (max_gap >= 0) {
-            params.max_gap = max_gap;
-        }
-        params.quit_on_first = use_quit_on_first_opt;
-
-        int num_jobs = n_queries / num_workers;
-        int num_remaining = n_queries % num_workers;
-        int jobs_so_far = 0;
-        std::vector<std::thread> workers;
-        workers.reserve(num_workers);
-        for (int i = 0; i < num_workers; ++i) {
-            int current_jobs = num_jobs + (i < num_remaining);
-
-            if (current_jobs == 0) {
-                break;
-            }
-
-            workers.emplace_back([&](int first, int length) -> void {
-                std::vector<Index> single_query_matches;
-                nclist::OverlapsWithinWorkspace<Index> ws_within;
-
-                for (Index i = first, last = first + length; i < last; ++i) {
+                    params.quit_on_first = quit_on_first;
                     nclist::overlaps_within(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_within, single_query_matches);
+                }
+                
+                if (!single_query_matches.empty()) {
+                    if (select == "last" && !quit_on_first) {
+                        all_results[i] = {single_query_matches.back()};
+                    } else {
+                        all_results[i] = single_query_matches;
+                    }
+                }
+            }
+        }, jobs_so_far, current_jobs);
+        jobs_so_far += current_jobs;
+    }
+
+    for (auto& worker : workers) {
+        worker.join();
+    }
+    
+    size_t total_hits = 0;
+    for(const auto& res : all_results) {
+        total_hits += res.size();
+    }
+
+    py::array_t<Index> self_hits(total_hits);
+    py::array_t<Index> query_hits(total_hits);
+    auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
+    auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
+    
+    size_t current_pos = 0;
+    for (Index i = 0; i < n_queries; ++i) {
+        if (!all_results[i].empty()) {
+            std::copy(all_results[i].begin(), all_results[i].end(), s_res_ptr + current_pos);
+            std::fill(q_res_ptr + current_pos, q_res_ptr + current_pos + all_results[i].size(), i);
+            current_pos += all_results[i].size();
+        }
+    }
+
+    return py::make_tuple(self_hits, query_hits);
+}
+
+
+struct GroupInfo {
+    const Index* ptr;
+    size_t size;
+};
+
+pybind11::tuple perform_find_overlaps_groups(
+    py::array_t<Position> self_starts,
+    py::array_t<Position> self_ends,
+    const std::vector<py::array_t<Index>>& self_groups,
+    py::array_t<Position> query_starts,
+    py::array_t<Position> query_ends,
+    const std::vector<py::array_t<Index>>& query_groups,
+    const std::string& query_type,
+    const std::string& select,
+    int max_gap,
+    int min_overlap,
+    int num_workers=1) {
+
+    auto s_starts_ptr = static_cast<const Position*>(self_starts.request().ptr);
+    auto s_ends_ptr = static_cast<const Position*>(self_ends.request().ptr);
+    auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
+    auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
+    size_t n_groups = self_groups.size();
+    if (n_groups != query_groups.size()) {
+        throw std::runtime_error("The number of self/subject groups must be equal to the number of query groups.");
+    }
+
+    bool quit_on_first = (select == "first" || select == "arbitrary");
+    if (select != "all" && select != "last" && !quit_on_first) {
+        throw std::runtime_error("Invalid 'select' parameter. Must be 'all', 'first', 'last', or 'arbitrary'.");
+    }
+    
+    std::vector<GroupInfo> self_group_info(n_groups);
+    std::vector<GroupInfo> query_group_info(n_groups);
+    for (size_t i = 0; i < n_groups; ++i) {
+        auto s_req = self_groups[i].request();
+        self_group_info[i] = {static_cast<const Index*>(s_req.ptr), static_cast<size_t>(s_req.shape[0])};
+        auto q_req = query_groups[i].request();
+        query_group_info[i] = {static_cast<const Index*>(q_req.ptr), static_cast<size_t>(q_req.shape[0])};
+    }
+
+    std::vector<std::vector<std::vector<Index> > > all_group_results(n_groups);
+    std::vector<std::thread> workers;
+    workers.reserve(num_workers);
+
+    int num_jobs = n_groups / num_workers;
+    int num_remaining = n_groups % num_workers;
+    int jobs_so_far = 0;
+
+    for (int i = 0; i < num_workers; ++i) {
+        int current_jobs = num_jobs + (i < num_remaining);
+        if (current_jobs == 0) {
+            break;
+        }
+
+        workers.emplace_back([&](int first, int length) -> void {
+            std::vector<Index> single_query_matches;
+
+            for (Index j = first, last = first + length; j < last; ++j) {
+
+                const auto& s_info = self_group_info[j];
+                const auto& q_info = query_group_info[j];
+
+                if (s_info.size == 0 || q_info.size == 0) {
+                    continue;
+                }
+
+                auto nclist_obj = nclist::build<Index, Position>(s_info.size, s_info.ptr, s_starts_ptr, s_ends_ptr);
+                std::vector<std::vector<Index> > local_group_results;
+                local_group_results.resize(q_info.size);
+
+                for (size_t k = 0; k < q_info.size; ++k) {
+                    Index original_query_idx = q_info.ptr[k];
+                    
+                    if (query_type == "any") {
+                        nclist::OverlapsAnyWorkspace<Index> ws_any;
+                        nclist::OverlapsAnyParameters<Position> params;
+                        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                        if (max_gap >= 0) params.max_gap = max_gap;
+                        params.quit_on_first = quit_on_first;
+                        nclist::overlaps_any(nclist_obj, q_starts_ptr[original_query_idx], q_ends_ptr[original_query_idx], params, ws_any, single_query_matches);
+                    } else if (query_type == "start") {
+                        nclist::OverlapsStartWorkspace<Index> ws_start;
+                        nclist::OverlapsStartParameters<Position> params;
+                        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                        if (max_gap >= 0) params.max_gap = max_gap;
+                        params.quit_on_first = quit_on_first;
+                        nclist::overlaps_start(nclist_obj, q_starts_ptr[original_query_idx], q_ends_ptr[original_query_idx], params, ws_start, single_query_matches);
+                    } else if (query_type == "end") {
+                        nclist::OverlapsEndWorkspace<Index> ws_end;
+                        nclist::OverlapsEndParameters<Position> params;
+                        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                        if (max_gap >= 0) params.max_gap = max_gap;
+                        params.quit_on_first = quit_on_first;
+                        nclist::overlaps_end(nclist_obj, q_starts_ptr[original_query_idx], q_ends_ptr[original_query_idx], params, ws_end, single_query_matches);
+                    } else if (query_type == "within") {
+                        nclist::OverlapsWithinWorkspace<Index> ws_within;
+                        nclist::OverlapsWithinParameters<Position> params;
+                        params.min_overlap = min_overlap > 0 ? min_overlap : 0;
+                        if (max_gap >= 0) {
+                            params.max_gap = max_gap;
+                        }
+                        params.quit_on_first = quit_on_first;
+                        nclist::overlaps_within(nclist_obj, q_starts_ptr[original_query_idx], q_ends_ptr[original_query_idx], params, ws_within, single_query_matches);
+                    }
+
                     if (!single_query_matches.empty()) {
-                        if (select == "last") {
-                            std::vector<Index> last_value = {single_query_matches.back()};
-                            final_results[i] = last_value;
+                         if (select == "last" && !quit_on_first) {
+                            local_group_results[k] = {single_query_matches.back()};
                         } else {
-                            final_results[i] = single_query_matches;
+                            local_group_results[k] = single_query_matches;
                         }
                     }
                 }
-            }, jobs_so_far, current_jobs);
+                
+                if (!local_group_results.empty()){
+                    all_group_results[j] = std::move(local_group_results);
+                }
+            }
+        }, jobs_so_far, current_jobs);
+        
+        jobs_so_far += current_jobs;
+    }
 
-            jobs_so_far += current_jobs;
+    for (auto& worker : workers) {
+        worker.join();
+    }
+
+    size_t total_hits = 0;
+    for(const auto& group_res : all_group_results) {
+        for (const auto& query_res : group_res) {
+            total_hits += query_res.size();
         }
+    }
 
-        for (auto& worker : workers) {
-            worker.join();
+    py::array_t<Index> query_hits(total_hits);
+    py::array_t<Index> self_hits(total_hits);
+    auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
+    auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
+
+    size_t current_pos = 0;
+    for (size_t group_idx = 0; group_idx < all_group_results.size(); ++group_idx) {
+        const auto& group_res = all_group_results[group_idx];
+        const auto& s_info = self_group_info[group_idx];
+        const auto& q_info = query_group_info[group_idx];
+
+        for (size_t query_in_group_idx = 0; query_in_group_idx < group_res.size(); ++query_in_group_idx) {
+            const auto& relative_subject_matches = group_res[query_in_group_idx];
+            if (!relative_subject_matches.empty()) {
+                Index original_query_idx = q_info.ptr[query_in_group_idx];
+                for (const auto& relative_subject_idx : relative_subject_matches) {
+                    q_res_ptr[current_pos] = original_query_idx;
+                    s_res_ptr[current_pos] = s_info.ptr[relative_subject_idx];
+                    current_pos++;
+                }
+            }
         }
-    } else {
-        throw std::runtime_error("Invalid query_type. Must be 'any', 'start', 'end', or 'within'.");
     }
 
-    std::size_t counter = 0;
-    for (const auto &res:final_results) {
-        counter += res.size();
-    }
-    pybind11::array_t<Index> self_hits(counter);
-    pybind11::array_t<Index> query_hits(counter);
-
-    py::buffer_info s_res_buf = self_hits.request();
-    py::buffer_info q_res_buf = query_hits.request();
-    auto s_res_ptr = static_cast<Index*>(s_res_buf.ptr);
-    auto q_res_ptr = static_cast<Index*>(q_res_buf.ptr);
-
-    counter = 0;
-    int index = 0;
-    for (const auto &res:final_results) {
-        std::copy(res.begin(), res.end(), s_res_ptr + counter);
-        std::fill_n(q_res_ptr + counter, res.size(), index);
-        index += 1;
-        counter += res.size();
-    }
-
-    pybind11::tuple output(2);
-    output[0] = self_hits;
-    output[1] = query_hits;
-
-    return output;
+    return py::make_tuple(self_hits, query_hits);
 }
 
 
 void init_nclist(pybind11::module &m){
 
-    py::class_<NCListHandler>(m, "NCListHandler", "Manages an nclist-cpp index and workspaces for overlap queries.")
+    py::class_<NCListHandler>(m, "NCListHandler", "Manages an nclist-cpp index for overlap queries.")
         .def(py::init<py::array_t<Position>, py::array_t<Position>>(),
-             py::arg("starts"), py::arg("ends"),
-             "Builds the NClist index from subject intervals.\n\n"
-             "Args:\n"
-             "    starts (np.ndarray): A numpy array of start positions.\n"
-             "    ends (np.ndarray): A numpy array of end positions.")
-
-        .def("find_overlaps",
-             &perform_find_overlaps,
+             py::arg("starts"), py::arg("ends"))
+        .def("find_overlaps", &perform_find_overlaps,
              py::arg("query_starts"),
              py::arg("query_ends"),
              py::arg("query_type") = "any",
@@ -281,32 +317,19 @@ void init_nclist(pybind11::module &m){
              py::arg("max_gap") = -1,
              py::arg("min_overlap") = 1,
              py::arg("num_workers") = 1,
-R"doc(Finds overlaps between query intervals and the indexed (self) subject intervals.
+             "Finds overlaps between query intervals and the indexed subject intervals.");
 
-Args:
-    query_starts (np.ndarray): A numpy array of start positions for the queries.
-    query_ends (np.ndarray): A numpy array of end positions for the queries.
-    query_type (str, optional): The type of overlap to perform.
-        Defaults to "any".
-        - "any": Any overlap is reported.
-        - "start": The query must lie inside the subject.
-        - "end": The subject must lie inside the query.
-        - "within": Same as "start".
-    select (str, optional): Which overlapping pairs to report.
-        Defaults to "all".
-        - "all": Reports all pairs.
-        - "first": For each query, reports the first overlapping subject.
-        - "last": For each query, reports the last overlapping subject.
-        - "arbitrary": For each query, reports an arbitrary overlapping subject (implemented as "first").
-    max_gap (int, optional): The maximum gap allowed between intervals for them
-        to be considered overlapping. A negative value means no gap is allowed.
-        Defaults to -1.
-    min_overlap (int, optional): The minimum number of positions that must
-        overlap for a pair to be reported. Defaults to 1.
-    num_workers (int, optional): Number of threads to use. Defaults to 1.
-
-Returns:
-    tuple[list[int], list[int]]]: A list of (query_index, subject_index) pairs
-    representing the found overlaps.
-)doc");
+    m.def("find_overlaps_groups", &perform_find_overlaps_groups,
+        py::arg("self_starts"),
+        py::arg("self_ends"),
+        py::arg("self_groups"),
+        py::arg("query_starts"),
+        py::arg("query_ends"),
+        py::arg("query_groups"),
+        py::arg("query_type") = "any",
+        py::arg("select") = "all",
+        py::arg("max_gap") = -1,
+        py::arg("min_overlap") = 1,
+        py::arg("num_workers") = 1,
+        "Finds overlaps between query and subject intervals, respecting group boundaries.");
 }
