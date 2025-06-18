@@ -9,12 +9,13 @@
 #include "nclist/nclist.hpp"
 #include <thread>
 #include <numeric>
+#include <cstdint>
 
 namespace py = pybind11;
 
 // Using integer types for consistency with numpy
-using Index = int32_t;
-using Position = int32_t;
+using Index = std::int32_t;
+using Position = std::int32_t;
 struct NCListHandler {
     NCListHandler(py::array_t<Position> starts, py::array_t<Position> ends) {
         py::buffer_info starts_buf = starts.request();
@@ -118,7 +119,7 @@ pybind11::tuple perform_find_overlaps(
         worker.join();
     }
     
-    size_t total_hits = 0;
+    std::size_t total_hits = 0;
     for(const auto& res : all_results) {
         total_hits += res.size();
     }
@@ -128,7 +129,7 @@ pybind11::tuple perform_find_overlaps(
     auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
     auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
     
-    size_t current_pos = 0;
+    std::size_t current_pos = 0;
     for (Index i = 0; i < n_queries; ++i) {
         if (!all_results[i].empty()) {
             std::copy(all_results[i].begin(), all_results[i].end(), s_res_ptr + current_pos);
@@ -143,7 +144,7 @@ pybind11::tuple perform_find_overlaps(
 
 struct GroupInfo {
     const Index* ptr;
-    size_t size;
+    std::size_t size;
 };
 
 pybind11::tuple perform_find_overlaps_groups(
@@ -163,7 +164,7 @@ pybind11::tuple perform_find_overlaps_groups(
     auto s_ends_ptr = static_cast<const Position*>(self_ends.request().ptr);
     auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
     auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
-    size_t n_groups = self_groups.size();
+    std::size_t n_groups = self_groups.size();
     if (n_groups != query_groups.size()) {
         throw std::runtime_error("The number of self/subject groups must be equal to the number of query groups.");
     }
@@ -175,11 +176,11 @@ pybind11::tuple perform_find_overlaps_groups(
     
     std::vector<GroupInfo> self_group_info(n_groups);
     std::vector<GroupInfo> query_group_info(n_groups);
-    for (size_t i = 0; i < n_groups; ++i) {
+    for (std::size_t i = 0; i < n_groups; ++i) {
         auto s_req = self_groups[i].request();
-        self_group_info[i] = {static_cast<const Index*>(s_req.ptr), static_cast<size_t>(s_req.shape[0])};
+        self_group_info[i] = {static_cast<const Index*>(s_req.ptr), static_cast<std::size_t>(s_req.shape[0])};
         auto q_req = query_groups[i].request();
-        query_group_info[i] = {static_cast<const Index*>(q_req.ptr), static_cast<size_t>(q_req.shape[0])};
+        query_group_info[i] = {static_cast<const Index*>(q_req.ptr), static_cast<std::size_t>(q_req.shape[0])};
     }
 
     std::vector<std::vector<std::vector<Index> > > all_group_results(n_groups);
@@ -212,7 +213,7 @@ pybind11::tuple perform_find_overlaps_groups(
                 std::vector<std::vector<Index> > local_group_results;
                 local_group_results.resize(q_info.size);
 
-                for (size_t k = 0; k < q_info.size; ++k) {
+                for (std::size_t k = 0; k < q_info.size; ++k) {
                     Index original_query_idx = q_info.ptr[k];
                     
                     if (query_type == "any") {
@@ -269,7 +270,7 @@ pybind11::tuple perform_find_overlaps_groups(
         worker.join();
     }
 
-    size_t total_hits = 0;
+    std::size_t total_hits = 0;
     for(const auto& group_res : all_group_results) {
         for (const auto& query_res : group_res) {
             total_hits += query_res.size();
@@ -281,21 +282,18 @@ pybind11::tuple perform_find_overlaps_groups(
     auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
     auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
 
-    size_t current_pos = 0;
-    for (size_t group_idx = 0; group_idx < all_group_results.size(); ++group_idx) {
+    std::size_t current_pos = 0;
+    for (std::size_t group_idx = 0, all_group_size=all_group_results.size(); group_idx < all_group_size; ++group_idx) {
         const auto& group_res = all_group_results[group_idx];
-        const auto& s_info = self_group_info[group_idx];
         const auto& q_info = query_group_info[group_idx];
 
-        for (size_t query_in_group_idx = 0; query_in_group_idx < group_res.size(); ++query_in_group_idx) {
+        for (std::size_t query_in_group_idx = 0, group_res_size = group_res.size(); query_in_group_idx < group_res_size; ++query_in_group_idx) {
             const auto& relative_subject_matches = group_res[query_in_group_idx];
             if (!relative_subject_matches.empty()) {
                 Index original_query_idx = q_info.ptr[query_in_group_idx];
-                for (const auto& relative_subject_idx : relative_subject_matches) {
-                    q_res_ptr[current_pos] = original_query_idx;
-                    s_res_ptr[current_pos] = s_info.ptr[relative_subject_idx];
-                    current_pos++;
-                }
+                std::copy(relative_subject_matches.begin(), relative_subject_matches.end(), s_res_ptr + current_pos);
+                std::fill(q_res_ptr + current_pos, q_res_ptr + current_pos + relative_subject_matches.size(), original_query_idx);
+                current_pos += relative_subject_matches.size();
             }
         }
     }
