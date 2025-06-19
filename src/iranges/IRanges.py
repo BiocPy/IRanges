@@ -1762,7 +1762,7 @@ class IRanges:
                     data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
                 )
 
-            return BiocFrame(data={"self_hits": _overlaps[0], "query_hits": _overlaps[1]})
+            return BiocFrame(data={"query_hits": _overlaps[0], "self_hits": _overlaps[1]})
 
     def count_overlaps(
         self,
