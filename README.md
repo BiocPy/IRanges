@@ -91,7 +91,7 @@ print(intersection)
 
 ### Overlap operations
 
-IRanges uses [nested containment lists](https://github.com/pyranges/ncls) under the hood to perform fast overlap and search based operations. These methods typically return a hits-like BiocFrame.
+IRanges uses [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) under the hood to perform fast overlap and search based operations. These methods typically return a hits-like BiocFrame.
 
 ```python
 subject = IRanges([2, 2, 10], [1, 2, 3])

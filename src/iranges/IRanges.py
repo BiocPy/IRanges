@@ -1565,6 +1565,8 @@ class IRanges:
             A new ``IRanges`` object with all intersecting ranges.
         """
 
+        warn("Use intersect_ncls for a faster implementation.", UserWarning)
+
         if not isinstance(other, IRanges):
             raise TypeError("'other' is not an `IRanges` object.")
 
@@ -1578,12 +1580,20 @@ class IRanges:
 
     # Inspired by pyranges intersection using NCLS
     # https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py
-    def intersect_ncls(self, other: "IRanges", delete_index: bool = True) -> "IRanges":
-        """Find intersecting ranges with `other`. Uses the NCLS index.
+    def intersect_ncls(self, other: "IRanges", delete_index: bool = True, num_threads: int = 1) -> "IRanges":
+        """Find intersecting ranges with `other`. Uses the nclist index.
 
         Args:
             other:
                 An `IRanges` object.
+
+            delete_index:
+                Defaults to True, to delete the cached ncls index.
+                Set to False, to reuse the index across multiple queries.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Raises:
             TypeError:
@@ -1595,18 +1605,20 @@ class IRanges:
 
         other._build_ncls_index()
 
-        self_indexes, other_indexes = other._ncls.all_overlaps_both(self.start, self.end, np.arange(len(self)))
+        res = other._nclist.find_overlaps(
+            self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1, num_workers=num_threads
+        )
 
         if delete_index:
             other._delete_ncls_index()
 
-        self_new_starts = self.start[self_indexes]
-        other_new_starts = other.start[other_indexes]
+        self_new_starts = self.get_start()[list(res[1])]
+        other_new_starts = other.get_start()[list(res[0])]
 
         new_starts = np.where(self_new_starts > other_new_starts, self_new_starts, other_new_starts)
 
-        self_new_ends = self.end[self_indexes]
-        other_new_ends = other.end[other_indexes]
+        self_new_ends = self.get_end()[list(res[1])]
+        other_new_ends = other.get_end()[list(res[0])]
 
         new_ends = np.where(self_new_ends < other_new_ends, self_new_ends, other_new_ends)
 
@@ -1617,18 +1629,12 @@ class IRanges:
     ############################
 
     def _build_ncls_index(self):
-        if not ut.package_utils.is_package_installed("ncls"):
-            raise ImportError("package: 'ncls' is not installed.")
-
-        from ncls import NCLS
-
-        if not hasattr(self, "_ncls"):
-            # NCLS needs non-inclusive ends
-            self._ncls = NCLS(self.start, self.get_end() + 1, np.arange(len(self)))
+        if not hasattr(self, "_nclist"):
+            self._nclist = libir.NCListHandler(self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1)
 
     def _delete_ncls_index(self):
-        if hasattr(self, "_ncls"):
-            del self._ncls
+        if hasattr(self, "_nclist"):
+            del self._nclist
 
     def find_overlaps(
         self,
@@ -1638,6 +1644,7 @@ class IRanges:
         max_gap: int = -1,
         min_overlap: int = 0,
         delete_index: bool = True,
+        num_threads: int = 1,
     ) -> BiocFrame:
         """Find overlaps with ``query``.
 
@@ -1672,8 +1679,12 @@ class IRanges:
                 Defaults to 1.
 
             delete_index:
-                Delete the cached ncls index.
-                Internal use only.
+                Defaults to True, to delete the cached ncls index.
+                Set to False, to reuse the index across multiple queries.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Returns:
             A BiocFrame with two columns:
@@ -1700,7 +1711,7 @@ class IRanges:
         # R rule: when type="any", at least one of maxgap and minoverlap must be at default
         if query_type == "any" and max_gap != -1 and min_overlap != 0:
             raise ValueError(
-                "when query_type='any', at least one of max_gap and min_overlap must be set to its default value"
+                "when query_type='any', at least one of 'max_gap' and 'min_overlap' must be set to its default value"
             )
 
         if len(query) == 0 or len(self) == 0:
@@ -1708,84 +1719,50 @@ class IRanges:
                 data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
             )
 
-        self._build_ncls_index()
+        if len(self) >= len(query):
+            self._build_ncls_index()
 
-        if query_type == "any":
-            if min_overlap == 0:
-                offset = max_gap + 1
-            else:
-                offset = 1 - min_overlap
-
-            search_starts = query._start - offset
-            search_ends = query.get_end() + 1 + offset
-        else:
-            search_starts = query._start
-            search_ends = query.get_end() + 1
-
-        query_hits, self_hits = self._ncls.all_overlaps_both(search_starts, search_ends, np.arange(len(query)))
-
-        if len(query_hits) == 0:
-            return BiocFrame(
-                data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+            _overlaps = self._nclist.find_overlaps(
+                query.get_start().astype(np.int32),
+                query.get_end().astype(np.int32) + 1,
+                min_overlap=min_overlap,
+                max_gap=max_gap,
+                query_type=query_type,
+                select=select,
+                num_workers=num_threads,
             )
 
-        q_starts = query._start[query_hits]
-        q_ends = query.get_end()[query_hits]
-        s_starts = self._start[self_hits]
-        s_ends = self.get_end()[self_hits]
+            if delete_index:
+                self._delete_ncls_index()
 
-        # filter based on overlap type and minoverlap
-        mask = np.ones(len(query_hits), dtype=bool)
-
-        if query_type == "any":
-            if min_overlap > 0:
-                overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
-                mask &= overlap_lengths >= min_overlap - max_gap - 2
-        else:
-            if query_type == "start":
-                mask &= np.abs(q_starts - s_starts) <= max_gap
-            elif query_type == "end":
-                mask &= np.abs(q_ends - s_ends) <= max_gap
-            elif query_type == "within":
-                mask &= (q_starts >= s_starts) & (q_ends <= s_ends)
-                if max_gap > 0:
-                    gaps = (q_starts - s_starts) + (s_ends - q_ends)
-                    mask &= gaps <= max_gap
-            elif query_type == "equal":
-                mask &= (np.abs(q_starts - s_starts) <= max_gap) & (np.abs(q_ends - s_ends) <= max_gap)
-
-            if min_overlap > 0:
-                overlap_lengths = np.minimum(q_ends, s_ends) - np.maximum(q_starts, s_starts) + 1
-                mask &= overlap_lengths >= min_overlap - 1
-
-        query_hits = query_hits[mask]
-        self_hits = self_hits[mask]
-
-        if delete_index:
-            self._delete_ncls_index()
-
-        if select == "all":
-            # sort by query hits for consistency with R
-            sort_idx = np.argsort(query_hits, stable=True)
-            return BiocFrame(data={"self_hits": self_hits[sort_idx], "query_hits": query_hits[sort_idx]})
-        else:
-            if len(query_hits) == 0:
+            if len(_overlaps) == 0:
                 return BiocFrame(
                     data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
                 )
 
-            _, unique_indices = np.unique(query_hits, return_index=True)
+            return BiocFrame(data={"self_hits": _overlaps[0], "query_hits": _overlaps[1]})
+        else:
+            query._build_ncls_index()
 
-            if select == "last":
-                # Find the last occurrence of each unique query
-                _, unique_indices = np.unique(query_hits[::-1], return_index=True)
-                unique_indices = len(query_hits) - 1 - unique_indices
+            _overlaps = query._nclist.find_overlaps(
+                self.get_start().astype(np.int32),
+                self.get_end().astype(np.int32) + 1,
+                min_overlap=min_overlap,
+                max_gap=max_gap,
+                query_type=query_type,
+                select=select,
+                num_workers=num_threads,
+            )
 
-            # Create mask for selected hits
-            mask = np.zeros_like(query_hits, dtype=bool)
-            mask[unique_indices] = True
+            if delete_index:
+                query._delete_ncls_index()
 
-            return BiocFrame(data={"self_hits": self_hits[mask], "query_hits": query_hits[mask]})
+            if len(_overlaps) == 0:
+                return BiocFrame(
+                    data={"self_hits": np.array([], dtype=np.int32), "query_hits": np.array([], dtype=np.int32)}
+                )
+
+            return BiocFrame(data={"query_hits": _overlaps[0], "self_hits": _overlaps[1]})
 
     def count_overlaps(
         self,
@@ -1794,6 +1771,7 @@ class IRanges:
         max_gap: int = -1,
         min_overlap: int = 0,
         delete_index: bool = True,
+        num_threads: int = 1,
     ) -> np.ndarray:
         """Count number of overlaps for each range in ``query``.
 
@@ -1820,8 +1798,12 @@ class IRanges:
                 Defaults to 1.
 
             delete_index:
-                Delete the cached ncls index.
-                Internal use only.
+                Defaults to True, to delete the cached ncls index.
+                Set to False, to reuse the index across multiple queries.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Returns:
             NumPy vector with length same as number of query ranges,
@@ -1833,6 +1815,7 @@ class IRanges:
             max_gap=max_gap,
             min_overlap=min_overlap,
             delete_index=delete_index,
+            num_threads=num_threads,
         )
         result = np.zeros(len(query))
         _ucounts = np.unique_counts(_overlaps.get_column("query_hits"))
@@ -1848,6 +1831,7 @@ class IRanges:
         max_gap: int = -1,
         min_overlap: int = 0,
         delete_index: bool = True,
+        num_threads: int = 1,
     ) -> "IRanges":
         """Subset to overlapping ranges with ``query``.
 
@@ -1882,8 +1866,12 @@ class IRanges:
                 Defaults to 1.
 
             delete_index:
-                Delete the cached ncls index.
-                Internal use only.
+                Defaults to True, to delete the cached ncls index.
+                Set to False, to reuse the index across multiple queries.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Returns:
             A new ``IRanges`` object containing ranges that overlap with query.
@@ -1895,6 +1883,7 @@ class IRanges:
             max_gap=max_gap,
             min_overlap=min_overlap,
             delete_index=delete_index,
+            num_threads=num_threads,
         )
         _all_indices = np.unique(_overlaps.get_column("self_hits"))
         return self[_all_indices]
