@@ -9,37 +9,37 @@ iranges.IRanges module
 
 .. automodule:: iranges.IRanges
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 iranges.lib\_iranges module
 ---------------------------
 
 .. automodule:: iranges.lib_iranges
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 iranges.sew\_handler module
 ---------------------------
 
 .. automodule:: iranges.sew_handler
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 iranges.utils module
 --------------------
 
 .. automodule:: iranges.utils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: iranges
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

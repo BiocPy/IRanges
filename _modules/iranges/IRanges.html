@@ -4,8 +4,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>iranges.IRanges - IRanges 0.4.2 documentation</title>
+    <!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
+        <title>iranges.IRanges - IRanges 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">IRanges 0.4.2 documentation</div></a>
+      <a href="../../index.html"><div class="brand">IRanges 0.5.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">IRanges 0.4.2 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.5.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -1958,6 +1958,8 @@
 <span class="sd">            A new ``IRanges`` object with all intersecting ranges.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Use intersect_ncls for a faster implementation.&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">IRanges</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;other&#39; is not an `IRanges` object.&quot;</span><span class="p">)</span>
 
@@ -1974,12 +1976,20 @@
     <span class="c1"># https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py</span>
 <div class="viewcode-block" id="IRanges.intersect_ncls">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.intersect_ncls">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">intersect_ncls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find intersecting ranges with `other`. Uses the NCLS index.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">intersect_ncls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">,</span> <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find intersecting ranges with `other`. Uses the nclist index.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            other:</span>
 <span class="sd">                An `IRanges` object.</span>
+
+<span class="sd">            delete_index:</span>
+<span class="sd">                Defaults to True, to delete the cached ncls index.</span>
+<span class="sd">                Set to False, to reuse the index across multiple queries.</span>
+
+<span class="sd">            num_threads:</span>
+<span class="sd">                Number of threads to use.</span>
+<span class="sd">                Defaults to 1.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError:</span>
@@ -1991,18 +2001,20 @@
 
         <span class="n">other</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
 
-        <span class="n">self_indexes</span><span class="p">,</span> <span class="n">other_indexes</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_nclist</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_start</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">num_threads</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
             <span class="n">other</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
 
-        <span class="n">self_new_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">self_indexes</span><span class="p">]</span>
-        <span class="n">other_new_starts</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">start</span><span class="p">[</span><span class="n">other_indexes</span><span class="p">]</span>
+        <span class="n">self_new_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_start</span><span class="p">()[</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">other_new_starts</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">get_start</span><span class="p">()[</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
         <span class="n">new_starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">self_new_starts</span> <span class="o">&gt;</span> <span class="n">other_new_starts</span><span class="p">,</span> <span class="n">self_new_starts</span><span class="p">,</span> <span class="n">other_new_starts</span><span class="p">)</span>
 
-        <span class="n">self_new_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">self_indexes</span><span class="p">]</span>
-        <span class="n">other_new_ends</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">end</span><span class="p">[</span><span class="n">other_indexes</span><span class="p">]</span>
+        <span class="n">self_new_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">other_new_ends</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
         <span class="n">new_ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">self_new_ends</span> <span class="o">&lt;</span> <span class="n">other_new_ends</span><span class="p">,</span> <span class="n">self_new_ends</span><span class="p">,</span> <span class="n">other_new_ends</span><span class="p">)</span>
 
@@ -2014,18 +2026,12 @@
     <span class="c1">############################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_ncls_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ut</span><span class="o">.</span><span class="n">package_utils</span><span class="o">.</span><span class="n">is_package_installed</span><span class="p">(</span><span class="s2">&quot;ncls&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;package: &#39;ncls&#39; is not installed.&quot;</span><span class="p">)</span>
-
-        <span class="kn">from</span><span class="w"> </span><span class="nn">ncls</span><span class="w"> </span><span class="kn">import</span> <span class="n">NCLS</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
-            <span class="c1"># NCLS needs non-inclusive ends</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span> <span class="o">=</span> <span class="n">NCLS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_nclist&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nclist</span> <span class="o">=</span> <span class="n">libir</span><span class="o">.</span><span class="n">NCListHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_start</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_delete_ncls_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_ncls&quot;</span><span class="p">):</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_nclist&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nclist</span>
 
 <div class="viewcode-block" id="IRanges.find_overlaps">
 <a class="viewcode-back" href="../../api/iranges.html#iranges.IRanges.IRanges.find_overlaps">[docs]</a>
@@ -2037,6 +2043,7 @@
         <span class="n">max_gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">min_overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BiocFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find overlaps with ``query``.</span>
 
@@ -2071,8 +2078,12 @@
 <span class="sd">                Defaults to 1.</span>
 
 <span class="sd">            delete_index:</span>
-<span class="sd">                Delete the cached ncls index.</span>
-<span class="sd">                Internal use only.</span>
+<span class="sd">                Defaults to True, to delete the cached ncls index.</span>
+<span class="sd">                Set to False, to reuse the index across multiple queries.</span>
+
+<span class="sd">            num_threads:</span>
+<span class="sd">                Number of threads to use.</span>
+<span class="sd">                Defaults to 1.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A BiocFrame with two columns:</span>
@@ -2099,7 +2110,7 @@
         <span class="c1"># R rule: when type=&quot;any&quot;, at least one of maxgap and minoverlap must be at default</span>
         <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span> <span class="ow">and</span> <span class="n">max_gap</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">min_overlap</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;when query_type=&#39;any&#39;, at least one of max_gap and min_overlap must be set to its default value&quot;</span>
+                <span class="s2">&quot;when query_type=&#39;any&#39;, at least one of &#39;max_gap&#39; and &#39;min_overlap&#39; must be set to its default value&quot;</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -2107,84 +2118,50 @@
                 <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">min_overlap</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="n">max_gap</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">min_overlap</span>
-
-            <span class="n">search_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span> <span class="o">-</span> <span class="n">offset</span>
-            <span class="n">search_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">offset</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">search_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span>
-            <span class="n">search_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="n">query_hits</span><span class="p">,</span> <span class="n">self_hits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ncls</span><span class="o">.</span><span class="n">all_overlaps_both</span><span class="p">(</span><span class="n">search_starts</span><span class="p">,</span> <span class="n">search_ends</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)))</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
-                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
+            <span class="n">_overlaps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nclist</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span>
+                <span class="n">query</span><span class="o">.</span><span class="n">get_start</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span><span class="p">,</span>
+                <span class="n">max_gap</span><span class="o">=</span><span class="n">max_gap</span><span class="p">,</span>
+                <span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">,</span>
+                <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">,</span>
+                <span class="n">num_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="n">q_starts</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">query_hits</span><span class="p">]</span>
-        <span class="n">q_ends</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">query_hits</span><span class="p">]</span>
-        <span class="n">s_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">[</span><span class="n">self_hits</span><span class="p">]</span>
-        <span class="n">s_ends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()[</span><span class="n">self_hits</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
 
-        <span class="c1"># filter based on overlap type and minoverlap</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">min_overlap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">overlap_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">q_ends</span><span class="p">,</span> <span class="n">s_ends</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">q_starts</span><span class="p">,</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">overlap_lengths</span> <span class="o">&gt;=</span> <span class="n">min_overlap</span> <span class="o">-</span> <span class="n">max_gap</span> <span class="o">-</span> <span class="mi">2</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q_starts</span> <span class="o">-</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_gap</span>
-            <span class="k">elif</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q_ends</span> <span class="o">-</span> <span class="n">s_ends</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_gap</span>
-            <span class="k">elif</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;within&quot;</span><span class="p">:</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">q_starts</span> <span class="o">&gt;=</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">q_ends</span> <span class="o">&lt;=</span> <span class="n">s_ends</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">max_gap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">gaps</span> <span class="o">=</span> <span class="p">(</span><span class="n">q_starts</span> <span class="o">-</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">s_ends</span> <span class="o">-</span> <span class="n">q_ends</span><span class="p">)</span>
-                    <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">gaps</span> <span class="o">&lt;=</span> <span class="n">max_gap</span>
-            <span class="k">elif</span> <span class="n">query_type</span> <span class="o">==</span> <span class="s2">&quot;equal&quot;</span><span class="p">:</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q_starts</span> <span class="o">-</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_gap</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q_ends</span> <span class="o">-</span> <span class="n">s_ends</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_gap</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">min_overlap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">overlap_lengths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">q_ends</span><span class="p">,</span> <span class="n">s_ends</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">q_starts</span><span class="p">,</span> <span class="n">s_starts</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">mask</span> <span class="o">&amp;=</span> <span class="n">overlap_lengths</span> <span class="o">&gt;=</span> <span class="n">min_overlap</span> <span class="o">-</span> <span class="mi">1</span>
-
-        <span class="n">query_hits</span> <span class="o">=</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-        <span class="n">self_hits</span> <span class="o">=</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
-            <span class="c1"># sort by query hits for consistency with R</span>
-            <span class="n">sort_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">sort_idx</span><span class="p">]})</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_overlaps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
                     <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
                 <span class="p">)</span>
 
-            <span class="n">_</span><span class="p">,</span> <span class="n">unique_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">_overlaps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">_overlaps</span><span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query</span><span class="o">.</span><span class="n">_build_ncls_index</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
-                <span class="c1"># Find the last occurrence of each unique query</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">unique_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">query_hits</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">unique_indices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">query_hits</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">unique_indices</span>
+            <span class="n">_overlaps</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">_nclist</span><span class="o">.</span><span class="n">find_overlaps</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_start</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_end</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span><span class="p">,</span>
+                <span class="n">max_gap</span><span class="o">=</span><span class="n">max_gap</span><span class="p">,</span>
+                <span class="n">query_type</span><span class="o">=</span><span class="n">query_type</span><span class="p">,</span>
+                <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">,</span>
+                <span class="n">num_workers</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
+            <span class="p">)</span>
 
-            <span class="c1"># Create mask for selected hits</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">query_hits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-            <span class="n">mask</span><span class="p">[</span><span class="n">unique_indices</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">delete_index</span><span class="p">:</span>
+                <span class="n">query</span><span class="o">.</span><span class="n">_delete_ncls_index</span><span class="p">()</span>
 
-            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">self_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">query_hits</span><span class="p">[</span><span class="n">mask</span><span class="p">]})</span></div>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_overlaps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span>
+                    <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)}</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">BiocFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;query_hits&quot;</span><span class="p">:</span> <span class="n">_overlaps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;self_hits&quot;</span><span class="p">:</span> <span class="n">_overlaps</span><span class="p">[</span><span class="mi">1</span><span class="p">]})</span></div>
 
 
 <div class="viewcode-block" id="IRanges.count_overlaps">
@@ -2196,6 +2173,7 @@
         <span class="n">max_gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">min_overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Count number of overlaps for each range in ``query``.</span>
 
@@ -2222,8 +2200,12 @@
 <span class="sd">                Defaults to 1.</span>
 
 <span class="sd">            delete_index:</span>
-<span class="sd">                Delete the cached ncls index.</span>
-<span class="sd">                Internal use only.</span>
+<span class="sd">                Defaults to True, to delete the cached ncls index.</span>
+<span class="sd">                Set to False, to reuse the index across multiple queries.</span>
+
+<span class="sd">            num_threads:</span>
+<span class="sd">                Number of threads to use.</span>
+<span class="sd">                Defaults to 1.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            NumPy vector with length same as number of query ranges,</span>
@@ -2235,6 +2217,7 @@
             <span class="n">max_gap</span><span class="o">=</span><span class="n">max_gap</span><span class="p">,</span>
             <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span><span class="p">,</span>
             <span class="n">delete_index</span><span class="o">=</span><span class="n">delete_index</span><span class="p">,</span>
+            <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
         <span class="n">_ucounts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique_counts</span><span class="p">(</span><span class="n">_overlaps</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;query_hits&quot;</span><span class="p">))</span>
@@ -2253,6 +2236,7 @@
         <span class="n">max_gap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">min_overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">delete_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;IRanges&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Subset to overlapping ranges with ``query``.</span>
 
@@ -2287,8 +2271,12 @@
 <span class="sd">                Defaults to 1.</span>
 
 <span class="sd">            delete_index:</span>
-<span class="sd">                Delete the cached ncls index.</span>
-<span class="sd">                Internal use only.</span>
+<span class="sd">                Defaults to True, to delete the cached ncls index.</span>
+<span class="sd">                Set to False, to reuse the index across multiple queries.</span>
+
+<span class="sd">            num_threads:</span>
+<span class="sd">                Number of threads to use.</span>
+<span class="sd">                Defaults to 1.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A new ``IRanges`` object containing ranges that overlap with query.</span>
@@ -2300,6 +2288,7 @@
             <span class="n">max_gap</span><span class="o">=</span><span class="n">max_gap</span><span class="p">,</span>
             <span class="n">min_overlap</span><span class="o">=</span><span class="n">min_overlap</span><span class="p">,</span>
             <span class="n">delete_index</span><span class="o">=</span><span class="n">delete_index</span><span class="p">,</span>
+            <span class="n">num_threads</span><span class="o">=</span><span class="n">num_threads</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">_all_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">_overlaps</span><span class="o">.</span><span class="n">get_column</span><span class="p">(</span><span class="s2">&quot;self_hits&quot;</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">_all_indices</span><span class="p">]</span></div>
@@ -2947,7 +2936,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=ff822928"></script>
+</div><script src="../../_static/documentation_options.js?v=1dd76d02"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
