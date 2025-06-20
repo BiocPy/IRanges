@@ -2,7 +2,7 @@
 
 ## Version 0.5.0
 
-- Switch to LTLA/nclist-cpp for overlap and intersection operations.
+- Switch to [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) for overlap and intersection operations.
 - Update Github template and setup.py to support editable builds.
 
 ## Version 0.4.2
