@@ -11,8 +11,8 @@ include(FetchContent)
 FetchContent_Declare(
   nclist
   GIT_REPOSITORY https://github.com/LTLA/nclist-cpp
-  GIT_TAG v0.1.0
-#   GIT_TAG maybe-faster2
+#   GIT_TAG v0.2.0
+  GIT_TAG master
 )
 
 FetchContent_MakeAvailable(nclist)
