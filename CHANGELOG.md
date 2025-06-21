@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 0.5.0
+## Version 0.5.0 - 0.5.1
 
 - Switch to [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) for overlap and intersection operations.
 - Update Github template and setup.py to support editable builds.
