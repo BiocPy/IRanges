@@ -39,7 +39,7 @@ pybind11::tuple perform_find_overlaps(
     const std::string& select,
     int max_gap,
     int min_overlap,
-    int num_workers=1) {
+    int num_threads=1) {
 
     py::buffer_info q_starts_buf = query_starts.request();
     py::buffer_info q_ends_buf = query_ends.request();
@@ -55,12 +55,12 @@ pybind11::tuple perform_find_overlaps(
 
     std::vector<std::vector<Index> > all_results(n_queries);
     std::vector<std::thread> workers;
-    workers.reserve(num_workers);
+    workers.reserve(num_threads);
 
-    int num_jobs = n_queries / num_workers;
-    int num_remaining = n_queries % num_workers;
+    int num_jobs = n_queries / num_threads;
+    int num_remaining = n_queries % num_threads;
     int jobs_so_far = 0;
-    for (int i = 0; i < num_workers; ++i) {
+    for (int i = 0; i < num_threads; ++i) {
         int current_jobs = num_jobs + (i < num_remaining);
 
         if (current_jobs == 0) {
@@ -158,7 +158,7 @@ pybind11::tuple perform_find_overlaps_groups(
     const std::string& select,
     int max_gap,
     int min_overlap,
-    int num_workers=1) {
+    int num_threads=1) {
 
     auto s_starts_ptr = static_cast<const Position*>(self_starts.request().ptr);
     auto s_ends_ptr = static_cast<const Position*>(self_ends.request().ptr);
@@ -185,13 +185,13 @@ pybind11::tuple perform_find_overlaps_groups(
 
     std::vector<std::vector<std::vector<Index> > > all_group_results(n_groups);
     std::vector<std::thread> workers;
-    workers.reserve(num_workers);
+    workers.reserve(num_threads);
 
-    int num_jobs = n_groups / num_workers;
-    int num_remaining = n_groups % num_workers;
+    int num_jobs = n_groups / num_threads;
+    int num_remaining = n_groups % num_threads;
     int jobs_so_far = 0;
 
-    for (int i = 0; i < num_workers; ++i) {
+    for (int i = 0; i < num_threads; ++i) {
         int current_jobs = num_jobs + (i < num_remaining);
         if (current_jobs == 0) {
             break;
@@ -306,16 +306,17 @@ void init_nclist(pybind11::module &m){
 
     py::class_<NCListHandler>(m, "NCListHandler", "Manages an nclist-cpp index for overlap queries.")
         .def(py::init<py::array_t<Position>, py::array_t<Position>>(),
-             py::arg("starts"), py::arg("ends"))
+            py::arg("starts"), py::arg("ends"))
+
         .def("find_overlaps", &perform_find_overlaps,
-             py::arg("query_starts"),
-             py::arg("query_ends"),
-             py::arg("query_type") = "any",
-             py::arg("select") = "all",
-             py::arg("max_gap") = -1,
-             py::arg("min_overlap") = 1,
-             py::arg("num_workers") = 1,
-             "Finds overlaps between query intervals and the indexed subject intervals.");
+            py::arg("query_starts"),
+            py::arg("query_ends"),
+            py::arg("query_type") = "any",
+            py::arg("select") = "all",
+            py::arg("max_gap") = -1,
+            py::arg("min_overlap") = 1,
+            py::arg("num_threads") = 1,
+            "Finds overlaps between query intervals and the indexed subject intervals.");
 
     m.def("find_overlaps_groups", &perform_find_overlaps_groups,
         py::arg("self_starts"),
@@ -328,6 +329,6 @@ void init_nclist(pybind11::module &m){
         py::arg("select") = "all",
         py::arg("max_gap") = -1,
         py::arg("min_overlap") = 1,
-        py::arg("num_workers") = 1,
+        py::arg("num_threads") = 1,
         "Finds overlaps between query and subject intervals, respecting group boundaries.");
 }
