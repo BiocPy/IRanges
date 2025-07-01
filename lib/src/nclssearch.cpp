@@ -95,10 +95,8 @@ py::object perform_follow(
     }
 
     if (select == "last") {
-        // "last" is equivalent to "first" here
         return py::array_t<Index>(n_queries, results.data());
     } else {
-        // select == "all"
         std::vector<Index> q_hits, s_hits;
         for (Index i = 0; i < n_queries; ++i) {
             if (results[i] != -1) {
@@ -156,7 +154,6 @@ py::object perform_precede(
     if (select == "first") {
         return py::array_t<Index>(n_queries, results.data());
     } else {
-        // select == "all"
         std::vector<Index> q_hits, s_hits;
         for (Index i = 0; i < n_queries; ++i) {
             if (results[i] != -1) {
@@ -239,11 +236,9 @@ py::object perform_nearest(
                 }
 
                 if (select == "arbitrary") {
-                    // Tie-break by smallest index.
                     std::sort(best_hits.begin(), best_hits.end());
                     all_results[i] = {best_hits[0]};
                 } else { 
-                    // select == "all"
                     all_results[i] = best_hits;
                 }
             }
@@ -263,7 +258,6 @@ py::object perform_nearest(
         }
         return std::move(result);
     } else { 
-        // select == "all"
         std::vector<std::pair<Index, Index>> final_pairs;
         for (Index i = 0; i < n_queries; ++i) {
             for (const auto& self_hit : all_results[i]) {
@@ -271,7 +265,6 @@ py::object perform_nearest(
             }
         }
 
-        // Sort to ensure deterministic output that matches Python's behavior
         std::stable_sort(final_pairs.begin(), final_pairs.end());
 
         py::array_t<Index> query_hits(final_pairs.size());
