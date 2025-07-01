@@ -242,7 +242,8 @@ py::object perform_nearest(
                     // Tie-break by smallest index.
                     std::sort(best_hits.begin(), best_hits.end());
                     all_results[i] = {best_hits[0]};
-                } else { // select == "all"
+                } else { 
+                    // select == "all"
                     all_results[i] = best_hits;
                 }
             }
@@ -261,7 +262,8 @@ py::object perform_nearest(
             res_ptr[i] = all_results[i].empty() ? -1 : all_results[i][0];
         }
         return std::move(result);
-    } else { // select == "all"
+    } else { 
+        // select == "all"
         std::vector<std::pair<Index, Index>> final_pairs;
         for (Index i = 0; i < n_queries; ++i) {
             for (const auto& self_hit : all_results[i]) {
