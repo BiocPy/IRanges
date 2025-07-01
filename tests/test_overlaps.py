@@ -203,7 +203,7 @@ def test_edge_cases():
     assert np.all(res.get_column("query_hits") == [])
 
     res = subject.nearest(query)
-    assert np.all(res == [0, 0]) # expected [6,6] arbitrary so its fine
+    assert np.all(res == [0, 0])  # expected [6,6] arbitrary so its fine
 
     res = subject.nearest(query, select="all")
     assert np.all(overlaps.get_column("self_hits") == [0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6])

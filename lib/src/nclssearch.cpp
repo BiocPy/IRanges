@@ -75,10 +75,10 @@ py::object perform_follow(
         workers.emplace_back([&](int first, int length) -> void {
             for (Index i = first, last = first + length; i < last; ++i) {
                 Position q_start = q_starts_ptr[i];
-                
+
                 // Binary search on sorted ends to find the last subject ending before the query starts
                 auto it = std::upper_bound(self.sorted_ends.begin(), self.sorted_ends.end(), std::make_pair(q_start, Index(-1)));
-                
+
                 if (it == self.sorted_ends.begin()) {
                     results[i] = -1; // No preceding range
                 } else {
@@ -94,10 +94,10 @@ py::object perform_follow(
         worker.join();
     }
 
-    if (select == "last") { 
+    if (select == "last") {
         // "last" is equivalent to "first" here
         return py::array_t<Index>(n_queries, results.data());
-    } else { 
+    } else {
         // select == "all"
         std::vector<Index> q_hits, s_hits;
         for (Index i = 0; i < n_queries; ++i) {
@@ -155,7 +155,7 @@ py::object perform_precede(
 
     if (select == "first") {
         return py::array_t<Index>(n_queries, results.data());
-    } else { 
+    } else {
         // select == "all"
         std::vector<Index> q_hits, s_hits;
         for (Index i = 0; i < n_queries; ++i) {
@@ -200,7 +200,7 @@ py::object perform_nearest(
             for (Index i = first, last = first + length; i < last; ++i) {
                 Position q_start = q_starts_ptr[i];
                 Position q_end = q_ends_ptr[i];
-                
+
                 std::vector<std::pair<Position, Index>> candidates;
 
                 std::vector<Index> overlaps;
@@ -270,7 +270,7 @@ py::object perform_nearest(
                 final_pairs.emplace_back(i, self_hit);
             }
         }
-        
+
         // Sort to ensure deterministic output that matches Python's behavior
         std::stable_sort(final_pairs.begin(), final_pairs.end());
 
