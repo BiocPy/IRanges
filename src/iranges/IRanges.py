@@ -1957,7 +1957,6 @@ class IRanges:
             self._delete_nclssearch_index()
 
         if select == "first":
-            print(type(_results))
             _results = np.asarray(_results, dtype=np.object_)
             # replace -1 with None
             _results[_results == -1] = None
@@ -2020,7 +2019,6 @@ class IRanges:
             self._delete_nclssearch_index()
 
         if select == "last":
-            print(type(_results))
             _results = np.asarray(_results, dtype=np.object_)
             # replace -1 with None
             _results[_results == -1] = None
@@ -2102,7 +2100,6 @@ class IRanges:
             self._delete_nclssearch_index()
 
         if select == "arbitrary":
-            print(type(_results))
             _results = np.asarray(_results, dtype=np.object_)
             # replace -1 with None
             _results[_results == -1] = None
