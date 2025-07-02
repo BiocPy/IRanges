@@ -9,7 +9,7 @@ from biocutils import Names, combine_rows, combine_sequences, show_as_cell
 
 from . import lib_iranges as libir
 from .sew_handler import SEWWrangler
-from .utils import compute_up_down, find_interval, normalize_array
+from .utils import compute_up_down, normalize_array
 
 __author__ = "Aaron Lun, Jayaram Kancherla"
 __copyright__ = "LTLA, jkanche"
@@ -1606,7 +1606,7 @@ class IRanges:
         other._build_ncls_index()
 
         res = other._nclist.find_overlaps(
-            self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1, num_workers=num_threads
+            self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1, num_threads=num_threads
         )
 
         if delete_index:
@@ -1729,7 +1729,7 @@ class IRanges:
                 max_gap=max_gap,
                 query_type=query_type,
                 select=select,
-                num_workers=num_threads,
+                num_threads=num_threads,
             )
 
             if delete_index:
@@ -1751,7 +1751,7 @@ class IRanges:
                 max_gap=max_gap,
                 query_type=query_type,
                 select=select,
-                num_workers=num_threads,
+                num_threads=num_threads,
             )
 
             if delete_index:
@@ -1892,10 +1892,22 @@ class IRanges:
     #### search operations ####
     ###########################
 
+    def _build_nclssearch_index(self):
+        if not hasattr(self, "_nclistsearch"):
+            self._nclistsearch = libir.NCListSearchHandler(
+                self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1
+            )
+
+    def _delete_nclssearch_index(self):
+        if hasattr(self, "_nclistsearch"):
+            del self._nclistsearch
+
     def precede(
         self,
         query: "IRanges",
         select: Literal["all", "first"] = "first",
+        delete_index: bool = True,
+        num_threads: int = 1,
     ) -> Union[np.ndarray, BiocFrame]:
         """Find nearest positions that are upstream/precede each query range.
 
@@ -1906,6 +1918,14 @@ class IRanges:
             select:
                 Whether to return "all" hits or just "first".
                 Defaults to "first".
+
+            delete_index:
+                Defaults to True, to delete the cached ncls index.
+                Set to False, to reuse the index across multiple queries.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Returns:
             If select="first":
@@ -1925,31 +1945,31 @@ class IRanges:
         if select not in ["all", "first"]:
             raise ValueError(f"'select' must be one of {', '.join(['all', 'first'])}.")
 
-        sort_idx = np.argsort(self._start, stable=True)
-        sorted_starts = self._start[sort_idx]
+        self._build_nclssearch_index()
 
-        indices = find_interval(query.get_end(), sorted_starts) + 1
+        _results = self._nclistsearch.precede(
+            query.get_end().astype(np.int32) + 1,
+            select=select,
+            num_threads=num_threads,
+        )
 
-        # cases where no following interval exists
-        indices[indices >= len(self._start)] = -1
-
-        # back to original indices
-        valid = indices >= 0
-        if np.any(valid):
-            indices[valid] = sort_idx[indices[valid]]
+        if delete_index:
+            self._delete_nclssearch_index()
 
         if select == "first":
-            result = np.where(valid, indices, None)
-            return result
+            _results = np.asarray(_results, dtype=np.object_)
+            # replace -1 with None
+            _results[_results == -1] = None
+            return _results
         else:
-            query_hits = np.where(valid)[0]
-            self_hits = indices[valid]
-            return BiocFrame({"self_hits": self_hits, "query_hits": query_hits})
+            return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
 
     def follow(
         self,
         query: "IRanges",
         select: Literal["all", "last"] = "last",
+        delete_index: bool = True,
+        num_threads: int = 1,
     ) -> Union[np.ndarray, BiocFrame]:
         """Find nearest positions that are downstream/follow each query range.
 
@@ -1960,6 +1980,14 @@ class IRanges:
             select:
                 Whether to return "all" hits or just "last".
                 Defaults to "last".
+
+            delete_index:
+                Defaults to True, to delete the cached ncls index.
+                Set to False, to reuse the index across multiple queries.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Returns:
             If select="last":
@@ -1973,24 +2001,30 @@ class IRanges:
                 Each row represents a query-self pair where self follows query.
         """
 
-        self_ends = self.get_end()
+        if not isinstance(query, IRanges):
+            raise TypeError("`query` is not a `IRanges` object.")
 
-        sort_idx = np.argsort(self_ends, stable=True)
-        sorted_ends = self_ends[sort_idx]
+        if select not in ["all", "last"]:
+            raise ValueError(f"'select' must be one of {', '.join(['all', 'last'])}.")
 
-        indices = find_interval(query._start - 1, sorted_ends)
+        self._build_nclssearch_index()
 
-        valid = indices >= 0
-        if np.any(valid):
-            indices[valid] = sort_idx[indices[valid]]
+        _results = self._nclistsearch.follow(
+            query.get_start().astype(np.int32),
+            select=select,
+            num_threads=num_threads,
+        )
+
+        if delete_index:
+            self._delete_nclssearch_index()
 
         if select == "last":
-            result = np.where(valid, indices, None)
-            return result
+            _results = np.asarray(_results, dtype=np.object_)
+            # replace -1 with None
+            _results[_results == -1] = None
+            return _results
         else:
-            query_hits = np.where(valid)[0]
-            self_hits = indices[valid]
-            return BiocFrame({"self_hits": self_hits, "query_hits": query_hits})
+            return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
 
     def distance(self, query: "IRanges") -> np.ndarray:
         """Calculate the pair-wise distance between ranges.
@@ -2013,7 +2047,11 @@ class IRanges:
         return np.maximum(max_starts - min_ends - 1, 0)
 
     def nearest(
-        self, query: "IRanges", select: Literal["all", "arbitrary"] = "arbitrary", delete_index: bool = True
+        self,
+        query: "IRanges",
+        select: Literal["all", "arbitrary"] = "arbitrary",
+        delete_index: bool = True,
+        num_threads: int = 1,
     ) -> Union[np.ndarray, BiocFrame]:
         """Find nearest ranges in both directions.
 
@@ -2027,6 +2065,10 @@ class IRanges:
             delete_index:
                 Delete the cached ncls index.
                 Internal use only.
+
+            num_threads:
+                Number of threads to use.
+                Defaults to 1.
 
         Returns:
             If select="arbitrary":
@@ -2045,140 +2087,25 @@ class IRanges:
         if select not in ["all", "arbitrary"]:
             raise ValueError("'select' must be one of 'all', 'arbitrary'")
 
-        ol = self.find_overlaps(query, max_gap=0, select="all", delete_index=delete_index)
+        self._build_nclssearch_index()
+
+        _results = self._nclistsearch.nearest(
+            query.get_start().astype(np.int32),
+            query.get_end().astype(np.int32) + 1,
+            select=select,
+            num_threads=num_threads,
+        )
+
+        if delete_index:
+            self._delete_nclssearch_index()
 
         if select == "arbitrary":
-            result = np.full(len(query), None)
-
-            # Handle overlaps
-            ol_query = ol.get_column("query_hits")
-            ol_subject = ol.get_column("self_hits")
-
-            if len(ol_query):
-                # pick first overlap for each query
-                # _, idx = np.unique(ol_query, return_index=True)
-                # result[ol_query[idx]] = ol_subject[idx]
-
-                # pick last overlap for each query
-                # unique_queries = np.unique(ol_query)
-                # for q in unique_queries:
-                #     matches = np.where(ol_query == q)[0]
-                #     # Take the last match for this query
-                #     result[q] = ol_subject[matches[-1]]
-
-                # sort the overlaps and pick the last
-                # probably missing some logic here compared to R implementation
-                # ideally should pick the one with the least overlap
-                # if they all overlap equally then pick the last one
-                # since the type is "arbitrary" it does not matter
-                unique_queries = np.unique(ol_query)
-
-                for q in unique_queries:
-                    # Find all overlaps for this query
-                    matches = np.where(ol_query == q)[0]
-
-                    sorted_order = self[ol_subject[matches]].order()
-                    result[q] = ol_subject[sorted_order[-1]]
-
-            missing = result == None  # noqa: E711
-            if np.any(missing):
-                missing_ranges = query[missing]
-                before = self.precede(missing_ranges, select="first")
-                after = self.follow(missing_ranges, select="last")
-
-                before_dist = np.full(len(missing_ranges), np.inf)
-                after_dist = np.full(len(missing_ranges), np.inf)
-
-                before_valid = before != None  # noqa: E711
-                after_valid = after != None  # noqa: E711
-
-                if np.any(before_valid):
-                    before_idx = before[before_valid].astype(np.int32)
-                    before_dist[before_valid] = self._start[before_idx] - missing_ranges.get_end()[before_valid]
-
-                if np.any(after_valid):
-                    after_idx = after[after_valid].astype(np.int32)
-                    after_dist[after_valid] = missing_ranges._start[after_valid] - self.get_end()[after_idx]
-
-                # Choose nearest (prefer before if distances are equal)
-                use_before = before_dist <= after_dist
-                missing_result = np.where(use_before, before, after)
-                result[missing] = missing_result
-
-            return result
-
+            _results = np.asarray(_results, dtype=np.object_)
+            # replace -1 with None
+            _results[_results == -1] = None
+            return _results
         else:
-            hits = []
-
-            if len(ol.get_column("query_hits")):
-                hits.append(ol)
-
-            has_ol = np.zeros(len(query), dtype=bool)
-            has_ol[ol.get_column("query_hits")] = True
-            missing = ~has_ol
-
-            if np.any(missing):
-                missing_ranges = query[missing]
-                missing_idx = np.where(missing)[0]
-
-                before = self.precede(missing_ranges, select="all")
-                after = self.follow(missing_ranges, select="all")
-
-                if len(before.get_column("query_hits")):
-                    before_q = before.get_column("query_hits")
-                    before_s = before.get_column("self_hits")
-                    before_dist = self._start[before_s] - missing_ranges.get_end()[before_q]
-
-                    before.get_column("query_hits")[:] = missing_idx[before_q]
-                    hits.append(before)
-
-                if len(after.get_column("query_hits")):
-                    after_q = after.get_column("query_hits")
-                    after_s = after.get_column("self_hits")
-                    after_dist = missing_ranges._start[after_q] - self.get_end()[after_s]
-
-                    after.get_column("query_hits")[:] = missing_idx[after_q]
-
-                    # Only include after hits if:
-                    # 1. No before hits exist for this query, or
-                    # 2. After distance is less than or equal to before distance
-                    if len(before.get_column("query_hits")):
-                        # Find corresponding before distances for each after hit
-                        after_queries = after.get_column("query_hits")
-                        before_queries = before.get_column("query_hits")
-
-                        # For each after hit, find if there's a before hit
-                        # for the same query, then compare distances
-                        mask = np.zeros(len(after_queries), dtype=bool)
-                        for i, q in enumerate(after_queries):
-                            before_idx = np.where(before_queries == q)[0]
-                            if len(before_idx) == 0:
-                                mask[i] = True
-                            else:
-                                mask[i] = after_dist[i] <= before_dist[before_idx[0]]
-
-                        # Only keep after hits that pass the distance check
-                        after = BiocFrame(
-                            {
-                                "query_hits": after.get_column("query_hits")[mask],
-                                "self_hits": after.get_column("self_hits")[mask],
-                            }
-                        )
-
-                    if len(after.get_column("query_hits")):
-                        hits.append(after)
-
-            if not hits:
-                return BiocFrame(
-                    {"query_hits": np.array([], dtype=np.int32), "self_hits": np.array([], dtype=np.int32)}
-                )
-
-            # Combine all hits and sort by query hits
-            all_queries = np.concatenate([h.get_column("query_hits") for h in hits])
-            all_subjects = np.concatenate([h.get_column("self_hits") for h in hits])
-
-            sort_idx = np.argsort(all_queries, stable=True)
-            return BiocFrame({"query_hits": all_queries[sort_idx], "self_hits": all_subjects[sort_idx]})
+            return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
 
     ########################
     #### pandas interop ####

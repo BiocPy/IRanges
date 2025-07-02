@@ -24,6 +24,7 @@ pybind11_add_module(iranges
     src/coverage.cpp
     src/interranges.cpp
     src/nclsoverlaps.cpp
+    src/nclssearch.cpp
     src/init.cpp
 )
 
