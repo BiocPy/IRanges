@@ -216,8 +216,7 @@ class IRanges:
         output._start = output._sanitize_start(start)
 
         if in_place is True:
-            output._delete_ncls_index()
-            output._delete_nclssearch_index()
+            output.delete_nclist_index()
 
         return output
 
@@ -277,8 +276,7 @@ class IRanges:
         output._validate_width()
 
         if in_place is True:
-            output._delete_ncls_index()
-            output._delete_nclssearch_index()
+            output.delete_nclist_index()
 
         return output
 
@@ -557,8 +555,7 @@ class IRanges:
             for i, j in enumerate(idx):
                 self._names[j] = ""
 
-        self._delete_ncls_index()
-        self._delete_nclssearch_index()
+        self.delete_nclist_index()
 
     def get_row(self, index_or_name: Union[str, int]) -> "IRanges":
         """Access a row by index or row name.
@@ -2269,6 +2266,11 @@ class IRanges:
             Same type as caller, in this case a ``IRanges``.
         """
         return cls([], [])
+
+    def delete_nclist_index(self):
+        """Delete cached nclist indexes."""
+        self._delete_ncls_index()
+        self._delete_nclssearch_index()
 
     #############################
     #### combine ops wrapper ####

@@ -1,10 +1,12 @@
 # Changelog
 
-## Version 0.5.0 - 0.5.2
+## Version 0.5.0 - 0.5.3
 
 - Switch to [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) for overlap and intersection operations.
 - Update Github template and setup.py to support editable builds.
 - Improving performance of search operations - nearest, follow and precede.
+- Method to delete cached nclist index, automatically remove as needed when properties are modified (starts, widths).
+- Add a method to get exclusive end positions.
 
 ## Version 0.4.2
 
