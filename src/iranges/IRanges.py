@@ -214,6 +214,11 @@ class IRanges:
             raise ValueError("length of 'start' should be equal to 'length(<IRanges>)'")
 
         output._start = output._sanitize_start(start)
+
+        if in_place is True:
+            output._delete_ncls_index()
+            output._delete_nclssearch_index()
+
         return output
 
     @property
@@ -270,6 +275,11 @@ class IRanges:
 
         output._width = output._sanitize_width(width)
         output._validate_width()
+
+        if in_place is True:
+            output._delete_ncls_index()
+            output._delete_nclssearch_index()
+
         return output
 
     @property
@@ -304,6 +314,15 @@ class IRanges:
             for all ranges.
         """
         return self._start + self._width - 1
+
+    def get_end_exclusive(self) -> np.ndarray:
+        """Get end positions (exclusive).
+
+        Returns:
+            NumPy array of 32-bit signed integers containing the end position
+            for all ranges.
+        """
+        return self._start + self._width
 
     @property
     def end(self) -> np.ndarray:
@@ -537,6 +556,9 @@ class IRanges:
         elif self._names is not None:
             for i, j in enumerate(idx):
                 self._names[j] = ""
+
+        self._delete_ncls_index()
+        self._delete_nclssearch_index()
 
     def get_row(self, index_or_name: Union[str, int]) -> "IRanges":
         """Access a row by index or row name.
@@ -1606,7 +1628,7 @@ class IRanges:
         other._build_ncls_index()
 
         res = other._nclist.find_overlaps(
-            self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1, num_threads=num_threads
+            self.get_start().astype(np.int32), self.get_end_exclusive().astype(np.int32), num_threads=num_threads
         )
 
         if delete_index:
@@ -1630,7 +1652,9 @@ class IRanges:
 
     def _build_ncls_index(self):
         if not hasattr(self, "_nclist"):
-            self._nclist = libir.NCListHandler(self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1)
+            self._nclist = libir.NCListHandler(
+                self.get_start().astype(np.int32), self.get_end_exclusive().astype(np.int32)
+            )
 
     def _delete_ncls_index(self):
         if hasattr(self, "_nclist"):
@@ -1724,7 +1748,7 @@ class IRanges:
 
             _overlaps = self._nclist.find_overlaps(
                 query.get_start().astype(np.int32),
-                query.get_end().astype(np.int32) + 1,
+                query.get_end_exclusive().astype(np.int32),
                 min_overlap=min_overlap,
                 max_gap=max_gap,
                 query_type=query_type,
@@ -1746,7 +1770,7 @@ class IRanges:
 
             _overlaps = query._nclist.find_overlaps(
                 self.get_start().astype(np.int32),
-                self.get_end().astype(np.int32) + 1,
+                self.get_end_exclusive().astype(np.int32),
                 min_overlap=min_overlap,
                 max_gap=max_gap,
                 query_type=query_type,
@@ -1895,7 +1919,7 @@ class IRanges:
     def _build_nclssearch_index(self):
         if not hasattr(self, "_nclistsearch"):
             self._nclistsearch = libir.NCListSearchHandler(
-                self.get_start().astype(np.int32), self.get_end().astype(np.int32) + 1
+                self.get_start().astype(np.int32), self.get_end_exclusive().astype(np.int32)
             )
 
     def _delete_nclssearch_index(self):
@@ -1948,7 +1972,7 @@ class IRanges:
         self._build_nclssearch_index()
 
         _results = self._nclistsearch.precede(
-            query.get_end().astype(np.int32) + 1,
+            query.get_end_exclusive().astype(np.int32),
             select=select,
             num_threads=num_threads,
         )
@@ -2091,7 +2115,7 @@ class IRanges:
 
         _results = self._nclistsearch.nearest(
             query.get_start().astype(np.int32),
-            query.get_end().astype(np.int32) + 1,
+            query.get_end_exclusive().astype(np.int32),
             select=select,
             num_threads=num_threads,
         )
