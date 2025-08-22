@@ -224,5 +224,13 @@ def test_index():
 
     i2.set_start(i2.start + 90, in_place=True)
     mod = i1.intersect_ncls(i2, delete_index=False)
-
     assert len(orig) != len(mod)
+
+    i2 = IRanges(start=np.array([105, 205, 305], dtype=np.int32), width=np.array([20, 20, 20], dtype=np.int32))
+    i3 = i2.set_start(i2.start + 90)
+    i3.delete_nclist_index()
+    mod2 = i1.intersect_ncls(i3)
+    assert len(orig) != len(mod2)
+    assert len(mod) == len(mod2)
+    assert np.allclose(mod.get_start(), mod2.get_start())
+    assert np.allclose(mod.get_end(), mod2.get_end())
