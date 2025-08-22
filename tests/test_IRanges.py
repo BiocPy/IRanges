@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from biocframe import BiocFrame
 from biocutils import combine_sequences
+
 from iranges import IRanges
 
 __author__ = "Aaron Lun"
@@ -210,4 +211,18 @@ def test_IRanges_ends():
     starts = [1, 8, 14, 15, 19, 34, 40]
     widths = [12, 6, 6, 15, 6, 2, 7]
     x = IRanges(starts, widths)
+
     assert np.allclose(x.get_end(), [12, 13, 19, 29, 24, 35, 46])
+    assert np.allclose(x.get_end_exclusive(), [13, 14, 20, 30, 25, 36, 47])
+
+
+def test_index():
+    i1 = IRanges(start=np.array([100, 200, 300], dtype=np.int32), width=np.array([20, 20, 20], dtype=np.int32))
+    i2 = IRanges(start=np.array([105, 205, 305], dtype=np.int32), width=np.array([20, 20, 20], dtype=np.int32))
+
+    orig = i1.intersect_ncls(i2, delete_index=False)
+
+    i2.set_start(i2.start + 90, in_place=True)
+    mod = i1.intersect_ncls(i2, delete_index=False)
+
+    assert len(orig) != len(mod)
