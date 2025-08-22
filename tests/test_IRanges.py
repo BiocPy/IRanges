@@ -227,7 +227,7 @@ def test_index():
     assert len(orig) != len(mod)
 
     i2 = IRanges(start=np.array([105, 205, 305], dtype=np.int32), width=np.array([20, 20, 20], dtype=np.int32))
-    i2.intersect_ncls(i1, delete_index=False) # perform some operation to check if the index is cached
+    i2.intersect_ncls(i1, delete_index=False)  # perform some operation to check if the index is cached
     i3 = i2.set_start(i2.start + 90)
     mod2 = i1.intersect_ncls(i3)
     assert len(orig) != len(mod2)
