@@ -36,12 +36,12 @@ print(narrowed)
 [32m----> [39m[32m1[39m narrowed = [43mir[49m[43m.[49m[43mnarrow[49m[43m([49m[43mstart[49m[43m=[49m[32;43m4[39;49m[43m,[49m[43m [49m[43mwidth[49m[43m=[49m[32;43m2[39;49m[43m)[49m
 [32m      2[39m [38;5;28mprint[39m(narrowed)
 
-[36mFile [39m[32m~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/IRanges.py:1064[39m, in [36mIRanges.narrow[39m[34m(self, start, width, end, in_place)[39m
-[32m   1061[39m     [38;5;28;01mreturn[39;00m output
-[32m   1063[39m sew = SEWWrangler(output._width, start, end, width, translate_negative=[38;5;28;01mTrue[39;00m, allow_nonnarrowing=[38;5;28;01mFalse[39;00m)
-[32m-> [39m[32m1064[39m window_starts, window_widths = [43msew[49m[43m.[49m[43msolve[49m[43m([49m[43m)[49m
-[32m   1066[39m output._start = output._start + window_starts - [32m1[39m
-[32m   1067[39m output._width = window_widths
+[36mFile [39m[32m~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/IRanges.py:1083[39m, in [36mIRanges.narrow[39m[34m(self, start, width, end, in_place)[39m
+[32m   1080[39m     [38;5;28;01mreturn[39;00m output
+[32m   1082[39m sew = SEWWrangler(output._width, start, end, width, translate_negative=[38;5;28;01mTrue[39;00m, allow_nonnarrowing=[38;5;28;01mFalse[39;00m)
+[32m-> [39m[32m1083[39m window_starts, window_widths = [43msew[49m[43m.[49m[43msolve[49m[43m([49m[43m)[49m
+[32m   1085[39m output._start = output._start + window_starts - [32m1[39m
+[32m   1086[39m output._width = window_widths
 
 [36mFile [39m[32m~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/sew_handler.py:109[39m, in [36mSEWWrangler.solve[39m[34m(self)[39m
 [32m    107[39m     out_widths = [38;5;28mself[39m.width
