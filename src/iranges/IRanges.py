@@ -1970,7 +1970,7 @@ class IRanges:
 
         _results = self._nclistsearch.precede(
             query.get_start().astype(np.int32),
-            query.get_end_exclusive().astype(np.int32),            
+            query.get_end_exclusive().astype(np.int32),
             select=select,
             num_threads=num_threads,
         )

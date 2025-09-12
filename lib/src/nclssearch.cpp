@@ -118,7 +118,7 @@ pybind11::tuple perform_precede(
     py::array_t<Position> query_ends,
     const std::string& select,
     int num_threads = 1) {
-       
+
     auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
     auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
     Index n_queries = query_starts.request().shape[0];
