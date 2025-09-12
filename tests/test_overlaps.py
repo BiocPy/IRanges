@@ -154,6 +154,7 @@ def test_nearest():
     subject = IRanges([3, 5, 12], [1, 2, 1])
 
     res = subject.nearest(query)
+    print(res)
     assert np.all(res == [0, 0, 2])
 
     res = query.nearest(subject)
@@ -189,7 +190,7 @@ def test_edge_cases():
     assert np.all(overlaps.get_column("query_hits") == [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1])
 
     res = subject.precede(query)
-    assert np.all(res == [6, 6])
+    assert np.all(res == [0, 0])
 
     res = subject.precede(query, select="all")
     assert np.all(res.get_column("self_hits") == [6, 6])

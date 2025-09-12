@@ -1969,7 +1969,8 @@ class IRanges:
         self._build_nclssearch_index()
 
         _results = self._nclistsearch.precede(
-            query.get_end_exclusive().astype(np.int32),
+            query.get_start().astype(np.int32),
+            query.get_end_exclusive().astype(np.int32),            
             select=select,
             num_threads=num_threads,
         )
@@ -1978,12 +1979,9 @@ class IRanges:
             self._delete_nclssearch_index()
 
         if select == "first":
-            _results = np.asarray(_results, dtype=np.object_)
-            # replace -1 with None
-            _results[_results == -1] = None
-            return _results
+            return _results[0]
         else:
-            return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
+            return BiocFrame(data={"query_hits": _results[1], "self_hits": _results[0]})
 
     def follow(
         self,
@@ -2032,6 +2030,7 @@ class IRanges:
 
         _results = self._nclistsearch.follow(
             query.get_start().astype(np.int32),
+            query.get_end_exclusive().astype(np.int32),
             select=select,
             num_threads=num_threads,
         )
@@ -2040,12 +2039,9 @@ class IRanges:
             self._delete_nclssearch_index()
 
         if select == "last":
-            _results = np.asarray(_results, dtype=np.object_)
-            # replace -1 with None
-            _results[_results == -1] = None
-            return _results
+            return _results[0]
         else:
-            return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
+            return BiocFrame(data={"query_hits": _results[1], "self_hits": _results[0]})
 
     def distance(self, query: "IRanges") -> np.ndarray:
         """Calculate the pair-wise distance between ranges.
@@ -2120,13 +2116,12 @@ class IRanges:
         if delete_index:
             self._delete_nclssearch_index()
 
+        print("right after cpp", _results)
+
         if select == "arbitrary":
-            _results = np.asarray(_results, dtype=np.object_)
-            # replace -1 with None
-            _results[_results == -1] = None
-            return _results
+            return _results[0]
         else:
-            return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
+            return BiocFrame(data={"query_hits": _results[1], "self_hits": _results[0]})
 
     ########################
     #### pandas interop ####
