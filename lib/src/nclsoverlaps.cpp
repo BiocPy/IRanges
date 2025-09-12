@@ -183,38 +183,72 @@ pybind11::tuple perform_find_overlaps_groups(
         query_group_info[i] = {static_cast<const Index*>(q_req.ptr), static_cast<std::size_t>(q_req.shape[0])};
     }
 
+    // Building the indices in parallel with a simple worker pool.
+    std::vector<nclist::Nclist<Index, Position> > built(n_groups);
+    {
+        std::vector<std::thread> workers;
+        workers.reserve(num_threads);
+        std::mutex mut;
+        std::size_t group = 0;
+
+        for (int i = 0; i < num_threads; ++i) {
+            workers.emplace_back([&]() -> void {
+                while (1) {
+                    std::unique_lock lck(mut);
+                    if (group == n_groups) {
+                        break;
+                    }
+                    const auto curgroup = group;
+                    ++group;
+                    lck.unlock();
+
+                    const auto& s_info = self_group_info[curgroup];
+                    if (s_info.size != 0) {
+                        built[curgroup] = nclist::build<Index, Position>(s_info.size, s_info.ptr, s_starts_ptr, s_ends_ptr);
+                    }
+                }
+            });
+        }
+
+        for (auto& worker : workers) {
+            worker.join();
+        }
+    }
+
+    // Now running through all groups to find overlaps in parallel. 
     std::vector<std::vector<std::vector<Index> > > all_group_results(n_groups);
     std::vector<std::thread> workers;
     workers.reserve(num_threads);
+    std::vector<std::size_t> total_hits_per_thread(num_threads);
 
-    int num_jobs = n_groups / num_threads;
-    int num_remaining = n_groups % num_threads;
-    int jobs_so_far = 0;
-
-    for (int i = 0; i < num_threads; ++i) {
-        int current_jobs = num_jobs + (i < num_remaining);
-        if (current_jobs == 0) {
-            break;
+    for (std::size_t g = 0; g < n_groups; ++g) {
+        const auto& s_info = self_group_info[g];
+        const auto& q_info = query_group_info[g];
+        if (s_info.size == 0 || q_info.size == 0) {
+            continue;
         }
 
-        workers.emplace_back([&](int first, int length) -> void {
-            std::vector<Index> single_query_matches;
+        const std::size_t num_jobs = q_info.size / num_threads;
+        const std::size_t num_remaining = q_info.size % num_threads;
+        std::size_t jobs_so_far = 0;
 
-            for (Index j = first, last = first + length; j < last; ++j) {
+        const auto& nclist_obj = built[g];
+        auto& current_group_results = all_group_results[g];
+        current_group_results.resize(q_info.size);
 
-                const auto& s_info = self_group_info[j];
-                const auto& q_info = query_group_info[j];
+        workers.clear();
+        for (int i = 0; i < num_threads; ++i) {
+            const std::size_t current_jobs = num_jobs + (i < num_remaining);
+            if (current_jobs == 0) {
+                break;
+            }
 
-                if (s_info.size == 0 || q_info.size == 0) {
-                    continue;
-                }
+            workers.emplace_back([&](int thread, std::size_t first, std::size_t length) -> void {
+                std::size_t current_total_hits = 0;
 
-                auto nclist_obj = nclist::build<Index, Position>(s_info.size, s_info.ptr, s_starts_ptr, s_ends_ptr);
-                std::vector<std::vector<Index> > local_group_results;
-                local_group_results.resize(q_info.size);
-
-                for (std::size_t k = 0; k < q_info.size; ++k) {
-                    Index original_query_idx = q_info.ptr[k];
+                for (std::size_t k = first, last = first + length; k < last; ++k) {
+                    const Index original_query_idx = q_info.ptr[k];
+                    auto& single_query_matches = current_group_results[k];
 
                     if (query_type == "any") {
                         nclist::OverlapsAnyWorkspace<Index> ws_any;
@@ -248,35 +282,29 @@ pybind11::tuple perform_find_overlaps_groups(
                         nclist::overlaps_within(nclist_obj, q_starts_ptr[original_query_idx], q_ends_ptr[original_query_idx], params, ws_within, single_query_matches);
                     }
 
-                    if (!single_query_matches.empty()) {
+                    if (!single_query_matches.empty()) { // WTF is this
                          if (select == "last" && !quit_on_first) {
-                            local_group_results[k] = {single_query_matches.back()};
-                        } else {
-                            local_group_results[k] = single_query_matches;
-                        }
+                             single_query_matches.front() = single_query_matches.back();
+                             single_query_matches.resize(1);
+                         }
                     }
+
+                    current_total_hits += single_query_matches.size();
                 }
 
-                if (!local_group_results.empty()){
-                    all_group_results[j] = std::move(local_group_results);
-                }
-            }
-        }, jobs_so_far, current_jobs);
+                // Don't add directly to this value in the inner loop, to reduce the risk of false sharing. 
+                total_hits_per_thread[thread] += current_total_hits;
+            }, i, jobs_so_far, current_jobs);
 
-        jobs_so_far += current_jobs;
-    }
+            jobs_so_far += current_jobs;
+        }
 
-    for (auto& worker : workers) {
-        worker.join();
-    }
-
-    std::size_t total_hits = 0;
-    for(const auto& group_res : all_group_results) {
-        for (const auto& query_res : group_res) {
-            total_hits += query_res.size();
+        for (auto& worker : workers) {
+            worker.join();
         }
     }
 
+    const std::size_t total_hits = std::accumulate(total_hits_per_thread.begin(), total_hits_per_thread.end(), static_cast<std::size_t>(0));
     py::array_t<Index> query_hits(total_hits);
     py::array_t<Index> self_hits(total_hits);
     auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
