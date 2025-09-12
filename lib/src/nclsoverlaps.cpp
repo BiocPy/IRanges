@@ -215,7 +215,7 @@ pybind11::tuple perform_find_overlaps_groups(
         }
     }
 
-    // Now running through all groups to find overlaps in parallel. 
+    // Now running through all groups to find overlaps in parallel.
     std::vector<std::vector<std::vector<Index> > > all_group_results(n_groups);
     std::vector<std::thread> workers;
     workers.reserve(num_threads);
@@ -292,7 +292,7 @@ pybind11::tuple perform_find_overlaps_groups(
                     current_total_hits += single_query_matches.size();
                 }
 
-                // Don't add directly to this value in the inner loop, to reduce the risk of false sharing. 
+                // Don't add directly to this value in the inner loop, to reduce the risk of false sharing.
                 total_hits_per_thread[thread] += current_total_hits;
             }, i, jobs_so_far, current_jobs);
 
