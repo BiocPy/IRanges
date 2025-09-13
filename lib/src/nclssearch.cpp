@@ -30,24 +30,12 @@ struct NCListSearchHandler {
 
         self_starts.assign(starts_ptr, starts_ptr + n);
         self_ends.assign(ends_ptr, ends_ptr + n);
-
-        sorted_starts.resize(n);
-        sorted_ends.resize(n);
-        for (Index i = 0; i < n; ++i) {
-            sorted_starts[i] = {self_starts[i], i};
-            sorted_ends[i] = {self_ends[i], i};
-        }
-
-        std::sort(sorted_starts.begin(), sorted_starts.end());
-        std::sort(sorted_ends.begin(), sorted_ends.end());
     }
 
     nclist::Nclist<Index, Position> nclist_obj;
 
     std::vector<Position> self_starts;
     std::vector<Position> self_ends;
-    std::vector<std::pair<Position, Index>> sorted_starts;
-    std::vector<std::pair<Position, Index>> sorted_ends;
 };
 
 py::object perform_follow(
@@ -55,8 +43,17 @@ py::object perform_follow(
     py::array_t<Position> query_starts,
     const std::string& select,
     int num_threads = 1) {
+
     auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
     Index n_queries = query_starts.request().shape[0];
+
+    std::vector<std::pair<Position, Index>> sorted_ends;
+    sorted_ends.resize(self.self_ends.size());
+    for (Index i = 0; i < self.self_ends.size(); ++i) {
+        sorted_ends[i] = {self.self_ends[i], i};
+    }
+
+    std::sort(sorted_ends.begin(), sorted_ends.end());
 
     std::vector<Index> results(n_queries);
     std::vector<std::thread> workers;
@@ -77,9 +74,9 @@ py::object perform_follow(
                 Position q_start = q_starts_ptr[i];
 
                 // Binary search on sorted ends to find the last subject ending before the query starts
-                auto it = std::upper_bound(self.sorted_ends.begin(), self.sorted_ends.end(), std::make_pair(q_start, Index(-1)));
+                auto it = std::upper_bound(sorted_ends.begin(), sorted_ends.end(), std::make_pair(q_start, Index(-1)));
 
-                if (it == self.sorted_ends.begin()) {
+                if (it == sorted_ends.begin()) {
                     results[i] = -1; // No preceding range
                 } else {
                     --it;
@@ -113,8 +110,17 @@ py::object perform_precede(
     py::array_t<Position> query_ends,
     const std::string& select,
     int num_threads = 1) {
+
     auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
     Index n_queries = query_ends.request().shape[0];
+
+    std::vector<std::pair<Position, Index>> sorted_starts;
+    sorted_starts.resize(self.self_starts.size());
+    for (Index i = 0; i < self.self_starts.size(); ++i) {
+        sorted_starts[i] = {self.self_starts[i], i};
+    }
+
+    std::sort(sorted_starts.begin(), sorted_starts.end());
 
     std::vector<Index> results(n_queries);
     std::vector<std::thread> workers;
@@ -135,9 +141,9 @@ py::object perform_precede(
                 Position q_end = q_ends_ptr[i];
 
                 // Binary search on sorted starts to find the first subject starting after the query ends
-                auto it = std::lower_bound(self.sorted_starts.begin(), self.sorted_starts.end(), std::make_pair(q_end, Index(-1)));
+                auto it = std::lower_bound(sorted_starts.begin(), sorted_starts.end(), std::make_pair(q_end, Index(-1)));
 
-                if (it == self.sorted_starts.end()) {
+                if (it == sorted_starts.end()) {
                     results[i] = -1; // No following range
                 } else {
                     results[i] = it->second;
@@ -171,9 +177,15 @@ py::object perform_nearest(
     py::array_t<Position> query_ends,
     const std::string& select,
     int num_threads=1) {
+
     auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
     auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
     Index n_queries = query_starts.request().shape[0];
+
+    bool quit_on_first = (select == "arbitrary");
+    if (select != "all" && select != "arbitrary" && !quit_on_first) {
+        throw std::runtime_error("Invalid 'select' parameter. Must be 'all' or 'arbitrary'.");
+    }
 
     std::vector<std::vector<Index>> all_results(n_queries);
     std::vector<std::thread> workers;
@@ -190,56 +202,21 @@ py::object perform_nearest(
         }
 
         workers.emplace_back([&](int first, int length) -> void {
-            nclist::OverlapsAnyWorkspace<Index> ws_any;
-            nclist::OverlapsAnyParameters<Position> ol_params;
-            ol_params.min_overlap = 1;
+            std::vector<Index> nearest_matches;
 
             for (Index i = first, last = first + length; i < last; ++i) {
-                Position q_start = q_starts_ptr[i];
-                Position q_end = q_ends_ptr[i];
+                nclist::NearestWorkspace<Index> ws_nearest;
+                nclist::NearestParameters<Position> params;
+                params.quit_on_first = quit_on_first;
 
-                std::vector<std::pair<Position, Index>> candidates;
+                nclist::nearest(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_nearest, nearest_matches);
 
-                std::vector<Index> overlaps;
-                nclist::overlaps_any(self.nclist_obj, q_start, q_end, ol_params, ws_any, overlaps);
-                for (const auto& ol_idx : overlaps) {
-                    candidates.emplace_back(0, ol_idx);
-                }
-
-                auto it_b = std::upper_bound(self.sorted_ends.begin(), self.sorted_ends.end(), std::make_pair(q_start, std::numeric_limits<Index>::max()));
-                if (it_b != self.sorted_ends.begin()) {
-                    --it_b;
-                    candidates.emplace_back(q_start - it_b->first, it_b->second);
-                }
-
-                auto it_a = std::lower_bound(self.sorted_starts.begin(), self.sorted_starts.end(), std::make_pair(q_end, Index(-1)));
-                if (it_a != self.sorted_starts.end()) {
-                    candidates.emplace_back(it_a->first - q_end, it_a->second);
-                }
-
-                if (candidates.empty()) {
-                    continue;
-                }
-
-                Position min_dist = candidates[0].first;
-                for (size_t k = 1; k < candidates.size(); ++k) {
-                    if (candidates[k].first < min_dist) {
-                        min_dist = candidates[k].first;
+                if (!nearest_matches.empty()) {
+                    if (select == "first" && !quit_on_first) {
+                        all_results[i] = {nearest_matches.back()};
+                    } else {
+                        all_results[i] = nearest_matches;
                     }
-                }
-
-                std::vector<Index> best_hits;
-                for (const auto& cand : candidates) {
-                    if (cand.first == min_dist) {
-                        best_hits.push_back(cand.second);
-                    }
-                }
-
-                if (select == "arbitrary") {
-                    std::sort(best_hits.begin(), best_hits.end());
-                    all_results[i] = {best_hits[0]};
-                } else {
-                    all_results[i] = best_hits;
                 }
             }
         }, jobs_so_far, current_jobs);
