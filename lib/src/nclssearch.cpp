@@ -176,7 +176,8 @@ py::object perform_nearest(
     py::array_t<Position> query_starts,
     py::array_t<Position> query_ends,
     const std::string& select,
-    int num_threads=1) {
+    int num_threads=1,
+    bool adjacent_equals_overlap=false) {
 
     auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
     auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
@@ -208,11 +209,12 @@ py::object perform_nearest(
                 nclist::NearestWorkspace<Index> ws_nearest;
                 nclist::NearestParameters<Position> params;
                 params.quit_on_first = quit_on_first;
+                params.adjacent_equals_overlap = adjacent_equals_overlap;
 
                 nclist::nearest(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_nearest, nearest_matches);
 
                 if (!nearest_matches.empty()) {
-                    if (select == "first" && !quit_on_first) {
+                    if (select == "arbitraty" && !quit_on_first) {
                         all_results[i] = {nearest_matches.back()};
                     } else {
                         all_results[i] = nearest_matches;
@@ -281,5 +283,6 @@ void init_nclistsearch(pybind11::module &m){
             py::arg("query_ends"),
             py::arg("select") = "arbitrary",
             py::arg("num_threads") = 1,
+            py::arg("adjacent_equals_overlap") = false,
             "Find nearest ranges in both directions.");
 }
