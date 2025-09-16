@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.5.4
+
+- Switch to the nearest implementation from [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) (v0.3.0).
+- Improved worksharing across threads for `find_overlaps_groups` and `nearest_groups`. The idea is to ensure that all threads are occupied, even when the groups are of different sizes. This is done with some more fine-grained parallelization during both index building and overlap identification.
+
 ## Version 0.5.0 - 0.5.3
 
 - Switch to [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) for overlap and intersection operations.

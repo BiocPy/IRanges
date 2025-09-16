@@ -2071,6 +2071,7 @@ class IRanges:
         self,
         query: "IRanges",
         select: Literal["all", "arbitrary"] = "arbitrary",
+        adjacent_equals_overlap: bool = True,
         delete_index: bool = True,
         num_threads: int = 1,
     ) -> Union[np.ndarray, BiocFrame]:
@@ -2090,6 +2091,16 @@ class IRanges:
             num_threads:
                 Number of threads to use.
                 Defaults to 1.
+
+            adjacent_equals_overlap:
+                Whether to consider immediately-adjacent subject intervals to be
+                equally "nearest" to the query as an overlapping subject interval.
+
+                If true, both overlapping and immediately-adjacent subject intervals
+                (i.e., a gap of zero) will be reported in matches.
+
+                Otherwise, immediately-adjacent subjects will only be reported if
+                overlapping subjects are not present.
 
         Returns:
             If select="arbitrary":
@@ -2115,6 +2126,7 @@ class IRanges:
             query.get_end_exclusive().astype(np.int32),
             select=select,
             num_threads=num_threads,
+            adjacent_equals_overlap=adjacent_equals_overlap,
         )
 
         if delete_index:
