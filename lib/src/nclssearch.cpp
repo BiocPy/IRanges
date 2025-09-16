@@ -375,7 +375,7 @@ pybind11::tuple perform_nearest_groups(
                     if (!single_query_matches.empty()) {
                         if (select == "arbitrary" && !quit_on_first) {
                             single_query_matches.front() = single_query_matches.back();
-                            single_query_matches.resize(1);                        
+                            single_query_matches.resize(1);
                         }
                     }
 
