@@ -214,7 +214,7 @@ py::object perform_nearest(
                 nclist::nearest(self.nclist_obj, q_starts_ptr[i], q_ends_ptr[i], params, ws_nearest, nearest_matches);
 
                 if (!nearest_matches.empty()) {
-                    if (select == "arbitraty" && !quit_on_first) {
+                    if (select == "arbitrary" && !quit_on_first) {
                         all_results[i] = {nearest_matches.back()};
                     } else {
                         all_results[i] = nearest_matches;
@@ -259,6 +259,166 @@ py::object perform_nearest(
     }
 }
 
+struct NearestGroupInfo {
+    const Index* ptr;
+    std::size_t size;
+};
+
+pybind11::tuple perform_nearest_groups(
+    py::array_t<Position> self_starts,
+    py::array_t<Position> self_ends,
+    const std::vector<py::array_t<Index>>& self_groups,
+    py::array_t<Position> query_starts,
+    py::array_t<Position> query_ends,
+    const std::vector<py::array_t<Index>>& query_groups,
+    const std::string& select,
+    int num_threads=1,
+    bool adjacent_equals_overlap=false) {
+
+    auto s_starts_ptr = static_cast<const Position*>(self_starts.request().ptr);
+    auto s_ends_ptr = static_cast<const Position*>(self_ends.request().ptr);
+    auto q_starts_ptr = static_cast<const Position*>(query_starts.request().ptr);
+    auto q_ends_ptr = static_cast<const Position*>(query_ends.request().ptr);
+    std::size_t n_groups = self_groups.size();
+    if (n_groups != query_groups.size()) {
+        throw std::runtime_error("The number of self/subject groups must be equal to the number of query groups.");
+    }
+
+    bool quit_on_first = (select == "arbitrary");
+    if (select != "all" && select != "arbitrary" && !quit_on_first) {
+        throw std::runtime_error("Invalid 'select' parameter. Must be 'all' or 'arbitrary'.");
+    }
+
+    std::vector<NearestGroupInfo> self_group_info(n_groups);
+    std::vector<NearestGroupInfo> query_group_info(n_groups);
+    for (std::size_t i = 0; i < n_groups; ++i) {
+        auto s_req = self_groups[i].request();
+        self_group_info[i] = {static_cast<const Index*>(s_req.ptr), static_cast<std::size_t>(s_req.shape[0])};
+        auto q_req = query_groups[i].request();
+        query_group_info[i] = {static_cast<const Index*>(q_req.ptr), static_cast<std::size_t>(q_req.shape[0])};
+    }
+
+    // Building the indices in parallel with a simple worker pool.
+    std::vector<nclist::Nclist<Index, Position> > built(n_groups);
+    {
+        std::vector<std::thread> workers;
+        workers.reserve(num_threads);
+        std::mutex mut;
+        std::size_t group = 0;
+
+        for (int i = 0; i < num_threads; ++i) {
+            workers.emplace_back([&]() -> void {
+                while (1) {
+                    std::unique_lock lck(mut);
+                    if (group == n_groups) {
+                        break;
+                    }
+                    const auto curgroup = group;
+                    ++group;
+                    lck.unlock();
+
+                    const auto& s_info = self_group_info[curgroup];
+                    if (s_info.size != 0) {
+                        built[curgroup] = nclist::build<Index, Position>(s_info.size, s_info.ptr, s_starts_ptr, s_ends_ptr);
+                    }
+                }
+            });
+        }
+
+        for (auto& worker : workers) {
+            worker.join();
+        }
+    }
+
+    // Now running through all groups to find overlaps in parallel.
+    std::vector<std::vector<std::vector<Index> > > all_group_results(n_groups);
+    std::vector<std::thread> workers;
+    workers.reserve(num_threads);
+    std::vector<std::size_t> total_hits_per_thread(num_threads);
+
+    for (std::size_t g = 0; g < n_groups; ++g) {
+        const auto& s_info = self_group_info[g];
+        const auto& q_info = query_group_info[g];
+        if (s_info.size == 0 || q_info.size == 0) {
+            continue;
+        }
+
+        const std::size_t num_jobs = q_info.size / num_threads;
+        const std::size_t num_remaining = q_info.size % num_threads;
+        std::size_t jobs_so_far = 0;
+
+        const auto& nclist_obj = built[g];
+        auto& current_group_results = all_group_results[g];
+        current_group_results.resize(q_info.size);
+
+        workers.clear();
+        for (int i = 0; i < num_threads; ++i) {
+            const std::size_t current_jobs = num_jobs + (i < num_remaining);
+            if (current_jobs == 0) {
+                break;
+            }
+
+            workers.emplace_back([&](int thread, std::size_t first, std::size_t length) -> void {
+                std::size_t current_total_hits = 0;
+
+                for (std::size_t k = first, last = first + length; k < last; ++k) {
+                    const Index original_query_idx = q_info.ptr[k];
+                    auto& single_query_matches = current_group_results[k];
+
+                    nclist::NearestWorkspace<Index> ws_nearest;
+                    nclist::NearestParameters<Position> params;
+                    params.quit_on_first = quit_on_first;
+                    params.adjacent_equals_overlap = adjacent_equals_overlap;
+
+                    nclist::nearest(nclist_obj, q_starts_ptr[original_query_idx], q_ends_ptr[original_query_idx], params, ws_nearest, single_query_matches);
+
+                    if (!single_query_matches.empty()) {
+                        if (select == "arbitrary" && !quit_on_first) {
+                            single_query_matches.front() = single_query_matches.back();
+                            single_query_matches.resize(1);                        
+                        }
+                    }
+
+                    current_total_hits += single_query_matches.size();
+                }
+
+                // Don't add directly to this value in the inner loop, to reduce the risk of false sharing.
+                total_hits_per_thread[thread] += current_total_hits;
+            }, i, jobs_so_far, current_jobs);
+
+            jobs_so_far += current_jobs;
+        }
+
+        for (auto& worker : workers) {
+            worker.join();
+        }
+    }
+
+    const std::size_t total_hits = std::accumulate(total_hits_per_thread.begin(), total_hits_per_thread.end(), static_cast<std::size_t>(0));
+    py::array_t<Index> query_hits(total_hits);
+    py::array_t<Index> self_hits(total_hits);
+    auto q_res_ptr = static_cast<Index*>(query_hits.request().ptr);
+    auto s_res_ptr = static_cast<Index*>(self_hits.request().ptr);
+
+    std::size_t current_pos = 0;
+    for (std::size_t group_idx = 0, all_group_size=all_group_results.size(); group_idx < all_group_size; ++group_idx) {
+        const auto& group_res = all_group_results[group_idx];
+        const auto& q_info = query_group_info[group_idx];
+
+        for (std::size_t query_in_group_idx = 0, group_res_size = group_res.size(); query_in_group_idx < group_res_size; ++query_in_group_idx) {
+            const auto& relative_subject_matches = group_res[query_in_group_idx];
+            if (!relative_subject_matches.empty()) {
+                Index original_query_idx = q_info.ptr[query_in_group_idx];
+                std::copy(relative_subject_matches.begin(), relative_subject_matches.end(), s_res_ptr + current_pos);
+                std::fill(q_res_ptr + current_pos, q_res_ptr + current_pos + relative_subject_matches.size(), original_query_idx);
+                current_pos += relative_subject_matches.size();
+            }
+        }
+    }
+
+    return py::make_tuple(query_hits, self_hits);
+}
+
 
 void init_nclistsearch(pybind11::module &m){
 
@@ -285,4 +445,16 @@ void init_nclistsearch(pybind11::module &m){
             py::arg("num_threads") = 1,
             py::arg("adjacent_equals_overlap") = false,
             "Find nearest ranges in both directions.");
+
+    m.def("nearest_groups", &perform_nearest_groups,
+        py::arg("self_starts"),
+        py::arg("self_ends"),
+        py::arg("self_groups"),
+        py::arg("query_starts"),
+        py::arg("query_ends"),
+        py::arg("query_groups"),
+        py::arg("select") = "arbitrary",
+        py::arg("num_threads") = 1,
+        py::arg("adjacent_equals_overlap") = false,
+        "Find nearest ranges in both directions, respecting group boundaries.");
 }
