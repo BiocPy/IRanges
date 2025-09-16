@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Contributors" href="authors.html" />
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
-        <title>Changelog - IRanges 0.5.3 documentation</title>
+        <title>Changelog - IRanges 0.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">IRanges 0.5.3 documentation</div></a>
+      <a href="index.html"><div class="brand">IRanges 0.5.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">IRanges 0.5.3 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.5.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -256,6 +256,13 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
+<section id="version-0-5-4">
+<h2>Version 0.5.4<a class="headerlink" href="#version-0-5-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Switch to the nearest implementation from <a class="reference external" href="https://github.com/LTLA/nclist-cpp">LTLA/nclist-cpp</a> (v0.3.0).</p></li>
+<li><p>Improved worksharing across threads for <code class="docutils literal notranslate"><span class="pre">find_overlaps_groups</span></code> and <code class="docutils literal notranslate"><span class="pre">nearest_groups</span></code>. The idea is to ensure that all threads are occupied, even when the groups are of different sizes. This is done with some more fine-grained parallelization during both index building and overlap identification.</p></li>
+</ul>
+</section>
 <section id="version-0-5-0-0-5-3">
 <h2>Version 0.5.0 - 0.5.3<a class="headerlink" href="#version-0-5-0-0-5-3" title="Link to this heading">¶</a></h2>
 <ul class="simple">
@@ -380,6 +387,7 @@ For more details, see <a class="reference external" href="https://numpy.org/devd
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#version-0-5-4">Version 0.5.4</a></li>
 <li><a class="reference internal" href="#version-0-5-0-0-5-3">Version 0.5.0 - 0.5.3</a></li>
 <li><a class="reference internal" href="#version-0-4-2">Version 0.4.2</a></li>
 <li><a class="reference internal" href="#version-0-4-0-0-4-1">Version 0.4.0 - 0.4.1</a></li>
@@ -400,7 +408,7 @@ For more details, see <a class="reference external" href="https://numpy.org/devd
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=2a2fe768"></script>
+</div><script src="_static/documentation_options.js?v=e1a677a5"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
