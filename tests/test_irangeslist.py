@@ -34,6 +34,7 @@ def test_split_iranges(irange_data):
     clist = splitAsCompressedList(range_list.unlist_data, groups_or_partitions=[0, 1, 2, 0, 0, 1, 1])
 
     assert isinstance(clist, CompressedIRangesList)
+    assert len(clist) == 3
 
     val = clist.__repr__()
     assert isinstance(val, str)

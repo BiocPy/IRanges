@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.6.0
+
+- Implement `CompressedIRangesList` extending the base compressed-lists class
+
 ## Version 0.5.4
 
 - Switch to the nearest implementation from [LTLA/nclist-cpp](https://github.com/LTLA/nclist-cpp) (v0.3.0).
