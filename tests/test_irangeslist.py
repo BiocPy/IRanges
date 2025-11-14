@@ -1,7 +1,6 @@
-import biocutils as ut
 import numpy as np
 import pytest
-from compressed_lists import Partitioning, splitAsCompressedList
+from compressed_lists import splitAsCompressedList
 
 from iranges import CompressedIRangesList, IRanges
 
