@@ -17,3 +17,4 @@ finally:
 
 from .IRanges import IRanges
 from .utils import normalize_array
+from .irangeslist import CompressedIRangesList
