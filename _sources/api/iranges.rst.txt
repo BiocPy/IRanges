@@ -12,6 +12,14 @@ iranges.IRanges module
    :show-inheritance:
    :undoc-members:
 
+iranges.irangeslist module
+--------------------------
+
+.. automodule:: iranges.irangeslist
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 iranges.lib\_iranges module
 ---------------------------
 

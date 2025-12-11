@@ -1,12 +1,12 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#"><link rel="search" title="Search" href="search.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 --><title>Index - IRanges 0.5.4 documentation</title>
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 --><title>Index - IRanges 0.6.0 documentation</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     
@@ -21,14 +21,14 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
       }
     }
@@ -143,14 +143,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -160,17 +156,15 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">IRanges 0.5.4 documentation</div></a>
+      <a href="index.html"><div class="brand">IRanges 0.6.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -178,8 +172,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -188,7 +181,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">IRanges 0.5.4 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.6.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -204,7 +197,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html#overlap-operations">Overlap operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html#transforming-ranges">Transforming ranges</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html#set-operations">Set operations</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="api/modules.html">Module Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Module Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/modules.html">Module Reference</a><input aria-label="Toggle navigation of Module Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/iranges.html">iranges package</a></li>
 </ul>
 </li>
@@ -232,8 +225,7 @@
         </a>
         <div class="content-icon-container">
           <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -241,8 +233,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -268,6 +259,8 @@
         <ul>
           <li><a href="api/iranges.html#iranges.IRanges.IRangesIter.__init__">(iranges.IRanges.IRangesIter method)</a>
 </li>
+          <li><a href="api/iranges.html#iranges.irangeslist.CompressedIRangesList.__init__">(iranges.irangeslist.CompressedIRangesList method)</a>
+</li>
           <li><a href="api/iranges.html#iranges.lib_iranges.NCListHandler.__init__">(iranges.lib_iranges.NCListHandler method)</a>
 </li>
           <li><a href="api/iranges.html#iranges.lib_iranges.NCListSearchHandler.__init__">(iranges.lib_iranges.NCListSearchHandler method)</a>
@@ -288,7 +281,11 @@
         <li><a href="api/iranges.html#iranges.IRanges.IRangesIter.__next__">__next__() (iranges.IRanges.IRangesIter method)</a>
 </li>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.__repr__">__repr__() (iranges.IRanges.IRanges method)</a>
+
+        <ul>
+          <li><a href="api/iranges.html#iranges.irangeslist.CompressedIRangesList.__repr__">(iranges.irangeslist.CompressedIRangesList method)</a>
 </li>
+        </ul></li>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.__setitem__">__setitem__() (iranges.IRanges.IRanges method)</a>
 </li>
     </ul></td>
@@ -304,6 +301,8 @@
         <li><a href="api/iranges.html#iranges.utils.clip_ranges">clip_ranges() (in module iranges.utils)</a>
 </li>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.combine">combine() (iranges.IRanges.IRanges method)</a>
+</li>
+        <li><a href="api/iranges.html#iranges.irangeslist.CompressedIRangesList">CompressedIRangesList (class in iranges.irangeslist)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -353,6 +352,8 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.end">end (iranges.IRanges.IRanges property)</a>
 </li>
+        <li><a href="api/iranges.html#iranges.irangeslist.CompressedIRangesList.extract_range">extract_range() (iranges.irangeslist.CompressedIRangesList method)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -371,16 +372,18 @@
         </ul></li>
         <li><a href="api/iranges.html#iranges.lib_iranges.find_overlaps_groups">find_overlaps_groups() (in module iranges.lib_iranges)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.flank">flank() (iranges.IRanges.IRanges method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.follow">follow() (iranges.IRanges.IRanges method)</a>
 
         <ul>
           <li><a href="api/iranges.html#iranges.lib_iranges.NCListSearchHandler.follow">(iranges.lib_iranges.NCListSearchHandler method)</a>
 </li>
         </ul></li>
+        <li><a href="api/iranges.html#iranges.irangeslist.CompressedIRangesList.from_list">from_list() (iranges.irangeslist.CompressedIRangesList class method)</a>
+</li>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.from_pandas">from_pandas() (iranges.IRanges.IRanges class method)</a>
 </li>
         <li><a href="api/iranges.html#iranges.IRanges.IRanges.from_polars">from_polars() (iranges.IRanges.IRanges class method)</a>
@@ -455,6 +458,13 @@
           <li><a href="api/iranges.html#module-iranges.IRanges">module</a>
 </li>
         </ul></li>
+        <li>
+    iranges.irangeslist
+
+        <ul>
+          <li><a href="api/iranges.html#module-iranges.irangeslist">module</a>
+</li>
+        </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li>
@@ -501,6 +511,8 @@
           <li><a href="api/iranges.html#module-iranges">iranges</a>
 </li>
           <li><a href="api/iranges.html#module-iranges.IRanges">iranges.IRanges</a>
+</li>
+          <li><a href="api/iranges.html#module-iranges.irangeslist">iranges.irangeslist</a>
 </li>
           <li><a href="api/iranges.html#module-iranges.lib_iranges">iranges.lib_iranges</a>
 </li>
@@ -709,7 +721,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=e1a677a5"></script>
+</div><script src="_static/documentation_options.js?v=8fa8b3e9"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

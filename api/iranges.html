@@ -1,14 +1,14 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="../">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Contributing" href="../contributing.html" /><link rel="prev" title="iranges" href="modules.html" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Contributing" href="../contributing.html"><link rel="prev" title="iranges" href="modules.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.07.19 -->
-        <title>iranges package - IRanges 0.5.4 documentation</title>
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>iranges package - IRanges 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=25af2a20" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=580074bf" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
@@ -23,14 +23,14 @@
   }
   @media not print {
     body[data-theme="dark"] {
-      --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
-        --color-code-background: #2b2b2b;
-  --color-code-foreground: #f8f8f2;
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
   
       }
     }
@@ -145,14 +145,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -162,17 +158,15 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">IRanges 0.5.4 documentation</div></a>
+      <a href="../index.html"><div class="brand">IRanges 0.6.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -180,8 +174,7 @@
         </button>
       </div>
       <label class="toc-overlay-icon toc-header-icon" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -190,7 +183,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
-  <span class="sidebar-brand-text">IRanges 0.5.4 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.6.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -206,7 +199,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html#overlap-operations">Overlap operations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html#transforming-ranges">Transforming ranges</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorial.html#set-operations">Set operations</a></li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">Module Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Module Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">Module Reference</a><input aria-label="Toggle navigation of Module Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">iranges package</a></li>
 </ul>
 </li>
@@ -240,8 +233,7 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
@@ -249,8 +241,7 @@
             </button>
           </div>
           <label class="toc-overlay-icon toc-content-icon" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
@@ -702,7 +693,7 @@ Each row represents a query-self pair where self follows query.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.from_pandas">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.from_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.from_pandas" title="Link to this definition">¶</a></dt>
-<dd><p>Create an <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object from a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
+<dd><p>Create an <code class="docutils literal notranslate"><span class="pre">IRanges</span></code> object from a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>input</strong> – Input data must contain columns ‘start’ and ‘width’.</p>
@@ -1623,10 +1614,10 @@ modified and a reference to it is returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="iranges.IRanges.IRanges.to_pandas">
 <span class="sig-name descname"><span class="pre">to_pandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRanges.to_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRanges.to_pandas" title="Link to this definition">¶</a></dt>
-<dd><p>Convert this IRanges object to a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
+<dd><p>Convert this IRanges object to a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
+<dd class="field-odd"><p>A <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1706,6 +1697,92 @@ ranges.</p>
 <dt class="sig sig-object py" id="iranges.IRanges.IRangesIter.__next__">
 <span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/IRanges.html#IRangesIter.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.IRanges.IRangesIter.__next__" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-iranges.irangeslist">
+<span id="iranges-irangeslist-module"></span><h2>iranges.irangeslist module<a class="headerlink" href="#module-iranges.irangeslist" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="iranges.irangeslist.CompressedIRangesList">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">iranges.irangeslist.</span></span><span class="sig-name descname"><span class="pre">CompressedIRangesList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unlist_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/irangeslist.html#CompressedIRangesList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.irangeslist.CompressedIRangesList" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">CompressedList</span></code></p>
+<p>CompressedList for IRanges.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.irangeslist.CompressedIRangesList.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unlist_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/irangeslist.html#CompressedIRangesList.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.irangeslist.CompressedIRangesList.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize a CompressedIRangesList.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unlist_data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span>) – IRanges object.</p></li>
+<li><p><strong>partitioning</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Partitioning</span></code></span>) – Partitioning object defining element boundaries.</p></li>
+<li><p><strong>element_metadata</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span>) – Optional metadata for elements.</p></li>
+<li><p><strong>metadata</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span>) – Optional general metadata.</p></li>
+<li><p><strong>kwargs</strong> – Additional arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.irangeslist.CompressedIRangesList.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/irangeslist.html#CompressedIRangesList.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.irangeslist.CompressedIRangesList.__repr__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string representation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.irangeslist.CompressedIRangesList.extract_range">
+<span class="sig-name descname"><span class="pre">extract_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/irangeslist.html#CompressedIRangesList.extract_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.irangeslist.CompressedIRangesList.extract_range" title="Link to this definition">¶</a></dt>
+<dd><p>Extract a range from <cite>unlist_data</cite>.</p>
+<p>This method must be implemented by subclasses to handle
+type-specific extraction from <cite>unlist_data</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Start index (inclusive).</p></li>
+<li><p><strong>end</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – End index (exclusive).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Extracted element.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="iranges.irangeslist.CompressedIRangesList.from_list">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/iranges/irangeslist.html#CompressedIRangesList.from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#iranges.irangeslist.CompressedIRangesList.from_list" title="Link to this definition">¶</a></dt>
+<dd><p>Create a <cite>CompressedIRangesList</cite> from a regular list.</p>
+<p>This concatenates the list of <cite>IRanges</cite> objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lst</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference internal" href="#iranges.IRanges.IRanges" title="iranges.IRanges.IRanges"><code class="xref py py-class docutils literal notranslate"><span class="pre">IRanges</span></code></a>]</span>) – <p>List of <cite>IRanges</cite> objects.</p>
+<p>Must have the same number and names of columns.</p>
+</p></li>
+<li><p><strong>names</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Union" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://biocpy.github.io/BiocUtils/api/biocutils.html#biocutils.Names.Names" title="(in biocutils v0.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Names</span></code></a>, <a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Sequence" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3.12/library/constants.html#None" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – Optional names for list elements.</p></li>
+<li><p><strong>metadata</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3.12/library/typing.html#typing.Optional" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.12/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span>) – Optional metadata.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#iranges.irangeslist.CompressedIRangesList" title="iranges.irangeslist.CompressedIRangesList"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompressedIRangesList</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A new <cite>CompressedList</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -2103,6 +2180,16 @@ Defaults to None for no upper bound.</p></li>
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-iranges.irangeslist">iranges.irangeslist module</a><ul>
+<li><a class="reference internal" href="#iranges.irangeslist.CompressedIRangesList"><code class="docutils literal notranslate"><span class="pre">CompressedIRangesList</span></code></a><ul>
+<li><a class="reference internal" href="#iranges.irangeslist.CompressedIRangesList.__init__"><code class="docutils literal notranslate"><span class="pre">CompressedIRangesList.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.irangeslist.CompressedIRangesList.__repr__"><code class="docutils literal notranslate"><span class="pre">CompressedIRangesList.__repr__()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.irangeslist.CompressedIRangesList.extract_range"><code class="docutils literal notranslate"><span class="pre">CompressedIRangesList.extract_range()</span></code></a></li>
+<li><a class="reference internal" href="#iranges.irangeslist.CompressedIRangesList.from_list"><code class="docutils literal notranslate"><span class="pre">CompressedIRangesList.from_list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-iranges.lib_iranges">iranges.lib_iranges module</a><ul>
 <li><a class="reference internal" href="#iranges.lib_iranges.NCListHandler"><code class="docutils literal notranslate"><span class="pre">NCListHandler</span></code></a><ul>
 <li><a class="reference internal" href="#iranges.lib_iranges.NCListHandler.__init__"><code class="docutils literal notranslate"><span class="pre">NCListHandler.__init__()</span></code></a></li>
@@ -2156,7 +2243,7 @@ Defaults to None for no upper bound.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e1a677a5"></script>
+</div><script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
