@@ -6,7 +6,7 @@ import biocutils as ut
 from compressed_lists import CompressedList, Partitioning
 from compressed_lists.split_generic import _generic_register_helper, splitAsCompressedList
 
-from .iranges import IRanges, _combine_IRanges
+from .base import IRanges, _combine_IRanges
 
 __author__ = "Jayaram Kancherla"
 __copyright__ = "Jayaram Kancherla"

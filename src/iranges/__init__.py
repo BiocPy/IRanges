@@ -15,6 +15,6 @@ except PackageNotFoundError:  # pragma: no cover
 finally:
     del version, PackageNotFoundError
 
-from .iranges import IRanges
+from .base import IRanges
 from .utils import normalize_array
 from .irangeslist import CompressedIRangesList

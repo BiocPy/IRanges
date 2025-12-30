@@ -2101,7 +2101,7 @@ class IRanges(ut.BiocObject):
             output = pd.concat([output, self._mcols.to_pandas()], axis=1)
 
         if self._names is not None:
-            output.index = self._names
+            output.index = list(self._names)
 
         return output
 
@@ -2165,7 +2165,7 @@ class IRanges(ut.BiocObject):
             output = pl.concat([output, self._mcols.to_polars()], how="horizontal")
 
         if self._names is not None:
-            output = output.with_columns(names=self._names)
+            output = output.with_columns(names=list(self._names))
 
         return output
 
