@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from copy import deepcopy
-from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 from warnings import warn
 
 import biocutils as ut
@@ -24,7 +26,7 @@ class IRangesIter:
             Object to iterate.
     """
 
-    def __init__(self, obj: "IRanges") -> None:
+    def __init__(self, obj: IRanges) -> None:
         """Initialize the iterator.
 
         Args:
@@ -48,7 +50,7 @@ class IRangesIter:
         raise StopIteration
 
 
-class IRanges:
+class IRanges(ut.BiocObject):
     """A collection of integer ranges, equivalent to the ``IRanges`` class from the
     `Bioconductor package <https://bioconductor.org/packages/IRanges>`_ of the same name.
     It enables efficient storage and manipulation of genomic intervals defined by start
@@ -61,12 +63,12 @@ class IRanges:
 
     def __init__(
         self,
-        start: Sequence[int] = [],
-        width: Sequence[int] = [],
-        names: Optional[Sequence[str]] = None,
+        start: Union[np.ndarray, Sequence[int]] = [],
+        width: Union[np.ndarray, Sequence[int]] = [],
+        names: Optional[Union[Sequence[str], ut.Names]] = None,
         mcols: Optional[BiocFrame] = None,
-        metadata: Optional[dict] = None,
-        validate: bool = True,
+        metadata: Optional[Union[Dict[str, Any], ut.NamedList]] = None,
+        _validate: bool = True,
     ):
         """
         Args:
@@ -95,21 +97,21 @@ class IRanges:
             metadata:
                 Additional metadata. If None, defaults to an empty dictionary.
 
-            validate:
+            _validate:
                 Whether to validate the arguments, internal use only.
         """
+
+        super().__init__(metadata=metadata, _validate=_validate)
 
         self._start = self._sanitize_start(start)
         self._width = self._sanitize_width(width)
         self._names = self._sanitize_names(names)
         self._mcols = self._sanitize_mcols(mcols)
-        self._metadata = self._sanitize_metadata(metadata)
 
-        if validate:
+        if _validate:
             self._validate_width()
             self._validate_names()
             self._validate_mcols()
-            self._validate_metadata()
 
     def _sanitize_start(self, start):
         arr = np.array(start, dtype=np.int32)
@@ -141,7 +143,8 @@ class IRanges:
     def _sanitize_names(self, names):
         if names is None:
             return None
-        elif not isinstance(names, list):
+
+        if not isinstance(names, ut.Names):
             names = Names(names)
 
         return names
@@ -150,8 +153,8 @@ class IRanges:
         if self._names is None:
             return None
 
-        if not ut.is_list_of_type(self._names, str):
-            raise ValueError("'names' should be a list of strings")
+        if not isinstance(self._names, ut.Names):
+            raise ValueError("'names' should be a list of strings.")
 
         if len(self._names) != len(self._start):
             raise ValueError("'names' must have the same length as 'start'")
@@ -169,18 +172,6 @@ class IRanges:
         if self._mcols.shape[0] != len(self._start):
             raise ValueError("'mcols' must have the same number of rows as the length of 'start'")
 
-    def _sanitize_metadata(self, metadata):
-        if metadata is None:
-            return {}
-        elif not isinstance(metadata, dict):
-            metadata = dict(metadata)
-
-        return metadata
-
-    def _validate_metadata(self):
-        if not isinstance(self._metadata, dict):
-            raise TypeError("'metadata' must be a dictionary")
-
     ########################
     #### Getter/setters ####
     ########################
@@ -194,7 +185,7 @@ class IRanges:
         """
         return self._start
 
-    def set_start(self, start: Sequence[int], in_place: bool = False) -> "IRanges":
+    def set_start(self, start: Union[np.ndarray, Sequence[int]], in_place: bool = False) -> IRanges:
         """Modify start positions (in-place operation).
 
         Args:
@@ -231,7 +222,7 @@ class IRanges:
         return self.get_start()
 
     @start.setter
-    def start(self, start: Sequence[int]):
+    def start(self, start: Union[np.ndarray, Sequence[int]]):
         """Modify start positions (in-place operation).
 
         Args:
@@ -254,7 +245,7 @@ class IRanges:
         """
         return self._width
 
-    def set_width(self, width: Sequence[int], in_place: bool = False) -> "IRanges":
+    def set_width(self, width: Union[np.ndarray, Sequence[int]], in_place: bool = False) -> IRanges:
         """
         Args:
             width:
@@ -291,7 +282,7 @@ class IRanges:
         return self.get_width()
 
     @width.setter
-    def width(self, width: Sequence[int]):
+    def width(self, width: Union[np.ndarray, Sequence[int]]):
         """Set or modify width of each interval (in-place operation).
 
         Args:
@@ -332,7 +323,7 @@ class IRanges:
         """
         return self.get_end()
 
-    def get_names(self) -> Optional[Names]:
+    def get_names(self) -> Optional[ut.Names]:
         """Get range names.
 
         Returns:
@@ -341,7 +332,7 @@ class IRanges:
         """
         return self._names
 
-    def set_names(self, names: Optional[Sequence[str]], in_place: bool = False) -> "IRanges":
+    def set_names(self, names: Optional[Union[ut.Names, Sequence[str]]], in_place: bool = False) -> IRanges:
         """
         Args:
             names:
@@ -361,7 +352,7 @@ class IRanges:
         return output
 
     @property
-    def names(self) -> Optional[Names]:
+    def names(self) -> Optional[ut.Names]:
         """Get names.
 
         Returns:
@@ -397,7 +388,7 @@ class IRanges:
         """
         return self._mcols
 
-    def set_mcols(self, mcols: Optional[BiocFrame], in_place: bool = False) -> "IRanges":
+    def set_mcols(self, mcols: Optional[BiocFrame], in_place: bool = False) -> IRanges:
         """Set new metadata about ranges.
 
         Args:
@@ -442,57 +433,6 @@ class IRanges:
         )
         self.set_mcols(mcols, in_place=True)
 
-    def get_metadata(self) -> dict:
-        """Get additional metadata.
-
-        Returns:
-            Dictionary containing additional metadata.
-        """
-        return self._metadata
-
-    def set_metadata(self, metadata: Optional[dict], in_place: bool = False) -> "IRanges":
-        """Set or replace metadata.
-
-        Args:
-            metadata:
-                Additional metadata.
-
-            in_place:
-                Whether to modify the object in place.
-
-        Returns:
-            If ``in_place = False``, a new ``IRanges`` is returned with the
-            modified metadata. Otherwise, the current object is directly
-            modified and a reference to it is returned.
-        """
-        output = self._define_output(in_place)
-        output._metadata = output._sanitize_metadata(metadata)
-        output._validate_metadata()
-        return output
-
-    @property
-    def metadata(self) -> dict:
-        """Get additional metadata.
-
-        Returns:
-            Dictionary containing additional metadata.
-        """
-        return self.get_metadata()
-
-    @metadata.setter
-    def metadata(self, metadata: Optional[dict]):
-        """Set or replace metadata (in-place operation).
-
-        Args:
-            metadata:
-                Additional metadata.
-        """
-        warn(
-            "Setting property 'metadata'is an in-place operation, use 'set_metadata' instead",
-            UserWarning,
-        )
-        self.set_metadata(metadata, in_place=True)
-
     #########################
     #### Getitem/setitem ####
     #########################
@@ -504,7 +444,7 @@ class IRanges:
         """
         return len(self._start)
 
-    def __getitem__(self, subset: Union[Sequence, int, str, bool, slice, range]) -> "IRanges":
+    def __getitem__(self, subset: Union[Sequence, int, str, bool, slice, range]) -> IRanges:
         """Subset the IRanges.
 
         Args:
@@ -525,7 +465,7 @@ class IRanges:
             metadata=self._metadata,
         )
 
-    def __setitem__(self, args: Union[Sequence, int, str, bool, slice, range], value: "IRanges"):
+    def __setitem__(self, args: Union[Sequence, int, str, bool, slice, range], value: IRanges):
         """Add or update positions (in-place operation).
 
         Args:
@@ -546,18 +486,23 @@ class IRanges:
         self._width[idx] = value._width
         self._mcols[idx, :] = value._mcols
 
-        if value._names is not None:
-            if self._names is None:
-                self._names = [""] * len(self)
-            for i, j in enumerate(idx):
-                self._names[j] = value._names[i]
-        elif self._names is not None:
-            for i, j in enumerate(idx):
-                self._names[j] = ""
+        if self._names is None and value._names is None:
+            self._names = None
+        else:
+            _names = list(self._names) if self._names is not None else None
+            if value._names is not None:
+                if self._names is None:
+                    _names = [""] * len(self)
+                for i, j in enumerate(idx):
+                    _names[j] = value._names[i]
+            elif self._names is not None:
+                for i, j in enumerate(idx):
+                    _names[j] = ""
+            self._names = ut.Names(_names)
 
         self.delete_nclist_index()
 
-    def get_row(self, index_or_name: Union[str, int]) -> "IRanges":
+    def get_row(self, index_or_name: Union[str, int]) -> IRanges:
         """Access a row by index or row name.
 
         Args:
@@ -694,13 +639,7 @@ class IRanges:
     #### Copying ####
     #################
 
-    def _define_output(self, in_place):
-        if in_place:
-            return self
-        else:
-            return self.__copy__()
-
-    def __copy__(self) -> "IRanges":
+    def __copy__(self) -> IRanges:
         """Shallow copy of the object.
 
         Returns:
@@ -712,10 +651,10 @@ class IRanges:
             names=self._names,
             mcols=self._mcols,
             metadata=self._metadata,
-            validate=False,
+            _validate=False,
         )
 
-    def __deepcopy__(self, memo) -> "IRanges":
+    def __deepcopy__(self, memo) -> IRanges:
         """Deep copy of the object.
 
         Args:
@@ -730,7 +669,7 @@ class IRanges:
             names=deepcopy(self._names, memo),
             mcols=deepcopy(self._mcols, memo),
             metadata=deepcopy(self._metadata, memo),
-            validate=False,
+            _validate=False,
         )
 
     #############################
@@ -811,7 +750,7 @@ class IRanges:
 
         return libir.coverage(self._start, self._width, shift, width, weight, circle_length, method)
 
-    def range(self) -> "IRanges":
+    def range(self) -> IRanges:
         """Concatenate and compute the mix and max across all ranges.
 
         Returns:
@@ -829,7 +768,7 @@ class IRanges:
         with_reverse_map: bool = False,
         drop_empty_ranges: bool = False,
         min_gap_width: int = 1,
-    ) -> "IRanges":
+    ) -> IRanges:
         """Reduce orders the ranges, then merges overlapping or adjacent ranges.
 
         Args:
@@ -882,7 +821,7 @@ class IRanges:
 
         return np.asarray(order_buf)
 
-    def sort(self, decreasing: bool = False, in_place: bool = False) -> "IRanges":
+    def sort(self, decreasing: bool = False, in_place: bool = False) -> IRanges:
         """Sort the ranges.
 
         Args:
@@ -903,7 +842,7 @@ class IRanges:
         output = self._define_output(in_place)
         return output[order]
 
-    def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> "IRanges":
+    def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> IRanges:
         """Gaps returns an ``IRanges`` object representing the set of intervals that remain after the ranges are
         removed specified by the start and end arguments.
 
@@ -923,7 +862,7 @@ class IRanges:
 
     # follows the same logic as in https://stackoverflow.com/questions/55480499/split-set-of-intervals-into-minimal-set-of-disjoint-intervals
     # otherwise too much magic happening here - https://github.com/Bioconductor/IRanges/blob/devel/R/inter-range-methods.R#L389
-    def disjoin(self, with_reverse_map: bool = False) -> "IRanges":
+    def disjoin(self, with_reverse_map: bool = False) -> IRanges:
         """Calculate disjoint ranges.
 
         Args:
@@ -1011,7 +950,7 @@ class IRanges:
     #### intra-range methods ####
     #############################
 
-    def shift(self, shift: Union[int, List[int], np.ndarray], in_place: bool = False) -> "IRanges":
+    def shift(self, shift: Union[int, List[int], np.ndarray], in_place: bool = False) -> IRanges:
         """Shift ranges by specified amount.
 
         Args:
@@ -1047,7 +986,7 @@ class IRanges:
         width: Optional[Union[int, List[int], np.ndarray]] = None,
         end: Optional[Union[int, List[int], np.ndarray]] = None,
         in_place: bool = False,
-    ) -> "IRanges":
+    ) -> IRanges:
         """Narrow ranges.
 
         Important: These arguments are relative shift in positions for each range.
@@ -1091,7 +1030,7 @@ class IRanges:
         width: Union[int, List[int], np.ndarray],
         fix: Union[Literal["start", "end", "center"], List[Literal["start", "end", "center"]]] = "start",
         in_place: bool = False,
-    ) -> "IRanges":
+    ) -> IRanges:
         """Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an
         anchor.
 
@@ -1148,7 +1087,7 @@ class IRanges:
         output._width = width_arr.data
         return output
 
-    def flank(self, width: int, start: bool = True, both: bool = False, in_place: bool = False) -> "IRanges":
+    def flank(self, width: int, start: bool = True, both: bool = False, in_place: bool = False) -> IRanges:
         """Compute flanking ranges for each range. The logic is from the `IRanges` package.
 
         If ``start`` is ``True`` for a given range, the flanking occurs at the `start`,
@@ -1245,7 +1184,7 @@ class IRanges:
         output._width = new_widths
         return output
 
-    def promoters(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> "IRanges":
+    def promoters(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> IRanges:
         """Get promoter regions (upstream and downstream of TSS sites).
 
         Generates promoter ranges relative to the transcription start site (TSS),
@@ -1281,7 +1220,7 @@ class IRanges:
         output._width = new_widths
         return output
 
-    def terminators(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> "IRanges":
+    def terminators(self, upstream: int = 2000, downstream: int = 200, in_place: bool = False) -> IRanges:
         """Get terminator regions (upstream and downstream of TES).
 
         Args:
@@ -1310,7 +1249,7 @@ class IRanges:
         output._width = new_widths
         return output
 
-    def reflect(self, bounds: "IRanges", in_place: bool = False) -> "IRanges":
+    def reflect(self, bounds: IRanges, in_place: bool = False) -> IRanges:
         """Reverses each range in x relative to the corresponding range in bounds.
 
         Reflection preserves the width of a range, but shifts it such the distance
@@ -1357,7 +1296,7 @@ class IRanges:
         start: Optional[Union[int, List[int], np.ndarray]] = None,
         end: Optional[Union[int, List[int], np.ndarray]] = None,
         keep_all_ranges: bool = False,
-    ) -> "IRanges":
+    ) -> IRanges:
         """Restrict ranges to a given start and end positions.
 
         Args:
@@ -1426,7 +1365,7 @@ class IRanges:
 
         new_widths = new_ends - new_starts + 1
         return IRanges(
-            new_starts, new_widths, mcols=BiocFrame({"revmap": np.where(keep_mask == 1)[0]}), validate=validate
+            new_starts, new_widths, mcols=BiocFrame({"revmap": np.where(keep_mask == 1)[0]}), _validate=validate
         )
 
     def threebands(
@@ -1434,7 +1373,7 @@ class IRanges:
         start: Optional[Union[int, np.ndarray]] = None,
         end: Optional[Union[int, np.ndarray]] = None,
         width: Optional[Union[int, np.ndarray]] = None,
-    ) -> Dict[str, Tuple[np.ndarray, np.ndarray]]:
+    ) -> Dict[str, IRanges]:
         """Split ranges into three parts: left, middle, and right.
 
         Args:
@@ -1517,7 +1456,7 @@ class IRanges:
     #### set operations ####
     ########################
 
-    def union(self, other: "IRanges") -> "IRanges":
+    def union(self, other: IRanges) -> IRanges:
         """Find union of ranges with `other`.
 
         Args:
@@ -1542,7 +1481,7 @@ class IRanges:
         output = output.reduce(min_gap_width=0, drop_empty_ranges=True)
         return output
 
-    def setdiff(self, other: "IRanges") -> "IRanges":
+    def setdiff(self, other: IRanges) -> IRanges:
         """Find set difference with `other`.
 
         Args:
@@ -1569,7 +1508,7 @@ class IRanges:
 
         return diff
 
-    def intersect(self, other: "IRanges") -> "IRanges":
+    def intersect(self, other: IRanges) -> IRanges:
         """Find intersecting ranges with `other`.
 
         Args:
@@ -1599,7 +1538,7 @@ class IRanges:
 
     # Inspired by pyranges intersection using NCLS
     # https://github.com/pyranges/pyranges/blob/master/pyranges/methods/intersection.py
-    def intersect_ncls(self, other: "IRanges", delete_index: bool = True, num_threads: int = 1) -> "IRanges":
+    def intersect_ncls(self, other: IRanges, delete_index: bool = True, num_threads: int = 1) -> IRanges:
         """Find intersecting ranges with `other`. Uses the nclist index.
 
         Args:
@@ -1659,7 +1598,7 @@ class IRanges:
 
     def find_overlaps(
         self,
-        query: "IRanges",
+        query: IRanges,
         query_type: Literal["any", "start", "end", "within"] = "any",
         select: Literal["all", "first", "last", "arbitrary"] = "all",
         max_gap: int = -1,
@@ -1787,7 +1726,7 @@ class IRanges:
 
     def count_overlaps(
         self,
-        query: "IRanges",
+        query: IRanges,
         query_type: Literal["any", "start", "end", "within"] = "any",
         max_gap: int = -1,
         min_overlap: int = 0,
@@ -1846,14 +1785,14 @@ class IRanges:
 
     def subset_by_overlaps(
         self,
-        query: "IRanges",
+        query: IRanges,
         query_type: Literal["any", "start", "end", "within"] = "any",
         select: Literal["all", "first", "last", "arbitrary"] = "all",
         max_gap: int = -1,
         min_overlap: int = 0,
         delete_index: bool = True,
         num_threads: int = 1,
-    ) -> "IRanges":
+    ) -> IRanges:
         """Subset to overlapping ranges with ``query``.
 
         Args:
@@ -1925,7 +1864,7 @@ class IRanges:
 
     def precede(
         self,
-        query: "IRanges",
+        query: IRanges,
         select: Literal["all", "first"] = "first",
         delete_index: bool = True,
         num_threads: int = 1,
@@ -1987,7 +1926,7 @@ class IRanges:
 
     def follow(
         self,
-        query: "IRanges",
+        query: IRanges,
         select: Literal["all", "last"] = "last",
         delete_index: bool = True,
         num_threads: int = 1,
@@ -2047,7 +1986,7 @@ class IRanges:
         else:
             return BiocFrame(data={"query_hits": _results[0], "self_hits": _results[1]})
 
-    def distance(self, query: "IRanges") -> np.ndarray:
+    def distance(self, query: IRanges) -> np.ndarray:
         """Calculate the pair-wise distance between ranges.
 
         Args:
@@ -2069,7 +2008,7 @@ class IRanges:
 
     def nearest(
         self,
-        query: "IRanges",
+        query: IRanges,
         select: Literal["all", "arbitrary"] = "arbitrary",
         adjacent_equals_overlap: bool = True,
         delete_index: bool = True,
@@ -2167,7 +2106,7 @@ class IRanges:
         return output
 
     @classmethod
-    def from_pandas(cls, input) -> "IRanges":
+    def from_pandas(cls, input) -> IRanges:
         """Create an ``IRanges`` object from a :py:class:`~pandas.DataFrame`.
 
         Args:
@@ -2231,7 +2170,7 @@ class IRanges:
         return output
 
     @classmethod
-    def from_polars(cls, input) -> "IRanges":
+    def from_polars(cls, input) -> IRanges:
         """Create an ``IRanges`` object from a :py:class:`~polars.DataFrame`.
 
         Args:
@@ -2288,7 +2227,7 @@ class IRanges:
     #### combine ops wrapper ####
     #############################
 
-    def combine(self, *other: "IRanges") -> "IRanges":
+    def combine(self, *other: IRanges) -> IRanges:
         """Combine multiple range objects into one.
 
         Wrapper around :py:func:`~biocutils.combine_sequences`.
@@ -2304,7 +2243,7 @@ class IRanges:
 
     def tile(
         self, n: Optional[Union[int, np.ndarray]] = None, width: Optional[Union[int, np.ndarray]] = None
-    ) -> List["IRanges"]:
+    ) -> List[IRanges]:
         """Split ranges into either n equal parts or parts of fixed width.
 
         Args:
@@ -2358,7 +2297,7 @@ class IRanges:
 
         return result
 
-    def sliding_windows(self, width: int, step: int = 1) -> List["IRanges"]:
+    def sliding_windows(self, width: int, step: int = 1) -> List[IRanges]:
         """Create sliding windows of fixed width and step size.
 
         Args:
@@ -2424,5 +2363,5 @@ def _combine_IRanges(*x: IRanges) -> IRanges:
         names=all_names,
         mcols=combine_rows(*[y._mcols for y in x]),
         metadata=x[0]._metadata,
-        validate=False,
+        _validate=False,
     )

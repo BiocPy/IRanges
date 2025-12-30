@@ -1,9 +1,9 @@
 import copy
 
+import biocutils as ut
 import numpy as np
 import pytest
 from biocframe import BiocFrame
-from biocutils import combine_sequences
 
 from iranges import IRanges
 
@@ -48,11 +48,11 @@ def test_IRanges_basic():
 
     # Adding names.
     x = IRanges(starts, widths, names=["A", "B", "C", "D"])
-    assert x.get_names() == ["A", "B", "C", "D"]
+    assert x.get_names() == ut.Names(["A", "B", "C", "D"])
     y = x.set_names(None)
     assert y.get_names() is None
     y = x.set_names(["a", "b", "c", "d"])
-    assert y.get_names() == ["a", "b", "c", "d"]
+    assert y.get_names() == ut.Names(["a", "b", "c", "d"])
 
 
 def test_IRanges_metadata():
@@ -74,13 +74,13 @@ def test_IRanges_metadata():
         IRanges(starts, widths, mcols=BiocFrame({}, number_of_rows=3))
     assert str(ex.value).find("number of rows") >= 0
 
-    assert x.get_metadata() == {}
+    assert x.get_metadata() == ut.NamedList()
     y = x.set_metadata({"A": 2})
-    assert "A" in y.get_metadata()
-    y = x.set_metadata([])
-    assert y.get_metadata() == {}
+    assert "A" in y.get_metadata().as_dict()
+    y = x.set_metadata({})
+    assert y.get_metadata() == ut.NamedList([], [])
     y = x.set_metadata(None)
-    assert y.get_metadata() == {}
+    assert y.get_metadata() == ut.NamedList()
 
 
 def test_IRanges_getitem():
@@ -95,7 +95,7 @@ def test_IRanges_getitem():
 
     y = x.set_names(["A", "B", "C", "D"])[[0, 3]]
     assert (y.get_start() == np.array([1, 4])).all()
-    assert y.get_names() == ["A", "D"]
+    assert y.get_names() == ut.Names(["A", "D"])
 
     y = x.set_mcols(BiocFrame({"ok": [True, True, False, False]}))[::-1]
     assert (y.get_start() == np.array([4, 3, 2, 1])).all()
@@ -103,7 +103,7 @@ def test_IRanges_getitem():
 
     y = x.set_metadata({"A": "B"})[0]
     assert (y.get_start() == np.array([1])).all()
-    assert y.get_metadata() == {"A": "B"}
+    assert y.get_metadata() == ut.NamedList.from_dict({"A": "B"})
 
 
 def test_IRanges_setitem():
@@ -127,17 +127,17 @@ def test_IRanges_setitem():
     x = IRanges(starts, widths, names=["a", "b", "c", "d"])
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
     x[1:3] = y[1:3]
-    assert x.get_names() == ["a", "B", "C", "d"]
+    assert x.get_names() == ut.Names(["a", "B", "C", "d"])
 
     x = IRanges(starts, widths)
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
     x[1:3] = y[1:3]
-    assert x.get_names() == ["", "B", "C", ""]
+    assert x.get_names() == ut.Names(["", "B", "C", ""])
 
     x = IRanges(starts, widths, names=["a", "b", "c", "d"])
     y = IRanges(starts2, widths2)
     x[1:3] = y[1:3]
-    assert x.get_names() == ["a", "", "", "d"]
+    assert x.get_names() == ut.Names(["a", "", "", "d"])
 
 
 def test_IRanges_print():
@@ -172,28 +172,28 @@ def test_IRanges_combine():
 
     x = IRanges(starts, widths)
     y = IRanges(starts2, widths2)
-    comb = combine_sequences(x, y)
+    comb = ut.combine_sequences(x, y)
     assert (comb.get_start() == np.array([1, 2, 3, 4, 10, 20, 30, 40])).all()
     assert (comb.get_width() == np.array([4, 5, 6, 7, 50, 60, 70, 80])).all()
     assert comb.get_names() is None
 
     x = IRanges(starts, widths, mcols=BiocFrame({"foo": ["a", "b", "c", "d"]}))
     y = IRanges(starts2, widths2, mcols=BiocFrame({"foo": ["A", "B", "C", "D"]}))
-    comb = combine_sequences(x, y)
+    comb = ut.combine_sequences(x, y)
     assert comb.get_mcols().column("foo") == ["a", "b", "c", "d", "A", "B", "C", "D"]
 
     x = IRanges(starts, widths, names=["a", "b", "c", "d"])
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
-    comb = combine_sequences(x, y)
-    assert comb.get_names() == ["a", "b", "c", "d", "A", "B", "C", "D"]
+    comb = ut.combine_sequences(x, y)
+    assert comb.get_names() == ut.Names(["a", "b", "c", "d", "A", "B", "C", "D"])
 
     x = IRanges(starts, widths)
     y = IRanges(starts2, widths2, names=["A", "B", "C", "D"])
-    comb = combine_sequences(x, y)
-    assert comb.get_names() == ["", "", "", "", "A", "B", "C", "D"]
+    comb = ut.combine_sequences(x, y)
+    assert comb.get_names() == ut.Names(["", "", "", "", "A", "B", "C", "D"])
 
     z = x.combine(y)
-    assert z.get_names() == ["", "", "", "", "A", "B", "C", "D"]
+    assert z.get_names() == ut.Names(["", "", "", "", "A", "B", "C", "D"])
 
 
 def test_empty():

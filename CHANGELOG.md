@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.7.0
+
+- Classes extend `BiocObject` from biocutils.
+- `validate` param in the constructor is renamed to `_validate`.
+
 ## Version 0.6.0
 
 - Implement `CompressedIRangesList` extending the base compressed-lists class
