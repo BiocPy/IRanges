@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="iranges" href="api/modules.html"><link rel="prev" title="IRanges" href="index.html">
 
-    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
-        <title>IRanges: Interval arithmetic - IRanges 0.6.0 documentation</title>
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>IRanges: Interval arithmetic - IRanges 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     
@@ -162,7 +162,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">IRanges 0.6.0 documentation</div></a>
+      <a href="index.html"><div class="brand">IRanges 0.7.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -183,7 +183,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">IRanges 0.6.0 documentation</span>
+  <span class="sidebar-brand-text">IRanges 0.7.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -471,12 +471,12 @@ end positions: [ 2  5 14 -4  4  2 -5 12]
 <span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">narrowed</span> <span class="o">=</span> <span class="n">ir</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="nb">print</span><span class="p">(</span><span class="n">narrowed</span><span class="p">)</span>
 
-<span class="nn">File ~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/IRanges.py:1083,</span> in <span class="ni">IRanges.narrow</span><span class="nt">(self, start, width, end, in_place)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1080</span>     <span class="k">return</span> <span class="n">output</span>
-<span class="g g-Whitespace">   </span><span class="mi">1082</span> <span class="n">sew</span> <span class="o">=</span> <span class="n">SEWWrangler</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">translate_negative</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_nonnarrowing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="ne">-&gt; </span><span class="mi">1083</span> <span class="n">window_starts</span><span class="p">,</span> <span class="n">window_widths</span> <span class="o">=</span> <span class="n">sew</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">1085</span> <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">+</span> <span class="n">window_starts</span> <span class="o">-</span> <span class="mi">1</span>
-<span class="g g-Whitespace">   </span><span class="mi">1086</span> <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">window_widths</span>
+<span class="nn">File ~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/base.py:1022,</span> in <span class="ni">IRanges.narrow</span><span class="nt">(self, start, width, end, in_place)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1019</span>     <span class="k">return</span> <span class="n">output</span>
+<span class="g g-Whitespace">   </span><span class="mi">1021</span> <span class="n">sew</span> <span class="o">=</span> <span class="n">SEWWrangler</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">translate_negative</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_nonnarrowing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">1022</span> <span class="n">window_starts</span><span class="p">,</span> <span class="n">window_widths</span> <span class="o">=</span> <span class="n">sew</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1024</span> <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">_start</span> <span class="o">+</span> <span class="n">window_starts</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="g g-Whitespace">   </span><span class="mi">1025</span> <span class="n">output</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">window_widths</span>
 
 <span class="nn">File ~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/sew_handler.py:109,</span> in <span class="ni">SEWWrangler.solve</span><span class="nt">(self)</span>
 <span class="g g-Whitespace">    </span><span class="mi">107</span>     <span class="n">out_widths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
@@ -660,7 +660,7 @@ end positions: [ 2  5 14 -4  4  2 -5 12]
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8fa8b3e9"></script>
+</div><script src="_static/documentation_options.js?v=fe7df9b0"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

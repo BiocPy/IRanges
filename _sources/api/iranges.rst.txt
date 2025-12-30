@@ -4,10 +4,10 @@ iranges package
 Submodules
 ----------
 
-iranges.IRanges module
-----------------------
+iranges.base module
+-------------------
 
-.. automodule:: iranges.IRanges
+.. automodule:: iranges.base
    :members:
    :show-inheritance:
    :undoc-members:
