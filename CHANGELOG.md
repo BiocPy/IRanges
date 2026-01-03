@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 0.7.0
+## Version 0.7.0 - 0.7.1
 
 - Classes extend `BiocObject` from biocutils.
 - `validate` param in the constructor is renamed to `_validate`.
