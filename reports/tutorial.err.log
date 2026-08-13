@@ -7,7 +7,7 @@ Traceback (most recent call last):
   File "/home/runner/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
     return loop.run_until_complete(inner)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+  File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
     return future.result()
            ^^^^^^^^^^^^^^^
   File "/home/runner/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
@@ -26,20 +26,20 @@ print(narrowed)
 [31m---------------------------------------------------------------------------[39m
 [31mException[39m                                 Traceback (most recent call last)
 [36mCell[39m[36m [39m[32mIn[9][39m[32m, line 1[39m
-[32m----> [39m[32m1[39m narrowed = [43mir[49m[43m.[49m[43mnarrow[49m[43m([49m[43mstart[49m[43m=[49m[32;43m4[39;49m[43m,[49m[43m [49m[43mwidth[49m[43m=[49m[32;43m2[39;49m[43m)[49m
-[32m      2[39m [38;5;28mprint[39m(narrowed)
+[32m----> [39m[32m1[39m narrowed = ir.narrow(start=[32m4[39m, width=[32m2[39m)
+[32m      2[39m print(narrowed)
 
 [36mFile [39m[32m~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/IRanges.py:1022[39m, in [36mIRanges.narrow[39m[34m(self, start, width, end, in_place)[39m
 [32m   1019[39m     [38;5;28;01mreturn[39;00m output
 [32m   1021[39m sew = SEWWrangler(output._width, start, end, width, translate_negative=[38;5;28;01mTrue[39;00m, allow_nonnarrowing=[38;5;28;01mFalse[39;00m)
-[32m-> [39m[32m1022[39m window_starts, window_widths = [43msew[49m[43m.[49m[43msolve[49m[43m([49m[43m)[49m
+[32m-> [39m[32m1022[39m window_starts, window_widths = [30;43msew[39;49m[30;43m.[39;49m[30;43msolve[39;49m[30;43m([39;49m[30;43m)[39;49m
 [32m   1024[39m output._start = output._start + window_starts - [32m1[39m
 [32m   1025[39m output._width = window_widths
 
 [36mFile [39m[32m~/work/IRanges/IRanges/.tox/docs/lib/python3.12/site-packages/iranges/sew_handler.py:109[39m, in [36mSEWWrangler.solve[39m[34m(self)[39m
 [32m    107[39m     out_widths = [38;5;28mself[39m.width
 [32m    108[39m     [38;5;66;03m# Validate after computing[39;00m
-[32m--> [39m[32m109[39m     [38;5;28;43mself[39;49m[43m.[49m[43m_validate_narrowing[49m[43m([49m[43mout_starts[49m[43m,[49m[43m [49m[43mout_widths[49m[43m)[49m
+[32m--> [39m[32m109[39m     [30;43mself[39;49m[30;43m.[39;49m[30;43m_validate_narrowing[39;49m[30;43m([39;49m[30;43mout_starts[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mout_widths[39;49m[30;43m)[39;49m
 [32m    111[39m [38;5;28;01melse[39;00m:
 [32m    112[39m     [38;5;66;03m# Only width specified[39;00m
 [32m    113[39m     out_widths = [38;5;28mself[39m.width
