@@ -16,5 +16,5 @@ finally:
     del version, PackageNotFoundError
 
 from .IRanges import IRanges
-from .utils import normalize_array
 from .irangeslist import CompressedIRangesList
+from .utils import normalize_array

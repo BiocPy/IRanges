@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from iranges import IRanges
 
 __author__ = "jkanche"

@@ -1,5 +1,3 @@
-from typing import Optional, Tuple, Union
-
 import numpy as np
 
 from .utils import handle_negative_coords, normalize_array
@@ -17,9 +15,9 @@ class SEWWrangler:
     def __init__(
         self,
         ref_widths: np.ndarray,
-        start: Optional[Union[int, np.ndarray]] = None,
-        end: Optional[Union[int, np.ndarray]] = None,
-        width: Optional[Union[int, np.ndarray]] = None,
+        start: int | np.ndarray | None = None,
+        end: int | np.ndarray | None = None,
+        width: int | np.ndarray | None = None,
         translate_negative: bool = True,
         allow_nonnarrowing: bool = False,
     ):
@@ -79,7 +77,7 @@ class SEWWrangler:
                     f"the solved end ({int(ends[idx])}) is > refwidth"
                 )
 
-    def solve(self) -> Tuple[np.ndarray, np.ndarray]:
+    def solve(self) -> tuple[np.ndarray, np.ndarray]:
         """Resolve Start/End/Width parameters to concrete ranges.
 
         Returns:

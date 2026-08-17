@@ -1,5 +1,3 @@
-from typing import Optional, Tuple, Union
-
 import numpy as np
 
 __author__ = "Jayaram Kancherla"
@@ -8,7 +6,7 @@ __license__ = "MIT"
 
 
 def normalize_array(
-    x: Optional[Union[int, float, np.number, np.ndarray]], length: int, dtype: np.dtype = np.int32
+    x: float | np.number | np.ndarray | None, length: int, dtype: np.dtype = np.int32
 ) -> np.ma.MaskedArray:
     """Normalize input to masked array with proper length and type.
 
@@ -66,8 +64,8 @@ def handle_negative_coords(coords: np.ma.MaskedArray, ref_len: np.ndarray) -> np
 
 
 def clip_ranges(
-    starts: np.ndarray, widths: np.ndarray, min_val: Optional[int] = None, max_val: Optional[int] = None
-) -> Tuple[np.ndarray, np.ndarray]:
+    starts: np.ndarray, widths: np.ndarray, min_val: int | None = None, max_val: int | None = None
+) -> tuple[np.ndarray, np.ndarray]:
     """Clip ranges to specified bounds.
 
     Args:
@@ -102,10 +100,10 @@ def clip_ranges(
 def compute_up_down(
     starts: np.ndarray,
     widths: np.ndarray,
-    upstream: Union[int, np.ndarray],
-    downstream: Union[int, np.ndarray],
+    upstream: int | np.ndarray,
+    downstream: int | np.ndarray,
     site: str,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Helper for promoters/terminators."""
     length = len(starts)
 

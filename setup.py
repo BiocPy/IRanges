@@ -73,7 +73,7 @@ if __name__ == "__main__":
             ext_modules=[CMakeExtension("iranges")],
             cmdclass={"build_ext": build_ext},
         )
-    except:  # noqa
+    except:
         print(
             "\n\nAn error occurred while building the project, "
             "please ensure you have the most updated version of setuptools, "
