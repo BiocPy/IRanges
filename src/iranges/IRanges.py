@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from copy import deepcopy
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Any, Literal
 from warnings import warn
 
 import biocutils as ut
@@ -63,11 +64,11 @@ class IRanges(ut.BiocObject):
 
     def __init__(
         self,
-        start: Union[np.ndarray, Sequence[int]] = [],
-        width: Union[np.ndarray, Sequence[int]] = [],
-        names: Optional[Union[Sequence[str], ut.Names]] = None,
-        mcols: Optional[BiocFrame] = None,
-        metadata: Optional[Union[Dict[str, Any], ut.NamedList]] = None,
+        start: np.ndarray | Sequence[int] = [],
+        width: np.ndarray | Sequence[int] = [],
+        names: Sequence[str] | ut.Names | None = None,
+        mcols: BiocFrame | None = None,
+        metadata: dict[str, Any] | ut.NamedList | None = None,
         _validate: bool = True,
     ):
         """
@@ -151,7 +152,7 @@ class IRanges(ut.BiocObject):
 
     def _validate_names(self):
         if self._names is None:
-            return None
+            return
 
         if not isinstance(self._names, ut.Names):
             raise ValueError("'names' should be a list of strings.")
@@ -185,7 +186,7 @@ class IRanges(ut.BiocObject):
         """
         return self._start
 
-    def set_start(self, start: Union[np.ndarray, Sequence[int]], in_place: bool = False) -> IRanges:
+    def set_start(self, start: np.ndarray | Sequence[int], in_place: bool = False) -> IRanges:
         """Modify start positions (in-place operation).
 
         Args:
@@ -222,7 +223,7 @@ class IRanges(ut.BiocObject):
         return self.get_start()
 
     @start.setter
-    def start(self, start: Union[np.ndarray, Sequence[int]]):
+    def start(self, start: np.ndarray | Sequence[int]):
         """Modify start positions (in-place operation).
 
         Args:
@@ -245,7 +246,7 @@ class IRanges(ut.BiocObject):
         """
         return self._width
 
-    def set_width(self, width: Union[np.ndarray, Sequence[int]], in_place: bool = False) -> IRanges:
+    def set_width(self, width: np.ndarray | Sequence[int], in_place: bool = False) -> IRanges:
         """
         Args:
             width:
@@ -282,7 +283,7 @@ class IRanges(ut.BiocObject):
         return self.get_width()
 
     @width.setter
-    def width(self, width: Union[np.ndarray, Sequence[int]]):
+    def width(self, width: np.ndarray | Sequence[int]):
         """Set or modify width of each interval (in-place operation).
 
         Args:
@@ -323,7 +324,7 @@ class IRanges(ut.BiocObject):
         """
         return self.get_end()
 
-    def get_names(self) -> Optional[ut.Names]:
+    def get_names(self) -> ut.Names | None:
         """Get range names.
 
         Returns:
@@ -332,7 +333,7 @@ class IRanges(ut.BiocObject):
         """
         return self._names
 
-    def set_names(self, names: Optional[Union[ut.Names, Sequence[str]]], in_place: bool = False) -> IRanges:
+    def set_names(self, names: ut.Names | Sequence[str] | None, in_place: bool = False) -> IRanges:
         """
         Args:
             names:
@@ -352,7 +353,7 @@ class IRanges(ut.BiocObject):
         return output
 
     @property
-    def names(self) -> Optional[ut.Names]:
+    def names(self) -> ut.Names | None:
         """Get names.
 
         Returns:
@@ -362,7 +363,7 @@ class IRanges(ut.BiocObject):
         return self.get_names()
 
     @names.setter
-    def names(self, names: Optional[Sequence[str]]):
+    def names(self, names: Sequence[str] | None):
         """Set new names (in-place operation).
 
         Args:
@@ -388,7 +389,7 @@ class IRanges(ut.BiocObject):
         """
         return self._mcols
 
-    def set_mcols(self, mcols: Optional[BiocFrame], in_place: bool = False) -> IRanges:
+    def set_mcols(self, mcols: BiocFrame | None, in_place: bool = False) -> IRanges:
         """Set new metadata about ranges.
 
         Args:
@@ -419,7 +420,7 @@ class IRanges(ut.BiocObject):
         return self.get_mcols()
 
     @mcols.setter
-    def mcols(self, mcols: Optional[BiocFrame]):
+    def mcols(self, mcols: BiocFrame | None):
         """Set new metadata about ranges (in-place operation).
 
         Args:
@@ -444,7 +445,7 @@ class IRanges(ut.BiocObject):
         """
         return len(self._start)
 
-    def __getitem__(self, subset: Union[Sequence, int, str, bool, slice, range]) -> IRanges:
+    def __getitem__(self, subset: Sequence | int | str | bool | slice | range) -> IRanges:
         """Subset the IRanges.
 
         Args:
@@ -465,7 +466,7 @@ class IRanges(ut.BiocObject):
             metadata=self._metadata,
         )
 
-    def __setitem__(self, args: Union[Sequence, int, str, bool, slice, range], value: IRanges):
+    def __setitem__(self, args: Sequence | int | str | bool | slice | range, value: IRanges):
         """Add or update positions (in-place operation).
 
         Args:
@@ -502,7 +503,7 @@ class IRanges(ut.BiocObject):
 
         self.delete_nclist_index()
 
-    def get_row(self, index_or_name: Union[str, int]) -> IRanges:
+    def get_row(self, index_or_name: str | int) -> IRanges:
         """Access a row by index or row name.
 
         Args:
@@ -677,8 +678,8 @@ class IRanges(ut.BiocObject):
     #############################
 
     def shift_and_clip_ranges(
-        self, shift: np.ndarray, width: Union[int, None] = None, circle_length: Union[int, None] = None
-    ) -> Tuple[np.ndarray, np.ndarray, int, bool]:
+        self, shift: np.ndarray, width: int | None = None, circle_length: int | None = None
+    ) -> tuple[np.ndarray, np.ndarray, int, bool]:
         """Shift and clip interval ranges.
 
         Args:
@@ -705,10 +706,10 @@ class IRanges(ut.BiocObject):
 
     def coverage(
         self,
-        shift: Optional[np.ndarray] = None,
-        width: Union[int, None] = None,
-        weight: Optional[np.ndarray] = None,
-        circle_length: Union[int, None] = None,
+        shift: np.ndarray | None = None,
+        width: int | None = None,
+        weight: np.ndarray | None = None,
+        circle_length: int | None = None,
         method: Literal["auto", "sort", "hash", "naive"] = "auto",
     ) -> np.ndarray:
         """Compute weighted coverage of ranges.
@@ -842,7 +843,7 @@ class IRanges(ut.BiocObject):
         output = self._define_output(in_place)
         return output[order]
 
-    def gaps(self, start: Optional[int] = None, end: Optional[int] = None) -> IRanges:
+    def gaps(self, start: int | None = None, end: int | None = None) -> IRanges:
         """Gaps returns an ``IRanges`` object representing the set of intervals that remain after the ranges are
         removed specified by the start and end arguments.
 
@@ -950,7 +951,7 @@ class IRanges(ut.BiocObject):
     #### intra-range methods ####
     #############################
 
-    def shift(self, shift: Union[int, List[int], np.ndarray], in_place: bool = False) -> IRanges:
+    def shift(self, shift: int | list[int] | np.ndarray, in_place: bool = False) -> IRanges:
         """Shift ranges by specified amount.
 
         Args:
@@ -982,9 +983,9 @@ class IRanges(ut.BiocObject):
 
     def narrow(
         self,
-        start: Optional[Union[int, List[int], np.ndarray]] = None,
-        width: Optional[Union[int, List[int], np.ndarray]] = None,
-        end: Optional[Union[int, List[int], np.ndarray]] = None,
+        start: int | list[int] | np.ndarray | None = None,
+        width: int | list[int] | np.ndarray | None = None,
+        end: int | list[int] | np.ndarray | None = None,
         in_place: bool = False,
     ) -> IRanges:
         """Narrow ranges.
@@ -1027,8 +1028,8 @@ class IRanges(ut.BiocObject):
 
     def resize(
         self,
-        width: Union[int, List[int], np.ndarray],
-        fix: Union[Literal["start", "end", "center"], List[Literal["start", "end", "center"]]] = "start",
+        width: int | list[int] | np.ndarray,
+        fix: Literal["start", "end", "center"] | list[Literal["start", "end", "center"]] = "start",
         in_place: bool = False,
     ) -> IRanges:
         """Resize ranges to the specified ``width`` where either the ``start``, ``end``, or ``center`` is used as an
@@ -1293,8 +1294,8 @@ class IRanges(ut.BiocObject):
 
     def restrict(
         self,
-        start: Optional[Union[int, List[int], np.ndarray]] = None,
-        end: Optional[Union[int, List[int], np.ndarray]] = None,
+        start: int | list[int] | np.ndarray | None = None,
+        end: int | list[int] | np.ndarray | None = None,
         keep_all_ranges: bool = False,
     ) -> IRanges:
         """Restrict ranges to a given start and end positions.
@@ -1370,10 +1371,10 @@ class IRanges(ut.BiocObject):
 
     def threebands(
         self,
-        start: Optional[Union[int, np.ndarray]] = None,
-        end: Optional[Union[int, np.ndarray]] = None,
-        width: Optional[Union[int, np.ndarray]] = None,
-    ) -> Dict[str, IRanges]:
+        start: int | np.ndarray | None = None,
+        end: int | np.ndarray | None = None,
+        width: int | np.ndarray | None = None,
+    ) -> dict[str, IRanges]:
         """Split ranges into three parts: left, middle, and right.
 
         Args:
@@ -1417,7 +1418,7 @@ class IRanges(ut.BiocObject):
             "right": IRanges(right_starts, right_widths),
         }
 
-    def overlap_indices(self, start: Optional[int] = None, end: Optional[int] = None) -> np.ndarray:
+    def overlap_indices(self, start: int | None = None, end: int | None = None) -> np.ndarray:
         """Find overlaps with the start and end positions.
 
         Args:
@@ -1868,7 +1869,7 @@ class IRanges(ut.BiocObject):
         select: Literal["all", "first"] = "first",
         delete_index: bool = True,
         num_threads: int = 1,
-    ) -> Union[np.ndarray, BiocFrame]:
+    ) -> np.ndarray | BiocFrame:
         """Find nearest positions that are upstream/precede each query range.
 
         Args:
@@ -1930,7 +1931,7 @@ class IRanges(ut.BiocObject):
         select: Literal["all", "last"] = "last",
         delete_index: bool = True,
         num_threads: int = 1,
-    ) -> Union[np.ndarray, BiocFrame]:
+    ) -> np.ndarray | BiocFrame:
         """Find nearest positions that are downstream/follow each query range.
 
         Args:
@@ -2013,7 +2014,7 @@ class IRanges(ut.BiocObject):
         adjacent_equals_overlap: bool = True,
         delete_index: bool = True,
         num_threads: int = 1,
-    ) -> Union[np.ndarray, BiocFrame]:
+    ) -> np.ndarray | BiocFrame:
         """Find nearest ranges in both directions.
 
         Args:
@@ -2241,9 +2242,7 @@ class IRanges(ut.BiocObject):
     ######>> window methods <<######
     ################################
 
-    def tile(
-        self, n: Optional[Union[int, np.ndarray]] = None, width: Optional[Union[int, np.ndarray]] = None
-    ) -> List[IRanges]:
+    def tile(self, n: int | np.ndarray | None = None, width: int | np.ndarray | None = None) -> list[IRanges]:
         """Split ranges into either n equal parts or parts of fixed width.
 
         Args:
@@ -2297,7 +2296,7 @@ class IRanges(ut.BiocObject):
 
         return result
 
-    def sliding_windows(self, width: int, step: int = 1) -> List[IRanges]:
+    def sliding_windows(self, width: int, step: int = 1) -> list[IRanges]:
         """Create sliding windows of fixed width and step size.
 
         Args:
